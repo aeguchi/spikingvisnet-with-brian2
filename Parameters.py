@@ -14,6 +14,3 @@ gamma = 0.5 #aspect ratio:  the spatial aspect ratio.
 psiList = [0]#phase shift:  phase offset
 imageFolder = "images"
 sigma = 0.5 # the standard deviation of the Gaussian function used in the Gabor filter.
-	
-	#def __init( self):
-		
