@@ -27,7 +27,7 @@ def process(img, filters):
     filteredImages = [];
     for kern in filters:
         fimg = cv2.filter2D(img, cv2.CV_8UC3, kern)
-        fimg = fimg/mean(fimg);
+        fimg = fimg;#/mean(fimg);
         filteredImages.append(fimg)
     return filteredImages
 
