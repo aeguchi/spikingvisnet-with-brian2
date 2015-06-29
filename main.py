@@ -3,18 +3,16 @@ from imageImport import *
 import sys
 import numpy,pylab as plt, glob
 import nest
-from random import random
 
 
 
 ### Constructing Network ###
 nest.Models()
-ndict = {"I_e": 180.0, "tau_m": 20.0}
+ndict = {"I_e": I_e, "tau_m": tau_m}
 nest.SetDefaults("iaf_neuron", ndict)
-inputNeurons = nest.Create("iaf_neuron", 10*10);
-Vth=-55.                  
-Vrest=-70.  
-spikedetectors = nest.Create("spike_detector", 10*10, params={"withgid": True, "withtime": True})
+inputNeurons = nest.Create("iaf_neuron", layerDim*layerDim);
+
+spikedetectors = nest.Create("spike_detector", layerDim*layerDim, params={"withgid": True, "withtime": True})
 nest.Connect(inputNeurons,spikedetectors)
 
 
@@ -41,6 +39,9 @@ for img_fn in img_fns:
     filters = build_filters()
     res = process(img, filters)
     
+#     for r in res:
+#         r= cv2.resize(r,(layerDim,layerDim),interpolation = cv2.INTER_NEAREST);
+#     
     
     #convert from gabor filtered inputs to spikes
     #normalize
@@ -53,17 +54,22 @@ for img_fn in img_fns:
     plt.subplot(5,3,1);
     plt.imshow(img,interpolation='none');
     
-    eccentricity = 30/10;
+#     eccentricity = 30/10;
+#     
+#     plt.imshow(cv2.resize(res[2],(10,10),interpolation = cv2.INTER_NEAREST ),interpolation='none');
+#     plt.show()
+    
     
     rCounter = 1;
-    for r in res_norm:   
+    for r in res_norm:
+        
         index = 0;  
         for neuron in inputNeurons:
             y_index = math.floor(index/layerDim);
             x_index = index%layerDim;
             #print mean(r[y_index][x_index]);
             nest.SetStatus([neuron], {"V_m": Vrest+(Vth-Vrest)*numpy.random.rand()})
-            nest.SetStatus([neuron], {"I_e": 180.0+10*mean(r[y_index*3][x_index*3])}) #to-do: TOBE fixed
+            nest.SetStatus([neuron], {"I_e": 180.0+80*mean(r[y_index][x_index])}) #TO-DO: TOBE fixed
             index+=1;
             
         

@@ -28,7 +28,9 @@ def process(img, filters):
     for kern in filters:
         fimg = cv2.filter2D(img, cv2.CV_8UC3, kern)
         fimg = fimg;#/mean(fimg);
-        filteredImages.append(fimg)
+        filteredImages.append(cv2.resize(fimg,(layerDim,layerDim),interpolation = cv2.INTER_AREA))
+        #plt.imshow(cv2.resize(fimg,(layerDim,layerDim),interpolation = cv2.INTER_AREA  ))
+        plt.show()
     return filteredImages
 
 
