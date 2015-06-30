@@ -5,14 +5,22 @@ import numpy,pylab as plt, glob
 import nest
 
 
-
 ### Constructing Network ###
 nest.Models()
 ndict = {"I_e": I_e, "tau_m": tau_m}
+#ndict = {"C_m":C_m, 'tau_m': tau_m, 't_ref': t_ref, 'E_L': E_L, 'V_th': V_th, 'V_reset': V_reset};
 nest.SetDefaults("iaf_neuron", ndict)
-inputNeurons = nest.Create("iaf_neuron", layerDim*layerDim);
+inputNeurons = nest.Create("iaf_neuron", layerDim*layerDim*len(thetaList));
 
-spikedetectors = nest.Create("spike_detector", layerDim*layerDim, params={"withgid": True, "withtime": True})
+
+#nest.SetDefaults("iaf_psc_delta", ndict)
+#inputNeurons = nest.Create('iaf_psc_alpha',layerDim*layerDim*len(thetaList))
+
+
+
+
+
+spikedetectors = nest.Create("spike_detector", layerDim*layerDim*len(thetaList), params={"withgid": True, "withtime": True})
 nest.Connect(inputNeurons,spikedetectors)
 
 
@@ -27,7 +35,7 @@ if len(img_fns)!=nStim*nTrans:
     print 'Error: the number of images files does not match',len(img_fns);
     sys.exit(1)
 
-
+index_img=0;
 for img_fn in img_fns:
     print img_fn
     #load gabor filtered ImageSurface
@@ -51,8 +59,10 @@ for img_fn in img_fns:
     
 
     plt.figure(1)
+    #plot input Image
     plt.subplot(5,3,1);
     plt.imshow(img,interpolation='none');
+    plt.title('Input')
     
 #     eccentricity = 30/10;
 #     
@@ -60,48 +70,72 @@ for img_fn in img_fns:
 #     plt.show()
     
     
-    rCounter = 1;
-    for r in res_norm:
-        
-        index = 0;  
-        for neuron in inputNeurons:
-            y_index = math.floor(index/layerDim);
-            x_index = index%layerDim;
+    #rCounter = 1;
+    for index_filter in range(0,len(thetaList)):
+        r = res_norm[index_filter]
+        #index = 0;
+        for index_cell in range(0,layerDim*layerDim-1):
+        #for neuron in inputNeurons:
+            y_index = math.floor(index_cell/layerDim);
+            x_index = index_cell%layerDim;
             #print mean(r[y_index][x_index]);
-            nest.SetStatus([neuron], {"V_m": Vrest+(Vth-Vrest)*numpy.random.rand()})
-            nest.SetStatus([neuron], {"I_e": 180.0+80*mean(r[y_index][x_index])}) #TO-DO: TOBE fixed
-            index+=1;
+            neuron = inputNeurons[index_filter*layerDim*layerDim+index_cell]
+            nest.SetStatus([neuron], {"V_m": E_L+(V_th-E_L)*numpy.random.rand()})
+            nest.SetStatus([neuron], {"I_e": I_e+80*mean(r[y_index][x_index])}) #TO-DO: TOBE fixed
+            #print index_filter*len(thetaList)+index_cell
+        
+            #index+=1;
             
         
-        nest.SetStatus(spikedetectors, [{"n_events": 0}]);
-        nest.Simulate(simulationTime)
+    nest.SetStatus(spikedetectors, [{"n_events": 0}]);
+    nest.Simulate(simulationTime)
+
+    dSD =nest.GetStatus(spikedetectors,keys='events')[0]
+    evs = dSD["senders"]
+    ts = dSD["times"]
+    
+    for index_filter in range(0,len(res_norm)):    
+        ax = plt.subplot(5,3,(index_filter+1)*3+1);
+        plt.imshow(res[index_filter],interpolation='none');
+        #ax.get_xaxis().set_visible(False)
+        #ax.get_yaxis().set_visible(False)
+        plt.ylabel('Filter '+str(index_filter))
         
-        plt.subplot(5,3,rCounter*3+1);
-        plt.imshow(res[rCounter-1],interpolation='none');
-        
-        dSD =nest.GetStatus(spikedetectors,keys='events')[0]
-        evs = dSD["senders"]
-        ts = dSD["times"]
-        
-        plt.subplot(5,3,rCounter*3+2);
-        plt.plot(ts, evs, ".")
-        
+        evsIndex = [];
         res_FRMap = numpy.zeros((layerDim, layerDim));
+        index_evs = 0;
         for index in evs:
-            y_index = math.floor((index-1)/layerDim);
-            x_index = (index-1)%layerDim;
-            res_FRMap[y_index][x_index]+=1;
+            if layerDim*layerDim*index_filter <index and index<=layerDim*layerDim*(index_filter+1):
+                evsIndex.append(index_evs);
+                index_tmp = (index-1)%(layerDim*layerDim)+1
+                y_index = math.floor((index_tmp-1)/layerDim);
+                x_index = (index_tmp-1)%layerDim;
+                res_FRMap[y_index][x_index]+=1;
+            index_evs+=1;
         
         res_FRMap*=(1000/simulationTime)
         
-        plt.subplot(5,3,rCounter*3+3);
+        
+        #plot FR map
+        plt.subplot(5,3,(index_filter+1)*3+3);
+        if(index_filter==0):
+            plt.title('Firing Rate Map')
         plt.imshow(res_FRMap,interpolation='none');
         plt.colorbar();
         
-
         
-        rCounter+=1;
+        #plot spike raster
+        ax=plt.subplot(5,3,(index_filter+1)*3+2);
+        if(index_filter==0):
+            plt.title('Raster Plot')
+        plt.plot(ts[evsIndex], evs[evsIndex],'.')
+        ax.get_yaxis().set_visible(False)
+        ax.set_xlim([index_img*simulationTime, (index_img+1)*simulationTime])
+        
+
+
     plt.show()
+    index_img+=1;
             
     
 
