@@ -1,9 +1,9 @@
 from Parameters import *
 from imageImport import *
 import sys
-import numpy,pylab as plt, glob
+import numpy,pylab as plt , glob
 import nest
-
+import os
 
 ### Constructing Network ###
 nest.Models()
@@ -25,7 +25,8 @@ nest.Connect(inputNeurons,spikedetectors)
 
 
 ### Training ###
-trainingImages = sorted(glob.iglob("./images/training/*.png"))
+#trainingImages = sorted(glob.iglob("/images/training/*.png"))
+trainingImages = sorted(glob.iglob(os.path.split(os.path.realpath(__file__))[0] + "/images/training/*.png"))
 
 img_fns = []
 for img_fn in trainingImages:
