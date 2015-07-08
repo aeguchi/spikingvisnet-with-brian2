@@ -16,7 +16,7 @@ imageFolder = "images"
 sigma = 0.5 # the standard deviation of the Gaussian function used in the Gabor filter.
 
 simulationTime = 500;
-layerDim = 10;
+
 
 
 I_e = 180.0;         # (nA) external current
@@ -27,3 +27,87 @@ E_L=-70.       # (mV) resting potential
 #C_m = 250.0       # (pF) capacitance
 #V_reset = -70.0   # (mV) reset potential
 #t_ref = 2.0       # (ms) refractory period
+
+layerGDim = 10;
+layer1Dim = 100   # size of layer1 in neurons
+layer2Dim = 100   # size of layer2 in neurons
+extentG=[2.,2.] # size of  layer2 in mm
+extent1=[2.,2.] # size of  layer1 in mm
+extent2=[2.,2.] # size of  layer2 in mm
+
+
+
+
+# Dictionaries: 
+
+
+ndict = {"I_e": I_e, "tau_m": tau_m}
+
+layerGDict = {"extent" : extent1, # the size of the layer in mm
+    "rows" : layerGDim, # the number of rows in this layer ...
+    "columns" : layerGDim, # ... and the number of columns
+    "elements" : "iaf_neuron", # the element at each (x,y) coordinate in the grid
+    "center" : [0.,0.]}
+
+layer1Dict = {"extent" : extent1, # the size of the layer in mm
+    "rows" : layer1Dim, # the number of rows in this layer ...
+    "columns" : layer1Dim, # ... and the number of columns
+    "elements" : "iaf_neuron"} # the element at each (x,y) coordinate in the grid
+
+
+
+layer2Dict = {"extent" : extent2, # the size of the layer in mm
+    "rows" : layer2Dim, # the number of rows in this layer ...
+    "columns" : layer2Dim, # ... and the number of columns
+    "elements" : "iaf_neuron"} # the element at each (x,y) coordinate in the grid
+
+connGDict = {   "connection_type":"convergent",
+    "mask": "grid",
+    "model": "stdp_synapse",
+    "number_of_connections": layerGDim*layerGDim,
+    "weights": {"uniform":{'low': 0, 'high': 100}},
+    "delays" : {"linear" :{"c":0.1,"a":0.2}},
+    "allow_autapses":False,
+    "allow_multapses" :True
+}
+
+conn1Dict = {
+    "connection_type":"convergent",
+    "model": "stdp_synapse",
+    "number_of_connections": layer1Dim*layer1Dim,
+    "weights": {"uniform":{'low': 0, 'high': 100}},
+    "delays" : {"linear" :{"c":0.1,"a":0.2}},
+    "allow_autapses":False,
+    "allow_multapses" :True}
+
+
+conn2Dict = {   "connection_type":"convergent",
+    "mask": "grid",
+    "model": "stdp_synapse",
+    "number_of_connections": layer2Dim*layer2Dim,
+    "weights": {"uniform":{'low': 0, 'high': 100}},
+    "delays" : {"linear" :{"c":0.1,"a":0.2}},
+    "allow_autapses":False,
+    "allow_multapses" :True
+}
+
+spkdetGDict = {"withgid": True,
+    "withtime": True,
+    "to_memory" :True,
+    "to_file" : True,
+    "label" : "spkG"
+}
+
+spkdet1Dict = {"withgid": True,
+    "withtime": True,
+    "to_memory" :True,
+    "to_file" : True,
+    "label" : "spk1"
+}
+
+spkdet2Dict = {"withgid": True,
+    "withtime": True,
+    "to_memory" :True,
+    "to_file" : True,
+    "label" : "spk2"
+}
