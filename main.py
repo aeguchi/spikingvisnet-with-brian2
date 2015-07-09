@@ -93,6 +93,11 @@ for img_fn in img_fns:
     
     nodesG=nest.GetNodes(layerG)
     
+    
+    print len(nodesG)
+
+    print nodesG
+
     #rCounter = 1;
     for index_filter in range(0,len(thetaList)-1):
         r = res_norm[index_filter]
@@ -102,18 +107,21 @@ for img_fn in img_fns:
             y_index = math.floor(index_cell/layerGDim);
             x_index = index_cell%layerGDim;
             #print mean(r[y_index][x_index]);
-            neuron = nodesG[index_filter*layerGDim*layerGDim+index_cell]
+            neuron = nodesG[0][index_filter*layerGDim*layerGDim+index_cell]
             nest.SetStatus([neuron], {"V_m": E_L+(V_th-E_L)*numpy.random.rand()})
             nest.SetStatus([neuron], {"I_e": I_e+80*mean(r[y_index][x_index])}) #TO-DO: TOBE fixed
             #print index_filter*len(thetaList)+index_cell
         
             #index+=1;
             
-        
-    nest.SetStatus(spkdetG, [{"n_events": 0}]);
-#nest.Simulate(simulationTime)
+    nodesSpkG=nest.GetNodes(spkdetG)
 
-    dSD =nest.GetStatus(spkdetG,keys='events')[0]
+    for spk in nodesSpkG[0]:
+        nest.SetStatus([spk], {"n_events": 0});
+#nest.Simulate(simulationTime)
+#dsD={}
+#for spk in nodesSpkG[0]:
+    dSD =nest.GetStatus([nodesSpkG[0][0]],keys='events')[0]
     evs = dSD["senders"]
     ts = dSD["times"]
     
