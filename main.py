@@ -13,9 +13,9 @@ nest.SetDefaults("iaf_neuron", ndict)
 
 #layerG = nest.Create("iaf_neuron", layerDim*layerDim*len(thetaList));
 
-layer1 = topp.CreateLayer(layer1dict)
-layer2 = topp.CreateLayer(layer2dict)
-layerG = topp.CreateLayer(layerGdict)
+layer1 = topp.CreateLayer(layer1Dict)
+layer2 = topp.CreateLayer(layer2Dict)
+layerG = topp.CreateLayer(layerGDict)
 
 topp.ConnectLayers(layerG, layer1, connGDict)
 topp.ConnectLayers(layer1, layer2, conn1Dict)
@@ -23,22 +23,15 @@ topp.ConnectLayers(layer2, layer1, conn2Dict)
 
 
 nest.SetDefaults("spike_detector", spkdet1Dict)
-spkdet1 = nest.Create("spike_detector",layer1Dim*layer1Dim)
+spkdet1 = topp.CreateLayer(layer1SpkDict)
 nest.SetDefaults("spike_detector", spkdet2Dict)
-spkdet2 = nest.Create("spike_detector",layer2Dim*layer2Dim)
+spkdet2 = topp.CreateLayer(layer2SpkDict)
 nest.SetDefaults("spike_detector", spkdetGDict)
-spkdetG = nest.Create("spike_detector",layerGDim*layerGDim)
+spkdetG = topp.CreateLayer(layerGSpkDict)
 
-nodes1= nest.GetNodes(layer1)
-nodes2= nest.GetNodes(layer2)
-nodesG= nest.GetNodes(layerG)
-
-for i in range(0,layer1Dim*layer1Dim-1):
-    nest.Connect(nodes1[i],spkdet1[i])
-for i in range(0,layer2Dim*layer2Dim-1):
-    nest.Connect(nodes2[i],spkdet2[i])
-for i in range(0,layerGDim*layerGDim-1):
-    nest.Connect(nodesG[i],spkdetG[i])
+topp.ConnectLayers(layerG, spkdetG, connSpkDict)
+topp.ConnectLayers(layer1, spkdet1, connSpkDict)
+topp.ConnectLayers(layer2, spkdet2, connSpkDict)
 
 
 #nest.SetDefaults("iaf_psc_delta", ndict)
@@ -98,9 +91,10 @@ for img_fn in img_fns:
 #     plt.imshow(cv2.resize(res[2],(10,10),interpolation = cv2.INTER_NEAREST ),interpolation='none');
 #     plt.show()
     
+    nodesG=nest.GetNodes(layerG)
     
     #rCounter = 1;
-    for index_filter in range(0,len(thetaList)):
+    for index_filter in range(0,len(thetaList)-1):
         r = res_norm[index_filter]
         #index = 0;
         for index_cell in range(0,layerGDim*layerGDim-1):
