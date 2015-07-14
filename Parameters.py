@@ -116,20 +116,20 @@ connSpkDict={"number_of_connections":1, 'connection_type':'convergent'}
 spkdetGDict = {"withgid": True,
     "withtime": True,
     "to_memory" :True,
-    "to_file" : True,
+    "to_file" : False,
     "label" : "spkG"
 }
 
 spkdet1Dict = {"withgid": True,
     "withtime": True,
     "to_memory" :True,
-    "to_file" : True,
+    "to_file" : False,
     "label" : "spk1"
 }
 
 spkdet2Dict = {"withgid": True,
     "withtime": True,
     "to_memory" :True,
-    "to_file" : True,
+    "to_file" : False,
     "label" : "spk2"
 }
