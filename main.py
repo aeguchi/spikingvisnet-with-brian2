@@ -13,25 +13,29 @@ nest.SetDefaults("iaf_neuron", ndict)
 
 #layerG = nest.Create("iaf_neuron", layerDim*layerDim*len(thetaList));
 
+
+layerG = topp.CreateLayer(layerGDict)
 layer1 = topp.CreateLayer(layer1Dict)
 layer2 = topp.CreateLayer(layer2Dict)
-layerG = topp.CreateLayer(layerGDict)
 
 topp.ConnectLayers(layerG, layer1, connGDict)
 topp.ConnectLayers(layer1, layer2, conn1Dict)
 topp.ConnectLayers(layer2, layer1, conn2Dict)
 
 
-nest.SetDefaults("spike_detector", spkdet1Dict)
-spkdet1 = topp.CreateLayer(layer1SpkDict)
-nest.SetDefaults("spike_detector", spkdet2Dict)
-spkdet2 = topp.CreateLayer(layer2SpkDict)
-nest.SetDefaults("spike_detector", spkdetGDict)
-spkdetG = topp.CreateLayer(layerGSpkDict)
+# nest.SetDefaults("spike_detector", spkdet1Dict)
+# spkdet1 = topp.CreateLayer(layer1SpkDict)
+# nest.SetDefaults("spike_detector", spkdet2Dict)
+# spkdet2 = topp.CreateLayer(layer2SpkDict)
+# nest.SetDefaults("spike_detector", spkdetGDict)
+# spkdetG = topp.CreateLayer(layerGSpkDict)
 
-topp.ConnectLayers(layerG, spkdetG, connSpkDict)
-topp.ConnectLayers(layer1, spkdet1, connSpkDict)
-topp.ConnectLayers(layer2, spkdet2, connSpkDict)
+# topp.ConnectLayers(layerG, spkdetG, connSpkDict)
+# topp.ConnectLayers(layer1, spkdet1, connSpkDict)
+# topp.ConnectLayers(layer2, spkdet2, connSpkDict)
+
+spikedetectors = nest.Create("spike_detector", layerGDim*layerGDim*len(thetaList), params={"withgid": True, "withtime": True})
+nest.Connect(nest.GetNodes(layerG)[0],spikedetectors);
 
 
 #nest.SetDefaults("iaf_psc_delta", ndict)
@@ -59,7 +63,7 @@ if len(img_fns)!=nStim*nTrans:
 
 index_img=0;
 for img_fn in img_fns:
-    print img_fn
+    #print img_fn
     #load gabor filtered ImageSurface
     img = cv2.imread(img_fn)
     if img is None:
@@ -91,12 +95,9 @@ for img_fn in img_fns:
 #     plt.imshow(cv2.resize(res[2],(10,10),interpolation = cv2.INTER_NEAREST ),interpolation='none');
 #     plt.show()
     
-    nodesG=nest.GetNodes(layerG)
+    nodesG=nest.GetNodes(layerG)[0]
     
-    
-    print len(nodesG)
 
-    print nodesG
 
     #rCounter = 1;
     for index_filter in range(0,len(thetaList)-1):
@@ -104,26 +105,29 @@ for img_fn in img_fns:
         #index = 0;
         for index_cell in range(0,layerGDim*layerGDim-1):
         #for neuron in inputNeurons:
-            y_index = math.floor(index_cell/layerGDim);
+            y_index = int(math.floor(index_cell/layerGDim));
             x_index = index_cell%layerGDim;
             #print mean(r[y_index][x_index]);
-            neuron = nodesG[0][index_filter*layerGDim*layerGDim+index_cell]
+            neuron = nodesG[index_filter*layerGDim*layerGDim+index_cell]
             nest.SetStatus([neuron], {"V_m": E_L+(V_th-E_L)*numpy.random.rand()})
             nest.SetStatus([neuron], {"I_e": I_e+80*mean(r[y_index][x_index])}) #TO-DO: TOBE fixed
             #print index_filter*len(thetaList)+index_cell
         
             #index+=1;
             
-    nodesSpkG=nest.GetNodes(spkdetG)
+    #nodesSpkG=nest.GetNodes(spkdetG)[0]
+    #nest.SetStatus(nodesSpkG, {"n_events": 0});
+    nest.SetStatus(spikedetectors, [{"n_events": 0}]);
+    
+    nest.Simulate(simulationTime)
 
-    for spk in nodesSpkG[0]:
-        nest.SetStatus([spk], {"n_events": 0});
-#nest.Simulate(simulationTime)
-#dsD={}
-#for spk in nodesSpkG[0]:
-    dSD =nest.GetStatus([nodesSpkG[0][0]],keys='events')[0]
+    dSD =nest.GetStatus(spikedetectors,keys='events')[0]
+    #dSD =nest.GetStatus(nodesSpkG,keys='events')[0]
     evs = dSD["senders"]
     ts = dSD["times"]
+    
+    
+    
     
     for index_filter in range(0,len(res_norm)):    
         ax = plt.subplot(5,3,(index_filter+1)*3+1);
