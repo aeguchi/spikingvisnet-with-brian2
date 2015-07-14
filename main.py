@@ -35,7 +35,7 @@ topp.ConnectLayers(layer2, layer1, conn2Dict)
 # topp.ConnectLayers(layer2, spkdet2, connSpkDict)
 
 spikedetectors = nest.Create("spike_detector", layerGDim*layerGDim*len(thetaList), params={"withgid": True, "withtime": True})
-nest.Connect(nest.GetNodes(layerG)[0],spikedetectors);
+nest.Connect(nest.GetNodes(layerG)[0],spikedetectors,"one_to_one");
 
 
 #nest.SetDefaults("iaf_psc_delta", ndict)
@@ -121,10 +121,13 @@ for img_fn in img_fns:
     
     nest.Simulate(simulationTime)
 
-    dSD =nest.GetStatus(spikedetectors,keys='events')[0]
-    #dSD =nest.GetStatus(nodesSpkG,keys='events')[0]
-    evs = dSD["senders"]
-    ts = dSD["times"]
+
+
+    
+#     dSD =nest.GetStatus(spikedetectors,keys='events')[1]
+#     #dSD =nest.GetStatus(nodesSpkG,keys='events')[0]
+#     evs = dSD["senders"]
+#     ts = dSD["times"]
     
     
     
@@ -136,37 +139,36 @@ for img_fn in img_fns:
         #ax.get_yaxis().set_visible(False)
         plt.ylabel('Filter '+str(index_filter))
         
-        evsIndex = [];
+        
         res_FRMap = numpy.zeros((layerGDim, layerGDim));
-        index_evs = 0;
-        for index in evs:
-            if layerGDim*layerGDim*index_filter <index and index<=layerGDim*layerGDim*(index_filter+1):
-                evsIndex.append(index_evs);
-                index_tmp = (index-1)%(layerGDim*layerGDim)+1
-                y_index = math.floor((index_tmp-1)/layerGDim);
-                x_index = (index_tmp-1)%layerGDim;
-                res_FRMap[y_index][x_index]+=1;
-            index_evs+=1;
-        
-        res_FRMap*=(1000/simulationTime)
         
         
+        for cell_index in range(0,layerGDim*layerGDim):
+            index = index_filter*layerGDim*layerGDim+cell_index;
+            dSD =nest.GetStatus(spikedetectors,keys='events')[index]
+            #dSD =nest.GetStatus(nodesSpkG,keys='events')[0]
+            evs = dSD["senders"]
+            ts = dSD["times"]
+            
+            y_index = math.floor((cell_index)/layerGDim);
+            x_index = (cell_index)%layerGDim;
+            
+            res_FRMap[y_index][x_index]+=len(ts);
+     
+            #plot spike raster
+            ax=plt.subplot(5,3,(index_filter+1)*3+2);
+            if(index_filter==0):
+                plt.title('Raster Plot')
+            plt.plot(ts, evs,'.')
+        ax.get_yaxis().set_visible(False)
+        ax.set_xlim([index_img*simulationTime, (index_img+1)*simulationTime])
+
         #plot FR map
         plt.subplot(5,3,(index_filter+1)*3+3);
         if(index_filter==0):
             plt.title('Firing Rate Map')
         plt.imshow(res_FRMap,interpolation='none');
-        plt.colorbar();
-        
-        
-        #plot spike raster
-        ax=plt.subplot(5,3,(index_filter+1)*3+2);
-        if(index_filter==0):
-            plt.title('Raster Plot')
-        plt.plot(ts[evsIndex], evs[evsIndex],'.')
-        ax.get_yaxis().set_visible(False)
-        ax.set_xlim([index_img*simulationTime, (index_img+1)*simulationTime])
-        
+        plt.colorbar();            
 
 
     plt.show()
