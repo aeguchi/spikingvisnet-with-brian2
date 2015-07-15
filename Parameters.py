@@ -32,9 +32,11 @@ E_L=-70.       # (mV) resting potential
 
 #STRUCTURE OF THE NETWORK
 nLayers = 2
-layerGDim = 10;
-layer1Dim = 10   # size of layer1 in neurons
-layer2Dim = 10   # size of layer2 in neurons
+layerGDim = 20;
+layer1Dim = 20   # size of layer1 in neurons
+layer2Dim = 20   # size of layer2 in neurons
+inhibLayer1Dim = 10;
+inhibLayer2Dim = 10;
 extentG=[2.,2.] # size of  layer2 in mm
 extent1=[2.,2.] # size of  layer1 in mm
 extent2=[2.,2.] # size of  layer2 in mm
@@ -52,48 +54,85 @@ layerGDict = {"extent" : extent1, # the size of the layer in mm
     "elements" : "iaf_neuron"   # the element at each (x,y) coordinate in the grid
     }
 
-layer1Dict = {"extent" : extent1, # the size of the layer in mm
+layersDict = []
+#layer 1
+layersDict.append({"extent" : extent1, # the size of the layer in mm
     "rows" : layer1Dim, # the number of rows in this layer ...
     "columns" : layer1Dim, # ... and the number of columns
-    "elements" : "iaf_neuron"} # the element at each (x,y) coordinate in the grid
-
-layer2Dict = {"extent" : extent2, # the size of the layer in mm
+    "elements" : "iaf_neuron"}) # the element at each (x,y) coordinate in the grid
+#layer 2
+layersDict.append({"extent" : extent2, # the size of the layer in mm
     "rows" : layer2Dim, # the number of rows in this layer ...
     "columns" : layer2Dim, # ... and the number of columns
-    "elements" : "iaf_neuron"} # the element at each (x,y) coordinate in the grid
+    "elements" : "iaf_neuron"}) # the element at each (x,y) coordinate in the grid
+
+inhibLayersDict = []
+#inhibLayer 1
+inhibLayersDict.append({"extent" : extent1, # the size of the layer in mm
+    "rows" : inhibLayer1Dim, # the number of rows in this layer ...
+    "columns" : inhibLayer1Dim, # ... and the number of columns
+    "elements" : "iaf_neuron"}) # the element at each (x,y) coordinate in the grid
+#inhibLayer 2
+inhibLayersDict.append({"extent" : extent2, # the size of the layer in mm
+    "rows" : inhibLayer2Dim, # the number of rows in this layer ...
+    "columns" : inhibLayer2Dim, # ... and the number of columns
+    "elements" : "iaf_neuron"}) # the element at each (x,y) coordinate in the grid
+
 
 
 # Dictionaries (COnnection):
 connGDict = {   "connection_type":"convergent",
-    "synapse_model": "stdp_synapse",
+    #"synapse_model": "stdp_synapse",
     "kernel":gaborSampleRatio,
-    #"number_of_connections": math.floor(layerGDim*layerGDim*gaborSampleRatio),
-    "weights": {"uniform":{'min': 0., 'max': 100.}},
-    "delays" : {"linear" :{"c":0.1,"a":0.2}},
+    #"number_of_connections": int(layerGDim*layerGDim*gaborSampleRatio),
+    "weights": {"uniform":{'min': 0., 'max': 10.}},
+    #"delays" : {"linear" :{"c":0.1,"a":0.2}},
+    "delays" : {"uniform" :{'min':0.1,'max':0.2}},
     "allow_autapses":False,
     "allow_multapses" :True
 }
 
 connForwardDict = {
     "connection_type":"convergent",
-    "synapse_model": "stdp_synapse",
+    #"synapse_model": "stdp_synapse",
     "kernel":layerSampleRatio,
-    #"number_of_connections": math.floor(layer1Dim*layer1Dim*layerSampleRatio),
-    "weights": {"uniform":{'min': 0., 'max': 100.}},
-    "delays" : {"linear" :{"c":0.1,"a":0.2}},
+    #"number_of_connections": int(layer1Dim*layer1Dim*layerSampleRatio),
+    "weights": {"uniform":{'min': 0., 'max': 20.}},
+    #"delays" : {"linear" :{"c":0.1,"a":0.2}},
+    "delays" : {"uniform" :{'min':0.1,'max':50.0}},
     "allow_autapses":False,
     "allow_multapses" :True}
 
 
 connBackwardDict = {   "connection_type":"convergent",
-    "synapse_model": "stdp_synapse",
+    #"synapse_model": "stdp_synapse",
     "kernel":layerSampleRatio,
-    #"number_of_connections": math.floor(layer2Dim*layer2Dim*layerSampleRatio),
-    "weights": {"uniform":{'min': 0., 'max': 100.}},
-    "delays" : {"linear" :{"c":0.1,"a":0.2}},
+    #"number_of_connections": int(layer2Dim*layer2Dim*layerSampleRatio),
+    "weights": {"uniform":{'min': 0., 'max': 10.}},
+    #"delays" : {"linear" :{"c":0.1,"a":0.2}},
+    "delays" : {"uniform" :{'min':0.1,'max':50.0}},
     "allow_autapses":False,
     "allow_multapses" :True
 }
+
+connExInhibDict = {   "connection_type":"convergent",
+    #"kernel":layerSampleRatio,
+    "number_of_connections": layer2Dim*layer2Dim,
+    "weights": {"uniform":{'min': 0., 'max': 1.}},
+    "delays" : {"linear" :{"c":0.1,"a":0.2}},
+    "allow_autapses":False,
+    "allow_multapses" :False
+}
+
+connInhibExDict = {   "connection_type":"convergent",
+    #"kernel":layerSampleRatio,
+    "number_of_connections": inhibLayer1Dim*inhibLayer1Dim,
+    "weights": {"uniform":{'min': -10., 'max': 0.}},
+    "delays" : {"linear" :{"c":0.1,"a":0.2}},
+    "allow_autapses":False,
+    "allow_multapses" :False
+}
+
 
 #connSpkDict={"number_of_connections":1, 'connection_type':'convergent'}
 
