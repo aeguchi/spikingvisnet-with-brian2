@@ -4,6 +4,7 @@ from cmath import sqrt, log
 #class Parameters:
 nStim = 2
 nTrans = 8
+nLayers = 2
 
 ksize = 31#31  # 31 the size of the Gabor kernel. If ksize = (a, b), we then have a Gabor kernel of size a x b pixels. As with many other convolution kernels, ksize is preferably odd and the kernel is a square (just for the sake of uniformity).
 bw = 1.5 #spatial bandwidth:
@@ -45,16 +46,16 @@ layerSampleRatio = 0.05
 ndict = {"I_e": I_e, "tau_m": tau_m}
 
 layerGDict = {"extent" : extent1, # the size of the layer in mm
-    "rows" : layerGDim*len(thetaList), # the number of rows in this layer ...
+    "rows" : layerGDim, # the number of rows in this layer ...
     "columns" : layerGDim, # ... and the number of columns
     "elements" : "iaf_neuron"   # the element at each (x,y) coordinate in the grid
     }
 
-layerGSpkDict = {"extent" : extent1, # the size of the layer in mm
-    "rows" : layerGDim*len(thetaList), # the number of rows in this layer ...
-    "columns" : layerGDim, # ... and the number of columns
-    "elements" : "spike_detector"   # the element at each (x,y) coordinate in the grid
-}
+# layerGSpkDict = {"extent" : extent1, # the size of the layer in mm
+#     "rows" : layerGDim*len(thetaList), # the number of rows in this layer ...
+#     "columns" : layerGDim, # ... and the number of columns
+#     "elements" : "spike_detector"   # the element at each (x,y) coordinate in the grid
+# }
 
 layer1Dict = {"extent" : extent1, # the size of the layer in mm
     "rows" : layer1Dim, # the number of rows in this layer ...
