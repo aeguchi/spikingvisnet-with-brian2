@@ -14,24 +14,39 @@ nest.SetDefaults("iaf_neuron", ndict)
 plotGabor = 0;
 plotLayer = 1;
 
+#Creating Gabor input layer
 layerG = []
 for theta in range(0,len(thetaList)):
     layerG.append(topp.CreateLayer(layerGDict))
+
+#Creating ExcitLayers
 layers = []
 for layer in range(0,nLayers):
-    layers.append(topp.CreateLayer(layer1Dict))
+    layers.append(topp.CreateLayer(layersDict[layer]))
 
-for theta in range(0,len(thetaList)):
+#Creating InhibLayers
+inhibLayers = [] 
+for layer in range(0,nLayers):
+    inhibLayers.append(topp.CreateLayer(inhibLayersDict[layer]))
+
+#Connecting neurons in Gabor input layer and neurons in the first ExcitLayer
+for theta in range(0,len(thetaList)): 
     topp.ConnectLayers(layerG[theta], layers[0], connGDict)
 
-for layer in range(0,nLayers-1):
-    print layer
-    topp.ConnectLayers(layers[layer], layers[layer+1], connForwardDict)
-    topp.ConnectLayers(layers[layer+1], layers[layer], connBackwardDict)
+#Connecting neurons between layers
+for layer in range(0,nLayers-1): 
+    topp.ConnectLayers(layers[layer], layers[layer+1], connForwardDict)#feed forward connections
+    topp.ConnectLayers(layers[layer+1], layers[layer], connBackwardDict)#feedback connections
+
+#Connecting neurons within layers    
+for layer in range(0,nLayers): 
+    topp.ConnectLayers(layers[layer], inhibLayers[layer], connExInhibDict)#E->I connections within layer 
+    topp.ConnectLayers(inhibLayers[layer], layers[layer], connInhibExDict)#I->E connections within layer
 
 spkdetG = nest.Create("spike_detector", len(thetaList), params={"withgid": True, "withtime": True})
 for theta in range(0,len(thetaList)):
     nest.Connect(nest.GetNodes(layerG[theta])[0],[spkdetG[theta]],"all_to_all");
+
 spkdetLayers = []
 for layer in range(0,nLayers):
     spkdetLayers.append(nest.Create("spike_detector", 1, params={"withgid": True, "withtime": True}))
@@ -39,6 +54,12 @@ for layer in range(0,nLayers):
 for layer in range(0,nLayers):
     nest.Connect(nest.GetNodes(layers[layer])[0], [spkdetLayers[layer][0]], "all_to_all")
 
+spkdetInhibLayers = []
+for layer in range(0,nLayers):
+    spkdetInhibLayers.append(nest.Create("spike_detector", 1, params={"withgid": True, "withtime": True}))
+
+for layer in range(0,nLayers):
+    nest.Connect(nest.GetNodes(inhibLayers[layer])[0], [spkdetInhibLayers[layer][0]], "all_to_all")
 
 ### Training ###
 #trainingImages = sorted(glob.iglob("/images/training/*.png"))
@@ -89,6 +110,7 @@ for img_fn in img_fns:
     nest.SetStatus(spkdetG, [{"n_events": 0}]);
     for layer in range(0,nLayers):
         nest.SetStatus(spkdetLayers[layer], [{"n_events": 0}])
+        nest.SetStatus(spkdetInhibLayers[layer], [{"n_events": 0}])
     
     
     nest.Simulate(simulationTime)
@@ -133,7 +155,7 @@ for img_fn in img_fns:
             plt.subplot(5,3,(index_filter+1)*3+3);
             if(index_filter==0):
                 plt.title('Firing Rate Map')
-            plt.imshow(res_FRMap,interpolation='none');
+            plt.imshow(res_FRMap,interpolation='none',vmin=0, vmax=res_FRMap.max());
             plt.colorbar();
         
     if (plotLayer):
@@ -144,7 +166,7 @@ for img_fn in img_fns:
         
         for layer in range(0,nLayers):
             
-            res_FRMap = numpy.zeros((layerGDim, layerGDim));
+            ex_FRMap = numpy.zeros((layer1Dim, layer1Dim));
             dSD =nest.GetStatus(spkdetLayers[layer],keys='events')[0];
             evs = dSD["senders"]
             ts = dSD["times"]
@@ -152,12 +174,12 @@ for img_fn in img_fns:
             headNodeIndex = layers[layer][0]
             for sender in evs:
                 cell_index=sender-headNodeIndex-1
-                y_index = math.floor((cell_index)/layerGDim);
-                x_index = (cell_index)%layerGDim;
-                res_FRMap[y_index][x_index]+=1*(1000/simulationTime);
+                y_index = math.floor((cell_index)/layer1Dim);
+                x_index = (cell_index)%layer1Dim;
+                ex_FRMap[y_index][x_index]+=1*(1000/simulationTime);
          
             #plot spike raster
-            ax=plt.subplot(nLayers+1,2,(nLayers-layer)*2+1);
+            ax=plt.subplot(nLayers+1,4,(nLayers-layer)*4+1);
             
             plt.title(layer)
             plt.plot(ts, evs,'.')
@@ -166,11 +188,46 @@ for img_fn in img_fns:
             ax.set_ylim([headNodeIndex+1, headNodeIndex+(layer1Dim*layer1Dim)]);
             
             #plot FR map
-            plt.subplot(nLayers+1,2,(nLayers-layer)*2+2);
+            plt.subplot(nLayers+1,4,(nLayers-layer)*4+2);
             if(index_filter==0):
                 plt.title('Firing Rate Map')
-            plt.imshow(res_FRMap,interpolation='none');
+            plt.imshow(ex_FRMap,interpolation='none',vmin=0, vmax=ex_FRMap.max());
             plt.colorbar();
+            
+            
+            
+            
+            inhib_FRMap = numpy.zeros((inhibLayer1Dim, inhibLayer1Dim));
+            dSD =nest.GetStatus(spkdetInhibLayers[layer],keys='events')[0];
+            evs = dSD["senders"]
+            ts = dSD["times"]
+                
+            headNodeIndex = inhibLayers[layer][0]
+            for sender in evs:
+                cell_index=sender-headNodeIndex-1
+                y_index = math.floor((cell_index)/inhibLayer1Dim);
+                x_index = (cell_index)%inhibLayer1Dim;
+                inhib_FRMap[y_index][x_index]+=1*(1000/simulationTime);
+         
+            #plot spike raster
+            ax=plt.subplot(nLayers+1,4,(nLayers-layer)*4+3);
+            
+            plt.title(layer)
+            plt.plot(ts, evs,'.')
+            #ax.get_yaxis().set_visible(False)
+            ax.set_xlim([(index_img)*simulationTime, (index_img+1)*simulationTime])
+            ax.set_ylim([headNodeIndex+1, headNodeIndex+(inhibLayer1Dim*inhibLayer1Dim)]);
+            
+            #plot FR map
+            plt.subplot(nLayers+1,4,(nLayers-layer)*4+4);
+            if(index_filter==0):
+                plt.title('Firing Rate Map')
+            plt.imshow(inhib_FRMap,interpolation='none',vmin=0, vmax=inhib_FRMap.max());
+            plt.colorbar();
+            
+            spkdetInhibLayers
+            
+            
         
         plt.show()
     index_img+=1;
