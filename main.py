@@ -10,9 +10,11 @@ import nest.topology as topp
 nest.Models()
 #ndict = {"C_m":C_m, 'tau_m': tau_m, 't_ref': t_ref, 'E_L': E_L, 'V_th': V_th, 'V_reset': V_reset};
 nest.SetDefaults("iaf_neuron", ndict)
+nest.SetDefaults("stdp_synapse",stdp_dict);
+
 
 plotGabor = 0;
-plotLayer = 1;
+plotLayer = 0; #0:each images, 1: at end
 
 #Creating Gabor input layer
 layerG = []
@@ -42,6 +44,7 @@ for layer in range(0,nLayers-1):
 for layer in range(0,nLayers): 
     topp.ConnectLayers(layers[layer], inhibLayers[layer], connExInhibDict)#E->I connections within layer 
     topp.ConnectLayers(inhibLayers[layer], layers[layer], connInhibExDict)#I->E connections within layer
+    topp.ConnectLayers(inhibLayers[layer], inhibLayers[layer], connInhibRecDict)#I->I connections within layer
 
 spkdetG = nest.Create("spike_detector", len(thetaList), params={"withgid": True, "withtime": True})
 for theta in range(0,len(thetaList)):
@@ -106,11 +109,11 @@ for img_fn in img_fns:
             nest.SetStatus([neuron], {"V_m": E_L+(V_th-E_L)*numpy.random.rand()})
             nest.SetStatus([neuron], {"I_e": I_e+80*mean(r[y_index][x_index])}) #TO-DO: TOBE fixed
 
-    
-    nest.SetStatus(spkdetG, [{"n_events": 0}]);
-    for layer in range(0,nLayers):
-        nest.SetStatus(spkdetLayers[layer], [{"n_events": 0}])
-        nest.SetStatus(spkdetInhibLayers[layer], [{"n_events": 0}])
+    if(plotGabor or plotLayer==0):
+        nest.SetStatus(spkdetG, [{"n_events": 0}]);
+        for layer in range(0,nLayers):
+            nest.SetStatus(spkdetLayers[layer], [{"n_events": 0}])
+            nest.SetStatus(spkdetInhibLayers[layer], [{"n_events": 0}])
     
     
     nest.Simulate(simulationTime)
@@ -158,7 +161,7 @@ for img_fn in img_fns:
             plt.imshow(res_FRMap,interpolation='none',vmin=0, vmax=res_FRMap.max());
             plt.colorbar();
         
-    if (plotLayer):
+    if (plotLayer==0):
         plt.figure(2);    
         plt.subplot(nLayers+1,3,1);
         plt.imshow(img,interpolation='none');
@@ -225,13 +228,46 @@ for img_fn in img_fns:
             plt.imshow(inhib_FRMap,interpolation='none',vmin=0, vmax=inhib_FRMap.max());
             plt.colorbar();
             
-            spkdetInhibLayers
-            
-            
-        
+
         plt.show()
     index_img+=1;
     
-    #To-DO: trainNetworkWith
+#To-DO: trainNetworkWith
+if (plotLayer==1):
+#         plt.figure(2);    
+#         plt.subplot(nLayers+1,3,1);
+#         plt.imshow(img,interpolation='none');
+#         plt.title('Input')
+    
+    for layer in range(0,nLayers):
+        headNodeIndex = layers[layer][0]
+        dSD =nest.GetStatus(spkdetLayers[layer],keys='events')[0];
+        evs = dSD["senders"]
+        ts = dSD["times"]
+
+        #plot spike raster
+        ax=plt.subplot(nLayers,4,(nLayers-layer-1)*4+1);
+        
+        plt.title(layer)
+        plt.plot(ts, evs,'.')
+        #ax.get_yaxis().set_visible(False)
+        #ax.set_xlim([(index_img)*simulationTime, (index_img+1)*simulationTime])
+        ax.set_ylim([headNodeIndex+1, headNodeIndex+(layer1Dim*layer1Dim)]);
+        
+        
+        headNodeIndex = inhibLayers[layer][0]
+        dSD =nest.GetStatus(spkdetInhibLayers[layer],keys='events')[0];
+        evs = dSD["senders"]
+        ts = dSD["times"]
+            
+        #plot spike raster
+        ax=plt.subplot(nLayers,4,(nLayers-layer-1)*4+3);
+        plt.title(layer)
+        plt.plot(ts, evs,'.')
+        #ax.get_yaxis().set_visible(False)
+        #ax.set_xlim([(index_img)*simulationTime, (index_img+1)*simulationTime])
+        ax.set_ylim([headNodeIndex+1, headNodeIndex+(inhibLayer1Dim*inhibLayer1Dim)]);
+        
+    plt.show()
     
 #Testing
