@@ -14,7 +14,7 @@ nest.SetDefaults("stdp_synapse",stdp_dict);
 
 
 plotGabor = 0;
-plotLayer = 0; #0:each images, 1: at end
+plotLayer = 1; #0:each images, 1: at end
 
 #Creating Gabor input layer
 layerG = []
@@ -44,7 +44,7 @@ for layer in range(0,nLayers-1):
 for layer in range(0,nLayers): 
     topp.ConnectLayers(layers[layer], inhibLayers[layer], connExInhibDict)#E->I connections within layer 
     topp.ConnectLayers(inhibLayers[layer], layers[layer], connInhibExDict)#I->E connections within layer
-    topp.ConnectLayers(inhibLayers[layer], inhibLayers[layer], connInhibRecDict)#I->I connections within layer
+    #topp.ConnectLayers(inhibLayers[layer], inhibLayers[layer], connInhibRecDict)#I->I connections within layer
 
 spkdetG = nest.Create("spike_detector", len(thetaList), params={"withgid": True, "withtime": True})
 for theta in range(0,len(thetaList)):
