@@ -70,6 +70,9 @@ extent2=[2.,2.] # size of  layer2 in mm
 
 gaborSampleRatio = 0.1
 layerSampleRatio = 0.05
+EISampleRatio = 0.3;
+IESampleRatio = 1;
+
 
 # Dictionaries (Creation): 
 ndict = {"I_e": I_e, "tau_m": tau_m, "tau_minus": tau_minus}
@@ -143,8 +146,8 @@ connBackwardDict = {   "connection_type":"convergent",
 
 connExInhibDict = {   "connection_type":"convergent",
     #"kernel":layerSampleRatio,
-    "number_of_connections": layer2Dim*layer2Dim,
-    "weights": {"uniform":{'min': 0., 'max': 50.}},
+    "number_of_connections": int(layer2Dim*layer2Dim*EISampleRatio),
+    "weights": {"uniform":{'min': 0., 'max': 10.}},
     "delays" : {"uniform":{'min': minDelay, 'max': maxDelay}},#2.0,#{"linear" :{"c":0.1,"a":0.2}},
     "allow_autapses":False,
     "allow_multapses" :False
@@ -152,8 +155,8 @@ connExInhibDict = {   "connection_type":"convergent",
 
 connInhibExDict = {   "connection_type":"convergent",
     #"kernel":layerSampleRatio,
-    "number_of_connections": inhibLayer1Dim*inhibLayer1Dim,
-    "weights": {"uniform":{'min': -10., 'max': 0.}},
+    "number_of_connections": int(inhibLayer1Dim*inhibLayer1Dim*IESampleRatio),
+    "weights": {"uniform":{'min': -8., 'max': 0.}},
     "delays" : {"uniform":{'min': minDelay, 'max': maxDelay}},#2.0,#{"linear" :{"c":0.1,"a":0.2}},
     "allow_autapses":False,
     "allow_multapses" :False
@@ -162,7 +165,7 @@ connInhibExDict = {   "connection_type":"convergent",
 connInhibRecDict = {   "connection_type":"convergent",
     #"kernel":layerSampleRatio,
     "number_of_connections": inhibLayer1Dim*inhibLayer1Dim,
-    "weights": {"uniform":{'min': 0., 'max': 1.}},
+    "weights": {"uniform":{'min': 0., 'max': 0.1}},
     "delays" : {"uniform":{'min': minDelay, 'max': 5.}},#5.0,#{"linear" :{"c":0.1,"a":0.2}},
     "allow_autapses":True,
     "allow_multapses" :False
