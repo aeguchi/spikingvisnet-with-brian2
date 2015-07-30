@@ -24,7 +24,14 @@ dv/dt = (ge+gi-(v+49*mV))/(20*ms) : volt
 dge/dt = -ge/(5*ms) : volt
 dgi/dt = -gi/(10*ms) : volt
 '''
+ #need to learn thishttp://brian2.readthedocs.org/en/2.0b4/user/models.html
 
+
+# eqs = '''
+# dv/dt = (I-v)/tau : 1
+# I : 1
+# tau : second
+# '''
 
 
 simulationTime = 250;
