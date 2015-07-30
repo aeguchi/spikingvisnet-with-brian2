@@ -18,6 +18,15 @@ sigma = 0.5 # the standard deviation of the Gaussian function used in the Gabor 
 
 
 
+#Brian
+eqs = '''
+dv/dt = (ge+gi-(v+49*mV))/(20*ms) : volt
+dge/dt = -ge/(5*ms) : volt
+dgi/dt = -gi/(10*ms) : volt
+'''
+
+
+
 simulationTime = 250;
 
 #PARAM FOR NEURONS
@@ -60,10 +69,8 @@ minDelay = 1.
 #STRUCTURE OF THE NETWORK
 nLayers = 2
 layerGDim = 20;
-layer1Dim = 20   # size of layer1 in neurons
-layer2Dim = 20   # size of layer2 in neurons
-inhibLayer1Dim = 10;
-inhibLayer2Dim = 10;
+layerDim = 20   # size of layer1 in neurons
+inhibLayerDim = 10;
 extentG=[2.,2.] # size of  layer2 in mm
 extent1=[2.,2.] # size of  layer1 in mm
 extent2=[2.,2.] # size of  layer2 in mm
@@ -86,25 +93,25 @@ layerGDict = {"extent" : extent1, # the size of the layer in mm
 layersDict = []
 #layer 1
 layersDict.append({"extent" : extent1, # the size of the layer in mm
-    "rows" : layer1Dim, # the number of rows in this layer ...
-    "columns" : layer1Dim, # ... and the number of columns
+    "rows" : layerDim, # the number of rows in this layer ...
+    "columns" : layerDim, # ... and the number of columns
     "elements" : "iaf_neuron"}) # the element at each (x,y) coordinate in the grid
 #layer 2
 layersDict.append({"extent" : extent2, # the size of the layer in mm
-    "rows" : layer2Dim, # the number of rows in this layer ...
-    "columns" : layer2Dim, # ... and the number of columns
+    "rows" : layerDim, # the number of rows in this layer ...
+    "columns" : layerDim, # ... and the number of columns
     "elements" : "iaf_neuron"}) # the element at each (x,y) coordinate in the grid
 
 inhibLayersDict = []
 #inhibLayer 1
 inhibLayersDict.append({"extent" : extent1, # the size of the layer in mm
-    "rows" : inhibLayer1Dim, # the number of rows in this layer ...
-    "columns" : inhibLayer1Dim, # ... and the number of columns
+    "rows" : inhibLayerDim, # the number of rows in this layer ...
+    "columns" : inhibLayerDim, # ... and the number of columns
     "elements" : "iaf_neuron"}) # the element at each (x,y) coordinate in the grid
 #inhibLayer 2
 inhibLayersDict.append({"extent" : extent2, # the size of the layer in mm
-    "rows" : inhibLayer2Dim, # the number of rows in this layer ...
-    "columns" : inhibLayer2Dim, # ... and the number of columns
+    "rows" : inhibLayerDim, # the number of rows in this layer ...
+    "columns" : inhibLayerDim, # ... and the number of columns
     "elements" : "iaf_neuron"}) # the element at each (x,y) coordinate in the grid
 
 
@@ -146,7 +153,7 @@ connBackwardDict = {   "connection_type":"convergent",
 
 connExInhibDict = {   "connection_type":"convergent",
     #"kernel":layerSampleRatio,
-    "number_of_connections": int(layer2Dim*layer2Dim*EISampleRatio),
+    "number_of_connections": int(layerDim*layerDim*EISampleRatio),
     "weights": {"uniform":{'min': 0., 'max': 10.}},
     "delays" : {"uniform":{'min': minDelay, 'max': maxDelay}},#2.0,#{"linear" :{"c":0.1,"a":0.2}},
     "allow_autapses":False,
@@ -155,7 +162,7 @@ connExInhibDict = {   "connection_type":"convergent",
 
 connInhibExDict = {   "connection_type":"convergent",
     #"kernel":layerSampleRatio,
-    "number_of_connections": int(inhibLayer1Dim*inhibLayer1Dim*IESampleRatio),
+    "number_of_connections": int(inhibLayerDim*inhibLayerDim*IESampleRatio),
     "weights": {"uniform":{'min': -8., 'max': 0.}},
     "delays" : {"uniform":{'min': minDelay, 'max': maxDelay}},#2.0,#{"linear" :{"c":0.1,"a":0.2}},
     "allow_autapses":False,
@@ -164,7 +171,7 @@ connInhibExDict = {   "connection_type":"convergent",
 
 connInhibRecDict = {   "connection_type":"convergent",
     #"kernel":layerSampleRatio,
-    "number_of_connections": inhibLayer1Dim*inhibLayer1Dim,
+    "number_of_connections": inhibLayerDim*inhibLayerDim,
     "weights": {"uniform":{'min': 0., 'max': 0.1}},
     "delays" : {"uniform":{'min': minDelay, 'max': 5.}},#5.0,#{"linear" :{"c":0.1,"a":0.2}},
     "allow_autapses":True,
