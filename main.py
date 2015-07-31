@@ -6,6 +6,11 @@ import nest
 import os
 import nest.topology as topp
 
+spkpath = glob.iglob(os.path.split(os.path.realpath(__file__))[0]+"/*.gdf")
+for str in spkpath:
+    os.remove(str)
+
+
 ### Constructing Network ###
 nest.Models()
 #ndict = {"C_m":C_m, 'tau_m': tau_m, 't_ref': t_ref, 'E_L': E_L, 'V_th': V_th, 'V_reset': V_reset};
@@ -108,6 +113,19 @@ for img_fn in img_fns:
             neuron = nodesG[index_cell]
             nest.SetStatus([neuron], {"V_m": E_L+(V_th-E_L)*numpy.random.rand()})
             nest.SetStatus([neuron], {"I_e": I_e+80*mean(r[y_index][x_index])}) #TO-DO: TOBE fixed
+<<<<<<< local
+            #print index_filter*len(thetaList)+index_cell
+        
+            #index+=1;
+            
+<<<<<<< local
+    nodesSpkG=nest.GetNodes(spkdetG)
+    print nodesSpkG
+=======
+    #nodesSpkG=nest.GetNodes(spkdetG)[0]
+    #nest.SetStatus(nodesSpkG, {"n_events": 0});
+    nest.SetStatus(spikedetectors, [{"n_events": 0}]);
+=======
 
     if(plotGabor or plotLayer==0):
         nest.SetStatus(spkdetG, [{"n_events": 0}]);
@@ -115,8 +133,26 @@ for img_fn in img_fns:
             nest.SetStatus(spkdetLayers[layer], [{"n_events": 0}])
             nest.SetStatus(spkdetInhibLayers[layer], [{"n_events": 0}])
     
+>>>>>>> other
     
     nest.Simulate(simulationTime)
+<<<<<<< local
+>>>>>>> other
+
+<<<<<<< local
+    for spk in nodesSpkG[0]:
+        nest.SetStatus([spk], {"n_events": 0});
+    nest.Simulate(simulationTime)
+#dsD={}
+#for spk in nodesSpkG[0]:
+    dSD =nest.GetStatus([nodesSpkG[0][0]],keys='events')[0]
+    evs = dSD["senders"]
+    ts = dSD["times"]
+=======
+
+
+=======
+>>>>>>> other
     
     if(plotGabor):
         plt.figure(1)
@@ -125,6 +161,27 @@ for img_fn in img_fns:
         plt.imshow(img,interpolation='none');
         plt.title('Input')
     
+<<<<<<< local
+    
+    
+>>>>>>> other
+    
+    for index_filter in range(0,len(res_norm)):    
+        ax = plt.subplot(5,3,(index_filter+1)*3+1);
+        plt.imshow(res[index_filter],interpolation='none');
+        #ax.get_xaxis().set_visible(False)
+        #ax.get_yaxis().set_visible(False)
+        plt.ylabel('Filter '+str(index_filter))
+        
+        
+        res_FRMap = numpy.zeros((layerGDim, layerGDim));
+        
+        
+        for cell_index in range(0,layerGDim*layerGDim):
+            index = index_filter*layerGDim*layerGDim+cell_index;
+            dSD =nest.GetStatus(spikedetectors,keys='events')[index]
+            #dSD =nest.GetStatus(nodesSpkG,keys='events')[0]
+=======
         for index_filter in range(0,len(res_norm)):    
             ax = plt.subplot(5,3,(index_filter+1)*3+1);
             plt.imshow(res[index_filter],interpolation='none');
@@ -136,6 +193,7 @@ for img_fn in img_fns:
             res_FRMap = numpy.zeros((layerGDim, layerGDim));
             
             dSD =nest.GetStatus(spkdetG,keys='events')[index_filter];
+>>>>>>> other
             evs = dSD["senders"]
             ts = dSD["times"]
                 

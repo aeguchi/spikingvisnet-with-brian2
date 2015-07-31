@@ -19,11 +19,20 @@ sigma = 0.5 # the standard deviation of the Gaussian function used in the Gabor 
 
 
 #Brian
-eqs = '''
-dv/dt = (ge+gi-(v+49*mV))/(20*ms) : volt
-dge/dt = -ge/(5*ms) : volt
-dgi/dt = -gi/(10*ms) : volt
-'''
+eqs ='''
+    tau_m*(dV/dt) = -v + R * I : volt
+    R :ohm
+    I: amp
+    #v_th : volt  # neuron-specific threshold
+    #v_r : volt  # neuron-specific reset
+    
+    '''
+
+#'''
+#dv/dt = (ge+gi-(v+49*mV))/(20*ms) : volt/s
+#dge/dt = -ge/(5*ms) : siemens/s
+#dgi/dt = -gi/(10*ms) : siemens/s
+#'''
  #need to learn thishttp://brian2.readthedocs.org/en/2.0b4/user/models.html
 
 
@@ -37,14 +46,14 @@ dgi/dt = -gi/(10*ms) : volt
 simulationTime = 250;
 
 #PARAM FOR NEURONS
-I_e = 180.0;         # (nA) external current
-tau_m = 20.0;      # (ms) membrane time constant
-V_th=-55.      # (mV) firing threshold                  
-E_L=-70.       # (mV) resting potential
+I_e = 180.0 nA;         # (nA) external current
+tau_m = 20.0 ms;      # (ms) membrane time constant
+V_th=-55. mV      # (mV) firing threshold
+E_L=-70.  mV     # (mV) resting potential
 
-#C_m = 250.0       # (pF) capacitance
-#V_reset = -70.0   # (mV) reset potential
-#t_ref = 2.0       # (ms) refractory period
+#C_m = 250.0 pF       # (pF) capacitance
+#V_reset = -70.0 mV  # (mV) reset potential
+#t_ref = 2.0 s      # (ms) refractory period
 
 #PARAMS FOR STDP
 # Name: stdp_synapse - Synapse type for spike-timing dependent plasticity.
@@ -60,8 +69,8 @@ E_L=-70.       # (mV) resting potential
 #    van Rossum STDP     [4]  mu_plus = 0.0 mu_minus = 1.0 
 #    http://synergetics.github.io/nest/stdp__connection_8h_source.html
 #
-tau_minus = 30.0    #defined in post-synaptic neuron (param in postsynaptic neuron)     
-stdp_dict = {'tau_plus':15.0,       #Time constant of STDP window, potentiation in ms (tau_minus = 30.0 defined in post-synaptic neuron (param in postsynaptic neuron))
+tau_minus = 30.0 ms   #defined in post-synaptic neuron (param in postsynaptic neuron)
+stdp_dict = {'tau_plus':15.0 ms,       #Time constant of STDP window, potentiation in ms (tau_minus = 30.0 defined in post-synaptic neuron (param in postsynaptic neuron))
             'lambda':0.005,         #Step size. positive amplitude of the STDP window (A+ by convention).
             'alpha':1.0,            #Asymmetry parameter (scales depressing increments as alpha*lambda)
             'mu_plus':1.0,          #Weight dependence exponent, potentiation
@@ -86,6 +95,7 @@ gaborSampleRatio = 0.1
 layerSampleRatio = 0.05
 EISampleRatio = 0.3;
 IESampleRatio = 1;
+
 
 
 # Dictionaries (Creation): 
@@ -158,6 +168,21 @@ connBackwardDict = {   "connection_type":"convergent",
     "allow_multapses" :True
 }
 
+<<<<<<< local
+connSpkDict={"number_of_connections":1, 'connection_type':'convergent'}
+
+
+spkdetGDict = {"withgid": True,
+    "withtime": True,
+<<<<<<< local
+    "to_memory" :False,
+    "to_file" : True,
+=======
+    "to_memory" :True,
+    "to_file" : False,
+>>>>>>> other
+    "label" : "spkG"
+=======
 connExInhibDict = {   "connection_type":"convergent",
     #"kernel":layerSampleRatio,
     "number_of_connections": int(layerDim*layerDim*EISampleRatio),
@@ -165,8 +190,21 @@ connExInhibDict = {   "connection_type":"convergent",
     "delays" : {"uniform":{'min': minDelay, 'max': maxDelay}},#2.0,#{"linear" :{"c":0.1,"a":0.2}},
     "allow_autapses":False,
     "allow_multapses" :False
+>>>>>>> other
 }
 
+<<<<<<< local
+spkdet1Dict = {"withgid": True,
+    "withtime": True,
+<<<<<<< local
+    "to_memory" :False,
+    "to_file" : True,
+=======
+    "to_memory" :True,
+    "to_file" : False,
+>>>>>>> other
+    "label" : "spk1"
+=======
 connInhibExDict = {   "connection_type":"convergent",
     #"kernel":layerSampleRatio,
     "number_of_connections": int(inhibLayerDim*inhibLayerDim*IESampleRatio),
@@ -174,8 +212,23 @@ connInhibExDict = {   "connection_type":"convergent",
     "delays" : {"uniform":{'min': minDelay, 'max': maxDelay}},#2.0,#{"linear" :{"c":0.1,"a":0.2}},
     "allow_autapses":False,
     "allow_multapses" :False
+>>>>>>> other
 }
 
+<<<<<<< working copy
+<<<<<<< local
+spkdet2Dict = {"withgid": True,
+    "withtime": True,
+<<<<<<< local
+    "to_memory" :False,
+    "to_file" : True,
+=======
+    "to_memory" :True,
+    "to_file" : False,
+>>>>>>> other
+    "label" : "spk2"
+}=======
+=======
 connInhibRecDict = {   "connection_type":"convergent",
     #"kernel":layerSampleRatio,
     "number_of_connections": inhibLayerDim*inhibLayerDim,
@@ -185,6 +238,7 @@ connInhibRecDict = {   "connection_type":"convergent",
     "allow_multapses" :False
 }
 
+>>>>>>> destination
 
 #connSpkDict={"number_of_connections":1, 'connection_type':'convergent'}
 
@@ -208,4 +262,4 @@ connInhibRecDict = {   "connection_type":"convergent",
 #     "to_memory" :True,
 #     "to_file" : False,
 #     "label" : "spk2"
-# }
+# }>>>>>>> other

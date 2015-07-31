@@ -19,7 +19,7 @@ layerG = [];
 rates=zeros(layerGDim*layerGDim)*Hz
 for theta in range(0,len(thetaList)):
     #layerG.append(NeuronGroup(layerGDim*layerGDim, eqs, threshold='v>1', reset='v = 0'))
-    layerG.append(NeuronGroup(layerGDim*layerGDim, eqs, threshold='v>-50*mV', reset='v=-60*mV'))
+    layerG.append(NeuronGroup(layerGDim*layerGDim, eqs, threshold='V > V_th', reset='V = E_L))
     
 
 #Creating ExcitLayers
@@ -110,7 +110,7 @@ for img_fn in img_fns:
     
     for index_filter in range(0,len(thetaList)):
         r = numpy.reshape(numpy.mean(res_norm[index_filter],axis=2),(layerGDim*layerGDim));
-        layerG[index_filter].v = -60*mV + r*20*mV;    #To be fixed
+        layerG[index_filter].I = r;    #To be fixed
         
         
         
