@@ -15,7 +15,6 @@ plotLayer = 0; #0:each images, 1: at end
 
 #Creating Gabor input layer
 layerG = [];
-rates=zeros(layerGDim*layerGDim)*Hz
 for theta in range(0,len(thetaList)):
     #layerG.append(NeuronGroup(layerGDim*layerGDim, eqs, threshold='v>1', reset='v = 0'))
     layerG.append(PoissonGroup(layerGDim*layerGDim,numpy.random.rand(layerGDim*layerGDim)*Hz ))
@@ -68,8 +67,13 @@ for layer in range(0,nLayers):
 
 spikesG=[]
 for theta in range(0,len(thetaList)):
-    tmp = SpikeMonitor(layerG[theta])
-    spikesG.append(tmp)
+    tmp = layerG[theta];
+    tmp2 = SpikeMonitor(tmp);
+    spikesG.append(tmp2)
+
+
+# tmp = layerG[0];
+# testSpikes = SpikeMonitor(tmp);
 
 spkdetLayers = []
 for layer in range(0,nLayers):
@@ -110,11 +114,11 @@ for img_fn in img_fns:
     
     for index_filter in range(0,len(thetaList)):
         r = numpy.reshape(numpy.mean(res_norm[index_filter],axis=2),(layerGDim*layerGDim));
-        print r
+        #print r
         layerG[index_filter].rates= r * Rmax;    #To be fixed
-        print layerG[index_filter].rates
+        #print layerG[index_filter].rates
         
-        
+    
         
     run(simulationTime*ms)
     
@@ -143,9 +147,10 @@ for img_fn in img_fns:
             ax=plt.subplot(5,3,(index_filter+1)*3+2);
             if(index_filter==0):
                 plt.title('Raster Plot')
-            
-            plot(spikesG[index_filter].t/ms, spikesG[index_filter].i, '.')
-            
+            tmp = spikesG[index_filter];
+            #plot(spikesG[index_filter].t/ms, spikesG[index_filter].i, '.')
+            #plot(testSpikes.t/ms, testSpikes.i, '.')
+            plot(tmp.t/ms, tmp.i, '.')
             #plot FR map
             plt.subplot(5,3,(index_filter+1)*3+3);
             if(index_filter==0):
