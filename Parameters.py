@@ -66,6 +66,7 @@ I_e = 180.0 nA;         # (nA) external current
 tau_m = 20.0 ms;      # (ms) membrane time constant
 V_th=-55. mV      # (mV) firing threshold
 E_L=-70.  mV     # (mV) resting potential
+Rmax = 40 herz  # max FR
 
 #C_m = 250.0 pF       # (pF) capacitance
 #V_reset = -70.0 mV  # (mV) reset potential
