@@ -1,5 +1,6 @@
 import numpy as np
 from cmath import sqrt, log
+from brian2 import *
 
 #class Parameters:
 nStim = 2
@@ -20,12 +21,11 @@ sigma = 0.5 # the standard deviation of the Gaussian function used in the Gabor 
 
 #Brian
 eqs ='''
-    tau_m*(dV/dt) = -v + R * I : volt
+    dV/dt = (-v + R * I)/tau_m : volt
     R :ohm
     I: amp
     #v_th : volt  # neuron-specific threshold
     #v_r : volt  # neuron-specific reset
-    
     '''
     
 #eqn for STDP ; for usage, see http://brian2.readthedocs.org/en/latest/resources/tutorials/2-intro-to-brian-synapses.html
@@ -62,11 +62,11 @@ eqn_stdpPost ='''
 simulationTime = 250;
 
 #PARAM FOR NEURONS
-I_e = 180.0 nA;         # (nA) external current
-tau_m = 20.0 ms;      # (ms) membrane time constant
-V_th=-55. mV      # (mV) firing threshold
-E_L=-70.  mV     # (mV) resting potential
-Rmax = 40 herz  # max FR
+I_e = 180.0 * nA;         # (nA) external current
+tau_m = 20.0 * ms;      # (ms) membrane time constant
+V_th=-55. * mV      # (mV) firing threshold
+E_L=-70. * mV     # (mV) resting potential
+Rmax = 40 * Hz  # max FR
 
 #C_m = 250.0 pF       # (pF) capacitance
 #V_reset = -70.0 mV  # (mV) reset potential

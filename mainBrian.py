@@ -3,7 +3,6 @@ from imageImport import *
 import sys
 import numpy,pylab as plt , glob
 #import nest
-from brian2 import *
 import os
 #from nest import raster_plot
 #import nest.topology as topp
@@ -19,7 +18,7 @@ layerG = [];
 rates=zeros(layerGDim*layerGDim)*Hz
 for theta in range(0,len(thetaList)):
     #layerG.append(NeuronGroup(layerGDim*layerGDim, eqs, threshold='v>1', reset='v = 0'))
-    layerG.append(PoissonGroup(layerGDim*layerGDim,numpy.random.rand(layerGDim*layerGDim) ))
+    layerG.append(PoissonGroup(layerGDim*layerGDim,numpy.random.rand(layerGDim*layerGDim)*Hz ))
     
 
 #Creating ExcitLayers
@@ -69,7 +68,8 @@ for layer in range(0,nLayers):
 
 spikesG=[]
 for theta in range(0,len(thetaList)):
-    spikesG.append(SpikeMonitor(layerG[theta]))
+    tmp = SpikeMonitor(layerG[theta])
+    spikesG.append(tmp)
 
 spkdetLayers = []
 for layer in range(0,nLayers):
@@ -110,7 +110,9 @@ for img_fn in img_fns:
     
     for index_filter in range(0,len(thetaList)):
         r = numpy.reshape(numpy.mean(res_norm[index_filter],axis=2),(layerGDim*layerGDim));
-        layerG[index_filter].Rate= r * Rmax;    #To be fixed
+        print r
+        layerG[index_filter].rates= r * Rmax;    #To be fixed
+        print layerG[index_filter].rates
         
         
         
@@ -141,6 +143,7 @@ for img_fn in img_fns:
             ax=plt.subplot(5,3,(index_filter+1)*3+2);
             if(index_filter==0):
                 plt.title('Raster Plot')
+            
             plot(spikesG[index_filter].t/ms, spikesG[index_filter].i, '.')
             
             #plot FR map
