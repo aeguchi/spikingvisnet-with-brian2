@@ -19,7 +19,7 @@ layerG = [];
 rates=zeros(layerGDim*layerGDim)*Hz
 for theta in range(0,len(thetaList)):
     #layerG.append(NeuronGroup(layerGDim*layerGDim, eqs, threshold='v>1', reset='v = 0'))
-    layerG.append(NeuronGroup(layerGDim*layerGDim, eqs, threshold='V > V_th', reset='V = E_L))
+    layerG.append(NeuronGroup(layerGDim*layerGDim, eqs, threshold='V >'+ V_th, reset='V = ' +E_L))
     
 
 #Creating ExcitLayers
