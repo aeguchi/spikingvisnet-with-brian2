@@ -20,13 +20,29 @@ sigma = 0.5 # the standard deviation of the Gaussian function used in the Gabor 
 
 
 #Brian
-eqs ='''
-    dV/dt = (-v + R * I)/tau_m : volt
-    R :ohm
-    I: amp
-    #v_th : volt  # neuron-specific threshold
-    #v_r : volt  # neuron-specific reset
-    '''
+# eqs ='''
+#     dV/dt = (-v + R * I)/tau_m : volt
+#     R :ohm
+#     I: amp
+#     #v_th : volt  # neuron-specific threshold
+#     #v_r : volt  # neuron-specific reset
+#     '''
+
+eqn_membran = '''
+dv/dt  = (ge+gi-(v-El))/taum : volt (unless refractory)
+dge/dt = -ge/taue : volt (unless refractory)
+dgi/dt = -gi/taui : volt (unless refractory)
+'''
+
+taum = 20*ms
+taue = 5*ms
+taui = 10*ms
+Vt = -50*mV
+Vr = -60*mV
+El = -49*mV
+
+we = (60*0.27/10)*mV # excitatory synaptic weight (voltage)
+wi = (-20*4.5/10)*mV # inhibitory synaptic weight
     
 #eqn for STDP ; for usage, see http://brian2.readthedocs.org/en/latest/resources/tutorials/2-intro-to-brian-synapses.html
 eqs_stdpSyn ='''

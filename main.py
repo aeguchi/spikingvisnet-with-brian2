@@ -12,31 +12,42 @@ import os
 plotGabor = 1;
 plotLayer = 0; #0:each images, 1: at end
 
+net = Network(collect())
 
 #Creating Gabor input layer
 layerG = [];
 for theta in range(0,len(thetaList)):
     #layerG.append(NeuronGroup(layerGDim*layerGDim, eqs, threshold='v>1', reset='v = 0'))
     layerG.append(PoissonGroup(layerGDim*layerGDim,numpy.random.rand(layerGDim*layerGDim)*Hz ))
-    
+net.add(layerG);
 
 #Creating ExcitLayers
 layers = []
 for layer in range(0,nLayers):
     #layers.append(NeuronGroup(layerDim*layerDim, eqs, threshold='v>1', reset='v = 0'))
-    layers.append(NeuronGroup(layerDim*layerDim, eqs, threshold='v>-50*mV', reset='v=-60*mV'))
+    layers.append(NeuronGroup(layerDim*layerDim, eqn_membran, threshold='v>Vt', reset='v = Vr', refractory=5*ms))
+    layers[layer].v = 'Vr + rand() * (Vt - Vr)'
+    layers[layer].ge = 0*mV
+    layers[layer].gi = 0*mV
+
+net.add(layers);
 
 #Creating InhibLayers
 inhibLayers = [] 
 for layer in range(0,nLayers):
     #inhibLayers.append(NeuronGroup(inhibLayerDim*inhibLayerDim, eqs, threshold='v>1', reset='v = 0'))
-    inhibLayers.append(NeuronGroup(inhibLayerDim*inhibLayerDim, eqs, threshold='v>-50*mV', reset='v=-60*mV'))
+    inhibLayers.append(NeuronGroup(layerDim*layerDim, eqn_membran, threshold='v>Vt', reset='v = Vr', refractory=5*ms))
+    inhibLayers[layer].v = 'Vr + rand() * (Vt - Vr)'
+    inhibLayers[layer].ge = 0*mV
+    inhibLayers[layer].gi = 0*mV
+net.add(inhibLayers);
+
 
 #Connecting neurons in Gabor input layer and neurons in the first ExcitLayer
 connGtoInput = []
 for theta in range(0,len(thetaList)):
     #connGtoInput.append(Synapses(layerG[theta], layers[0], pre='v_post += 0.2'));
-    connGtoInput.append(Synapses(layerG[theta], layers[0], pre='ge+=1.62*mV'));
+    connGtoInput.append(Synapses(layerG[theta], layers[0], pre='ge += we'));
     connGtoInput[theta].connect(True, p=0.02)
 
 #Connecting neurons between layers
@@ -44,11 +55,11 @@ connFeedForward = []
 connBackProjection = []
 for layer in range(0,nLayers-1): 
     #connFeedForward.append(Synapses(layers[layer],layers[layer+1], pre='v_post += 0.2'))
-    connFeedForward.append(Synapses(layers[layer],layers[layer+1], pre='ge+=1.62*mV'))
+    connFeedForward.append(Synapses(layers[layer],layers[layer+1], pre='ge += we'))
     connFeedForward[layer].connect(True, p=0.02);
     
     #connBackProjection.append(Synapses(layers[layer+1],layers[layer], pre='v_post += 0.2'))
-    connBackProjection.append(Synapses(layers[layer+1],layers[layer], pre='ge+=1.62*mV'))
+    connBackProjection.append(Synapses(layers[layer+1],layers[layer], pre='ge += we'))
     connBackProjection[layer].connect(True, p=0.02);
     
 #Connecting neurons within layers    
@@ -58,19 +69,19 @@ connRecIn = []
 connRecEx = []
 for layer in range(0,nLayers): 
     #connExIn.append(Synapses(layers[layer],inhibLayers[layer], pre='v_post += 0.2'))
-    connExIn.append(Synapses(layers[layer],inhibLayers[layer], pre='ge+=1.62*mV'))
+    connExIn.append(Synapses(layers[layer],inhibLayers[layer], pre='ge += we'))
     connExIn[layer].connect(True, p=0.02)
     
     #connInEx.append(Synapses(inhibLayers[layer], layers[layer], pre='v_post += 0.2'))
-    connInEx.append(Synapses(inhibLayers[layer], layers[layer], pre='gi-=9*mV'))
-    connInEx[layer].connect(True, p=0.02)
+    connInEx.append(Synapses(inhibLayers[layer], layers[layer], pre='gi += wi'))
+    connInEx[layer].connect(True, p=1.0)
+
+
 
 spikesG=[]
 for theta in range(0,len(thetaList)):
-    tmp = layerG[theta];
-    tmp2 = SpikeMonitor(tmp);
-    spikesG.append(tmp2)
-
+    spikesG.append(SpikeMonitor(layerG[theta]))
+net.add(spikesG)
 
 # tmp = layerG[0];
 # testSpikes = SpikeMonitor(tmp);
@@ -78,10 +89,12 @@ for theta in range(0,len(thetaList)):
 spkdetLayers = []
 for layer in range(0,nLayers):
     spkdetLayers.append(SpikeMonitor(layers[layer]))
+net.add(spkdetLayers)
 
 spkdetInhibLayers = []
 for layer in range(0,nLayers):
     spkdetInhibLayers.append(SpikeMonitor(inhibLayers[layer]))
+net.add(spkdetInhibLayers)
 
 ### Training ###
 #trainingImages = sorted(glob.iglob("/images/training/*.png"))
@@ -120,7 +133,7 @@ for img_fn in img_fns:
         
     
         
-    run(simulationTime*ms)
+    net.run(simulationTime*ms)
     
     
     
@@ -157,7 +170,7 @@ for img_fn in img_fns:
                 plt.title('Firing Rate Map')
             plt.imshow(res_FRMap,interpolation='none',vmin=0, vmax=res_FRMap.max());
             plt.colorbar();
-        plt.show();
+        #plt.show();
         
         
     if (plotLayer==0):
