@@ -25,10 +25,10 @@ net.add(layerG);
 layers = []
 for layer in range(0,nLayers):
     #layers.append(NeuronGroup(layerDim*layerDim, eqs, threshold='v>1', reset='v = 0'))
-    layers.append(NeuronGroup(layerDim*layerDim, eqn_membran, threshold='v>Vt', reset='v = Vr', refractory=5*ms))
-    layers[layer].v = 'Vr + rand() * (Vt - Vr)'
-    layers[layer].ge = 0*mV
-    layers[layer].gi = 0*mV
+    layers.append(NeuronGroup(layerDim*layerDim, eqn_membran, threshold='v>Vt', reset='v = Vr', refractory=2*ms))
+    layers[layer].v = 'Vr'# + rand() * (Vt - Vr)'
+    layers[layer].ve = 0*mV
+    layers[layer].vi = 0*mV
 
 net.add(layers);
 
@@ -36,30 +36,30 @@ net.add(layers);
 inhibLayers = [] 
 for layer in range(0,nLayers):
     #inhibLayers.append(NeuronGroup(inhibLayerDim*inhibLayerDim, eqs, threshold='v>1', reset='v = 0'))
-    inhibLayers.append(NeuronGroup(layerDim*layerDim, eqn_membran, threshold='v>Vt', reset='v = Vr', refractory=5*ms))
-    inhibLayers[layer].v = 'Vr + rand() * (Vt - Vr)'
-    inhibLayers[layer].ge = 0*mV
-    inhibLayers[layer].gi = 0*mV
+    inhibLayers.append(NeuronGroup(layerDim*layerDim, eqn_membran, threshold='v>Vt', reset='v = Vr', refractory=2*ms))
+    inhibLayers[layer].v = 'Vr'# + rand() * (Vt - Vr)'
+    inhibLayers[layer].ve = 0*mV
+    inhibLayers[layer].vi = 0*mV
 net.add(inhibLayers);
 
 
 #Connecting neurons in Gabor input layer and neurons in the first ExcitLayer
 connGtoInput = []
 for theta in range(0,len(thetaList)):
-    #connGtoInput.append(Synapses(layerG[theta], layers[0], pre='v_post += 0.2'));
-    connGtoInput.append(Synapses(layerG[theta], layers[0], pre='ge += we'));
-    connGtoInput[theta].connect(True, p=0.02)
+    connGtoInput.append(Synapses(layerG[theta], layers[0], 'w:1', pre='ve += w*we'));
+    connGtoInput[theta].w = 1;
+    connGtoInput[theta].connect(True, p=0.2)
 
 #Connecting neurons between layers
 connFeedForward = []
 connBackProjection = []
 for layer in range(0,nLayers-1): 
-    #connFeedForward.append(Synapses(layers[layer],layers[layer+1], pre='v_post += 0.2'))
-    connFeedForward.append(Synapses(layers[layer],layers[layer+1], pre='ge += we'))
+    connFeedForward.append(Synapses(layers[layer],layers[layer+1], 'w:1',pre='ve += w*we'))
+    connFeedForward[layer].w = 0;
     connFeedForward[layer].connect(True, p=0.02);
     
-    #connBackProjection.append(Synapses(layers[layer+1],layers[layer], pre='v_post += 0.2'))
-    connBackProjection.append(Synapses(layers[layer+1],layers[layer], pre='ge += we'))
+    connBackProjection.append(Synapses(layers[layer+1],layers[layer], 'w:1',pre='ve += w*we'))
+    connBackProjection[layer].w = 0;
     connBackProjection[layer].connect(True, p=0.02);
     
 #Connecting neurons within layers    
@@ -68,13 +68,13 @@ connInEx = []
 connRecIn = []
 connRecEx = []
 for layer in range(0,nLayers): 
-    #connExIn.append(Synapses(layers[layer],inhibLayers[layer], pre='v_post += 0.2'))
-    connExIn.append(Synapses(layers[layer],inhibLayers[layer], pre='ge += we'))
+    connExIn.append(Synapses(layers[layer],inhibLayers[layer], 'w:1',pre='ve += w*we'))
+    connExIn[layer].w = 0;
     connExIn[layer].connect(True, p=0.02)
     
-    #connInEx.append(Synapses(inhibLayers[layer], layers[layer], pre='v_post += 0.2'))
-    connInEx.append(Synapses(inhibLayers[layer], layers[layer], pre='gi += wi'))
-    connInEx[layer].connect(True, p=1.0)
+    connInEx.append(Synapses(inhibLayers[layer], layers[layer],'w:1', pre='vi += w*wi'))
+    connInEx[layer].w = 0;
+    connInEx[layer].connect(True, p=0.02)
 
 
 

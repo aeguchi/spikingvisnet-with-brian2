@@ -27,19 +27,20 @@ sigma = 0.5 # the standard deviation of the Gaussian function used in the Gabor 
 #     #v_th : volt  # neuron-specific threshold
 #     #v_r : volt  # neuron-specific reset
 #     '''
-
-eqn_membran = '''
-dv/dt  = (ge+gi-(v-El))/taum : volt (unless refractory)
-dge/dt = -ge/taue : volt (unless refractory)
-dgi/dt = -gi/taui : volt (unless refractory)
-'''
-
 taum = 20*ms
 taue = 5*ms
 taui = 10*ms
 Vt = -50*mV
 Vr = -60*mV
-El = -49*mV
+El = -60*mV#-49*mV
+
+eqn_membran = '''
+dv/dt  = (ve+vi-(v-El))/taum : volt (unless refractory)
+dve/dt = -ve/taue : volt (unless refractory) #incoming excitatory voltage
+dvi/dt = -vi/taui : volt (unless refractory) #incoming inhibitory voltage
+'''
+
+
 
 we = (60*0.27/10)*mV # excitatory synaptic weight (voltage)
 wi = (-20*4.5/10)*mV # inhibitory synaptic weight
@@ -78,10 +79,10 @@ eqn_stdpPost ='''
 simulationTime = 250;
 
 #PARAM FOR NEURONS
-I_e = 180.0 * nA;         # (nA) external current
-tau_m = 20.0 * ms;      # (ms) membrane time constant
-V_th=-55. * mV      # (mV) firing threshold
-E_L=-70. * mV     # (mV) resting potential
+# I_e = 180.0 * nA;         # (nA) external current
+# tau_m = 20.0 * ms;      # (ms) membrane time constant
+# V_th=-55. * mV      # (mV) firing threshold
+# E_L=-70. * mV     # (mV) resting potential
 Rmax = 40 * Hz  # max FR
 
 #C_m = 250.0 pF       # (pF) capacitance
