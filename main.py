@@ -46,21 +46,25 @@ net.add(inhibLayers);
 #Connecting neurons in Gabor input layer and neurons in the first ExcitLayer
 connGtoInput = []
 for theta in range(0,len(thetaList)):
-    connGtoInput.append(Synapses(layerG[theta], layers[0], 'w:1', pre='ve += w*we'));
-    connGtoInput[theta].w = 1;
-    connGtoInput[theta].connect(True, p=0.2)
+    #connGtoInput.append(Synapses(layerG[theta], layers[0], 'w:1', pre='ve += w*we'));
+    #connGtoInput[theta].w = 1;
+    connGtoInput.append(Synapses(layerG[theta], layers[0], pre='ve += 10*we'));
+    connGtoInput[theta].connect(True, p=0.1)
+net.add(connGtoInput)
 
 #Connecting neurons between layers
 connFeedForward = []
 connBackProjection = []
 for layer in range(0,nLayers-1): 
-    connFeedForward.append(Synapses(layers[layer],layers[layer+1], 'w:1',pre='ve += w*we'))
-    connFeedForward[layer].w = 0;
-    connFeedForward[layer].connect(True, p=0.02);
+    connFeedForward.append(Synapses(layers[layer],layers[layer+1], 'w:1',pre='ve += 10*we'))
+    #connFeedForward[layer].w = 1;
+    connFeedForward[layer].connect(True, p=0.1);
     
-    connBackProjection.append(Synapses(layers[layer+1],layers[layer], 'w:1',pre='ve += w*we'))
-    connBackProjection[layer].w = 0;
-    connBackProjection[layer].connect(True, p=0.02);
+    connBackProjection.append(Synapses(layers[layer+1],layers[layer], 'w:1',pre='ve += 10*we'))
+    #connBackProjection[layer].w = 1;
+    connBackProjection[layer].connect(True, p=0.1);
+net.add(connFeedForward)
+net.add(connBackProjection)
     
 #Connecting neurons within layers    
 connExIn = []
@@ -68,13 +72,15 @@ connInEx = []
 connRecIn = []
 connRecEx = []
 for layer in range(0,nLayers): 
-    connExIn.append(Synapses(layers[layer],inhibLayers[layer], 'w:1',pre='ve += w*we'))
-    connExIn[layer].w = 0;
-    connExIn[layer].connect(True, p=0.02)
+    connExIn.append(Synapses(layers[layer],inhibLayers[layer], 'w:1',pre='ve += 10*we'))
+    #connExIn[layer].w = 1;
+    connExIn[layer].connect(True, p=0.1)
     
-    connInEx.append(Synapses(inhibLayers[layer], layers[layer],'w:1', pre='vi += w*wi'))
-    connInEx[layer].w = 0;
-    connInEx[layer].connect(True, p=0.02)
+    connInEx.append(Synapses(inhibLayers[layer], layers[layer],'w:1', pre='vi += 10*wi'))
+    #connInEx[layer].w = 1;
+    connInEx[layer].connect(True, p=0.1)
+net.add(connExIn)
+net.add(connInEx)
 
 
 
@@ -89,6 +95,7 @@ net.add(spikesG)
 spkdetLayers = []
 for layer in range(0,nLayers):
     spkdetLayers.append(SpikeMonitor(layers[layer]))
+    #spkdetLayers.append(StateMonitor(layers[layer], 'v', record=True))
 net.add(spkdetLayers)
 
 spkdetInhibLayers = []
@@ -186,6 +193,7 @@ for img_fn in img_fns:
             ax=plt.subplot(nLayers+1,4,(nLayers-layer)*4+1);
             
             plt.title(layer)
+            #plot(spkdetLayers[layer].t/ms, spkdetLayers[layer].v[0])
             plot(spkdetLayers[layer].t/ms, spkdetLayers[layer].i, '.')
             #ax.get_yaxis().set_visible(False)
             #ax.set_xlim([(index_img)*simulationTime, (index_img+1)*simulationTime])
