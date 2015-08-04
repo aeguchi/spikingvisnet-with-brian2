@@ -46,29 +46,31 @@ net.add(inhibLayers);
 #Connecting neurons in Gabor input layer and neurons in the first ExcitLayer
 connGtoInput = []
 for theta in range(0,len(thetaList)):
-<<<<<<< local
-    connGtoInput.append(Synapses(layerG[theta], layers[0], 'w:1', pre='ve += w*we'));
-    connGtoInput[theta].w = 10;
+
+    connGtoInput.append(Synapses(layerG[theta], layers[0], pre='ve += 10*we'));
     connGtoInput[theta].connect(True, p=0.2)
-=======
+
     #connGtoInput.append(Synapses(layerG[theta], layers[0], 'w:1', pre='ve += w*we'));
     #connGtoInput[theta].w = 1;
-    connGtoInput.append(Synapses(layerG[theta], layers[0], pre='ve += 10*we'));
-    connGtoInput[theta].connect(True, p=0.1)
+    #connGtoInput.append(Synapses(layerG[theta], layers[0], pre='ve += 10*we'));
+    #connGtoInput[theta].connect(True, p=0.1)
 net.add(connGtoInput)
->>>>>>> other
+
 
 #Connecting neurons between layers
 connFeedForward = []
 connBackProjection = []
 for layer in range(0,nLayers-1): 
-    connFeedForward.append(Synapses(layers[layer],layers[layer+1], 'w:1',pre='ve += 10*we'))
-    #connFeedForward[layer].w = 1;
-    connFeedForward[layer].connect(True, p=0.1);
+    #connFeedForward.append(Synapses(layers[layer],layers[layer+1], 'w:1',pre='ve += 10*we'))
+    connFeedForward.append(Synapses(layers[layer],layers[layer+1], eqs_stdpSyn, eqs_stdpPre ,eqs_stdpPost))    
+    connFeedForward[layer].connect(True, p=0.1)
+    connFeedForward[layer].w[:,:] = rand()*Apre
     
-    connBackProjection.append(Synapses(layers[layer+1],layers[layer], 'w:1',pre='ve += 10*we'))
-    #connBackProjection[layer].w = 1;
+    connBackProjection.append(Synapses(layers[layer],layers[layer+1], eqs_stdpSyn, eqs_stdpPre ,eqs_stdpPost))
+    #connBackProjection.append(Synapses(layers[layer+1],layers[layer], 'w:1',pre='ve += 10*we'))    
     connBackProjection[layer].connect(True, p=0.1);
+    connBackProjection[layer].w[:,:] = rand()*Apre
+
 net.add(connFeedForward)
 net.add(connBackProjection)
     

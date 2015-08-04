@@ -52,6 +52,7 @@ wmax = 200 *mV
 Apre = 20 *mV
 Apost = -Apre*taupre/taupost*1.05
 
+
 eqs_stdpSyn ='''
              w : volt
              dapre/dt = -apre/taupre : volt (event-driven)
