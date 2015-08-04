@@ -46,11 +46,17 @@ net.add(inhibLayers);
 #Connecting neurons in Gabor input layer and neurons in the first ExcitLayer
 connGtoInput = []
 for theta in range(0,len(thetaList)):
+<<<<<<< local
+    connGtoInput.append(Synapses(layerG[theta], layers[0], 'w:1', pre='ve += w*we'));
+    connGtoInput[theta].w = 10;
+    connGtoInput[theta].connect(True, p=0.2)
+=======
     #connGtoInput.append(Synapses(layerG[theta], layers[0], 'w:1', pre='ve += w*we'));
     #connGtoInput[theta].w = 1;
     connGtoInput.append(Synapses(layerG[theta], layers[0], pre='ve += 10*we'));
     connGtoInput[theta].connect(True, p=0.1)
 net.add(connGtoInput)
+>>>>>>> other
 
 #Connecting neurons between layers
 connFeedForward = []

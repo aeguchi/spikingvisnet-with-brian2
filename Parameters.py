@@ -46,17 +46,23 @@ we = (60*0.27/10)*mV # excitatory synaptic weight (voltage)
 wi = (-20*4.5/10)*mV # inhibitory synaptic weight
     
 #eqn for STDP ; for usage, see http://brian2.readthedocs.org/en/latest/resources/tutorials/2-intro-to-brian-synapses.html
+
+taupre = taupost = 20*ms
+wmax = 200 *mV
+Apre = 20 *mV
+Apost = -Apre*taupre/taupost*1.05
+
 eqs_stdpSyn ='''
-             w : 1
-             dapre/dt = -apre/taupre : 1 (event-driven)
-             dapost/dt = -apost/taupost : 1 (event-driven)
+             w : volt
+             dapre/dt = -apre/taupre : volt (event-driven)
+             dapost/dt = -apost/taupost : volt (event-driven)
              '''
 eqs_stdpPre ='''
              v_post += w
              apre += Apre
              w = clip(w+apost, 0, wmax)
              '''
-eqn_stdpPost ='''
+eqs_stdpPost ='''
              apost += Apost
              w = clip(w+apre, 0, wmax)
              '''
