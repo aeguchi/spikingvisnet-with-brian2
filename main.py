@@ -49,6 +49,7 @@ for theta in range(0,len(thetaList)):
 
     connGtoInput.append(Synapses(layerG[theta], layers[0], pre='ve += 10*we'));
     connGtoInput[theta].connect(True, p=0.2)
+    #connGtoInput[theta].connect(sqrt((i%layerGDim - j%layerGDim)**2 + (i/layerGDim - j/layerGDim)**2) < 0.1 * layerGDim)
 
     #connGtoInput.append(Synapses(layerG[theta], layers[0], 'w:1', pre='ve += w*we'));
     #connGtoInput[theta].w = 1;
@@ -65,11 +66,13 @@ for layer in range(0,nLayers-1):
     connFeedForward.append(Synapses(layers[layer],layers[layer+1], eqs_stdpSyn, eqs_stdpPre ,eqs_stdpPost))    
     connFeedForward[layer].connect(True, p=0.1)
     connFeedForward[layer].w[:,:] = rand()*Apre
+    connFeedForward[layer].delay[:,:] = rand()*2*ms
     
     connBackProjection.append(Synapses(layers[layer],layers[layer+1], eqs_stdpSyn, eqs_stdpPre ,eqs_stdpPost))
     #connBackProjection.append(Synapses(layers[layer+1],layers[layer], 'w:1',pre='ve += 10*we'))    
     connBackProjection[layer].connect(True, p=0.1);
     connBackProjection[layer].w[:,:] = rand()*Apre
+    connBackProjection[layer].delay[:,:] = rand()*2*ms
 
 net.add(connFeedForward)
 net.add(connBackProjection)
@@ -83,10 +86,12 @@ for layer in range(0,nLayers):
     connExIn.append(Synapses(layers[layer],inhibLayers[layer], 'w:1',pre='ve += 10*we'))
     #connExIn[layer].w = 1;
     connExIn[layer].connect(True, p=0.1)
+    connExIn[layer].delay[:,:] = rand()*2*ms
     
     connInEx.append(Synapses(inhibLayers[layer], layers[layer],'w:1', pre='vi += 10*wi'))
     #connInEx[layer].w = 1;
     connInEx[layer].connect(True, p=0.1)
+    connInEx[layer].delay[:,:] = rand()*2*ms
 net.add(connExIn)
 net.add(connInEx)
 

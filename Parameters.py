@@ -68,6 +68,10 @@ eqs_stdpPost ='''
              w = clip(w+apre, 0, wmax)
              '''
 
+connCond = '''
+        sqrt((i%layerDim - j%layerDim)**2 + (i/layerDim - j/layerDim)**2) < 0.1 * layerDim
+        '''
+
 #'''
 #dv/dt = (ge+gi-(v+49*mV))/(20*ms) : volt/s
 #dge/dt = -ge/(5*ms) : siemens/s
