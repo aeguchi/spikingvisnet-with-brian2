@@ -18,7 +18,6 @@ imageFolder = "images"
 sigma = 0.5 # the standard deviation of the Gaussian function used in the Gabor filter.
 
 
-
 #Brian
 # eqs ='''
 #     dV/dt = (-v + R * I)/tau_m : volt
@@ -51,6 +50,7 @@ taupre = taupost = 20*ms
 wmax = 200 *mV
 Apre = 20 *mV
 Apost = -Apre*taupre/taupost*1.05
+lRate = 0.001
 
 
 eqs_stdpSyn ='''
@@ -61,11 +61,11 @@ eqs_stdpSyn ='''
 eqs_stdpPre ='''
              v_post += w
              apre += Apre
-             w = clip(w+apost, 0, wmax)
+             w = clip(w+apost*lRate, 0, wmax)
              '''
 eqs_stdpPost ='''
              apost += Apost
-             w = clip(w+apre, 0, wmax)
+             w = clip(w+apre*lRate, 0, wmax)
              '''
 
 connCond = '''
@@ -94,7 +94,7 @@ simulationTime = 250;
 # tau_m = 20.0 * ms;      # (ms) membrane time constant
 # V_th=-55. * mV      # (mV) firing threshold
 # E_L=-70. * mV     # (mV) resting potential
-Rmax = 40 * Hz  # max FR
+Rmax = 20 * Hz  # max FR
 
 #C_m = 250.0 pF       # (pF) capacitance
 #V_reset = -70.0 mV  # (mV) reset potential
