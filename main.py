@@ -59,23 +59,23 @@ net.add(connGtoInput)
 
 
 #Connecting neurons between layers
-connFeedForward = []
-connBackProjection = []
+connBottomUp = []
+connTopDown = []
 for layer in range(0,nLayers-1): 
-    #connFeedForward.append(Synapses(layers[layer],layers[layer+1], 'w:1',pre='ve += 10*we'))
-    connFeedForward.append(Synapses(layers[layer],layers[layer+1], eqs_stdpSyn, eqs_stdpPre ,eqs_stdpPost))    
-    connFeedForward[layer].connect(True, p=0.1)
-    connFeedForward[layer].w[:,:] = rand()*Apre
-    connFeedForward[layer].delay[:,:] = rand()*2*ms
+    #connBottomUp.append(Synapses(layers[layer],layers[layer+1], 'w:1',pre='ve += 10*we'))
+    connBottomUp.append(Synapses(layers[layer],layers[layer+1], eqs_stdpSyn, eqs_stdpPre ,eqs_stdpPost))
+    connBottomUp[layer].connect(True, p=0.1)
+    connBottomUp[layer].w[:,:] = rand()*Apre
+    connBottomUp[layer].delay[:,:] = rand()*2*ms
     
-    connBackProjection.append(Synapses(layers[layer],layers[layer+1], eqs_stdpSyn, eqs_stdpPre ,eqs_stdpPost))
-    #connBackProjection.append(Synapses(layers[layer+1],layers[layer], 'w:1',pre='ve += 10*we'))    
-    connBackProjection[layer].connect(True, p=0.1);
-    connBackProjection[layer].w[:,:] = rand()*Apre
-    connBackProjection[layer].delay[:,:] = rand()*2*ms
+    connTopDown.append(Synapses(layers[layer+1],layers[layer], eqs_stdpSyn, eqs_stdpPre ,eqs_stdpPost))
+    #connTopDown.append(Synapses(layers[layer+1],layers[layer], 'w:1',pre='ve += 10*we'))    
+    connTopDown[layer].connect(True, p=0.1);
+    connTopDown[layer].w[:,:] = rand()*Apre
+    connTopDown[layer].delay[:,:] = rand()*2*ms
 
-net.add(connFeedForward)
-net.add(connBackProjection)
+net.add(connBottomUp)
+net.add(connTopDown)
     
 #Connecting neurons within layers    
 connExIn = []
