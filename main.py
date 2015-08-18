@@ -47,7 +47,7 @@ net.add(inhibLayers);
 connGtoInput = []
 for theta in range(0,len(thetaList)):
 
-    connGtoInput.append(Synapses(layerG[theta], layers[0], pre='ve += 10*we'));
+    connGtoInput.append(Synapses(layerG[theta], layers[0], pre='ve += 3*we'));
     connGtoInput[theta].connect(True, p=0.2)
     #connGtoInput[theta].connect(sqrt((i%layerGDim - j%layerGDim)**2 + (i/layerGDim - j/layerGDim)**2) < 0.1 * layerGDim)
 
@@ -66,13 +66,13 @@ for layer in range(0,nLayers-1):
     connBottomUp.append(Synapses(layers[layer],layers[layer+1], eqs_stdpSyn, eqs_stdpPre ,eqs_stdpPost))
     connBottomUp[layer].connect(True, p=0.1)
     connBottomUp[layer].w[:,:] = rand()*Apre
-    connBottomUp[layer].delay[:,:] = rand()*2*ms
+    connBottomUp[layer].delay[:,:] = rand()*10*ms
     
     connTopDown.append(Synapses(layers[layer+1],layers[layer], eqs_stdpSyn, eqs_stdpPre ,eqs_stdpPost))
     #connTopDown.append(Synapses(layers[layer+1],layers[layer], 'w:1',pre='ve += 10*we'))    
     connTopDown[layer].connect(True, p=0.1);
     connTopDown[layer].w[:,:] = rand()*Apre
-    connTopDown[layer].delay[:,:] = rand()*2*ms
+    connTopDown[layer].delay[:,:] = rand()*10*ms
 
 net.add(connBottomUp)
 net.add(connTopDown)
@@ -83,14 +83,14 @@ connInEx = []
 connRecIn = []
 connRecEx = []
 for layer in range(0,nLayers): 
-    connExIn.append(Synapses(layers[layer],inhibLayers[layer], 'w:1',pre='ve += 10*we'))
+    connExIn.append(Synapses(layers[layer],inhibLayers[layer], 'w:1',pre='ve += we'))
     #connExIn[layer].w = 1;
-    connExIn[layer].connect(True, p=0.1)
+    connExIn[layer].connect(True, p=0.2)
     connExIn[layer].delay[:,:] = rand()*2*ms
     
-    connInEx.append(Synapses(inhibLayers[layer], layers[layer],'w:1', pre='vi += 10*wi'))
+    connInEx.append(Synapses(inhibLayers[layer], layers[layer],'w:1', pre='vi += 3*wi'))
     #connInEx[layer].w = 1;
-    connInEx[layer].connect(True, p=0.1)
+    connInEx[layer].connect(True, p=0.2)
     connInEx[layer].delay[:,:] = rand()*2*ms
 net.add(connExIn)
 net.add(connInEx)
@@ -152,7 +152,8 @@ for img_fn in img_fns:
         #print layerG[index_filter].rates
         
     
-        
+    
+    
     net.run(simulationTime*ms)
     
     
@@ -184,11 +185,19 @@ for img_fn in img_fns:
             #plot(spikesG[index_filter].t/ms, spikesG[index_filter].i, '.')
             #plot(testSpikes.t/ms, testSpikes.i, '.')
             plot(tmp.t/ms, tmp.i, '.')
+            
+            
+            tmp2 = spikesG[index_filter].spike_trains();
+            for row_tmp in range(layerGDim):
+                for col_tmp in range(layerGDim):
+                    index_tmp = row_tmp*layerGDim + col_tmp;
+                    res_FRMap[row_tmp][col_tmp] = len(tmp2[index_tmp]);
+            
             #plot FR map
             plt.subplot(5,3,(index_filter+1)*3+3);
             if(index_filter==0):
                 plt.title('Firing Rate Map')
-            plt.imshow(res_FRMap,interpolation='none',vmin=0, vmax=res_FRMap.max());
+            plt.imshow(res_FRMap,interpolation='none',vmin=0, vmax=Rmax);
             plt.colorbar();
         #plt.show();
         
@@ -213,6 +222,13 @@ for img_fn in img_fns:
             #ax.set_ylim([headNodeIndex+1, headNodeIndex+(layer1Dim*layer1Dim)]);
             
             #plot FR map
+            ex_FRMap = numpy.zeros((layerDim, layerDim));
+            tmp2 = spkdetInhibLayers[layer].spike_trains();
+            for row_tmp in range(layerDim):
+                for col_tmp in range(layerDim):
+                    index_tmp = row_tmp*layerGDim + col_tmp;
+                    ex_FRMap[row_tmp][col_tmp] = len(tmp2[index_tmp]);
+                    
             plt.subplot(nLayers+1,4,(nLayers-layer)*4+2);
             if(index_filter==0):
                 plt.title('Firing Rate Map')
@@ -230,12 +246,21 @@ for img_fn in img_fns:
 #             ax.set_xlim([(index_img)*simulationTime, (index_img+1)*simulationTime])
 #             ax.set_ylim([headNodeIndex+1, headNodeIndex+(inhibLayer1Dim*inhibLayer1Dim)]);
 #             
-#             #plot FR map
-#             plt.subplot(nLayers+1,4,(nLayers-layer)*4+4);
-#             if(index_filter==0):
-#                 plt.title('Firing Rate Map')
-#             plt.imshow(inhib_FRMap,interpolation='none',vmin=0, vmax=inhib_FRMap.max());
-#             plt.colorbar();
+            #plot FR map
+            
+            inhib_FRMap = numpy.zeros((layerDim, layerDim));
+            tmp2 = spkdetInhibLayers[layer].spike_trains();
+            for row_tmp in range(layerDim):
+                for col_tmp in range(layerDim):
+                    index_tmp = row_tmp*layerGDim + col_tmp;
+                    inhib_FRMap[row_tmp][col_tmp] = len(tmp2[index_tmp]);
+            
+            
+            plt.subplot(nLayers+1,4,(nLayers-layer)*4+4);
+            if(index_filter==0):
+                plt.title('Firing Rate Map')
+            plt.imshow(inhib_FRMap,interpolation='none',vmin=0, vmax=inhib_FRMap.max());
+            plt.colorbar();
             
 
         plt.show()
