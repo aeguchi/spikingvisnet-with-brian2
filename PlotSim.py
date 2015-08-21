@@ -41,7 +41,7 @@ def PlotGabor (img,res_norm,res, index_img):
             for row_tmp in range(layerGDim):
                 for col_tmp in range(layerGDim):
                     index_tmp = row_tmp*layerGDim + col_tmp;
-                    print tmp2[index_tmp]
+                    #print tmp2[index_tmp]
                     
                     if (len(tmp2[index_tmp])==0):
                         condition = tmp2[index_tmp]>simulationTime*index_img
