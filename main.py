@@ -14,7 +14,46 @@ import os
 
 #http://brian2.readthedocs.org/en/latest/resources/tutorials/1-intro-to-brian-neurons.html
 
-
+def RunSim():
+    
+    index_img=0;
+    for img_fn in img_fns:
+        #print img_fn
+        #load gabor filtered ImageSurface
+        img = cv2.imread(img_fn)
+        if img is None:
+            print 'Failed to load image file:', img_fn
+            sys.exit(1)
+        
+        filters = build_filters()
+        res = process(img, filters)
+        
+        #convert from gabor filtered inputs to spikes
+        #normalize
+        res_norm=res/numpy.max(res);
+        res_norm=1-res_norm;
+        
+        for index_filter in range(0,len(thetaList)):
+            r = numpy.reshape(numpy.mean(res_norm[index_filter],axis=2),(layerGDim*layerGDim));
+            #print r
+            layerG[index_filter].rates= r * Rmax;    #To be fixed
+        #print layerG[index_filter].rates
+        
+        net.run(simulationTime*ms)
+        
+        store('trained')
+        
+        
+        if (plotGabor == 1 ):
+            PlotGabor(img,res_norm,res,index_img)
+        if (plotLayer == 1 ):
+            PlotLayer(img,res_norm,res,index_img, index_filter)
+        
+        index_img+=1;
+    
+    
+    
+    return 0
 
 
 ### Training ###
@@ -36,44 +75,25 @@ if len(img_fns)!=nStim*nTrans:
     print 'Error: the number of images files does not match',len(img_fns);
     sys.exit(1)
 
-index_img=0;
-for img_fn in img_fns:
-    #print img_fn
-    #load gabor filtered ImageSurface
-    img = cv2.imread(img_fn)
-    if img is None:
-        print 'Failed to load image file:', img_fn
-        sys.exit(1)
-    
-    filters = build_filters()
-    res = process(img, filters)
-    
-    #convert from gabor filtered inputs to spikes
-    #normalize
-    res_norm=res/numpy.max(res);
-    res_norm=1-res_norm;
-    
-    for index_filter in range(0,len(thetaList)):
-        r = numpy.reshape(numpy.mean(res_norm[index_filter],axis=2),(layerGDim*layerGDim));
-        #print r
-        layerG[index_filter].rates= r * Rmax;    #To be fixed
-        #print layerG[index_filter].rates
-        
-    
-    
-    
-    net.run(simulationTime*ms)
+for trial in range(trialNb) :
 
-    if (plotGabor == 1 ):
-        PlotGabor(img,res_norm,res,index_img)
-    if (plotLayer == 1 ):
-        PlotLayer(img,res_norm,res,index_img, index_filter)
-
-    index_img+=1;
-
-if (plotLayer == 2 ):
-    PlotLayer(img,res_norm,res,index_img,index_filter)
+    print('Trial '+ str(trial+1) + ' out of '+str(trialNb) )
+    restore('initialized')
+    plasticON(1)
+    RunSim()
+    
+    for test in range(testNb):
+        print('Test '+ str(test+1) + ' out of '+str(testNb) )
+        restore('trained')
+        plasticON(0)
+        RunSim()
+    
+    if (plotLayer == 2 ):
+        PlotLayer(img,res_norm,res,index_img,index_filter)
 
 #To-DO: trainNetworkWith
     
 #Testing
+
+
+
