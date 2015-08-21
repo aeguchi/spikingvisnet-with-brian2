@@ -63,42 +63,17 @@ for img_fn in img_fns:
     
     
     net.run(simulationTime*ms)
-    plotSim(img,res_norm,res,index_img)
+
+    if (plotGabor == 1 ):
+        PlotGabor(img,res_norm,res,index_img)
+    if (plotLayer == 1 ):
+        PlotLayer(img,res_norm,res,index_img, index_filter)
 
     index_img+=1;
-    
-#To-DO: trainNetworkWith
-if (plotLayer==1):
-#         plt.figure(2);    
-#         plt.subplot(nLayers+1,3,1);
-#         plt.imshow(img,interpolation='none');
-#         plt.title('Input')
-    
-    for layer in range(0,nLayers):
-        #headNodeIndex = layers[layer][0]
 
-        #plot spike raster
-        ax=plt.subplot(nLayers,4,(nLayers-layer-1)*4+1);
-        
-        plt.title(layer)
-        raster_plot(spkdetLayers[layer])
-        pylab.ylim([0,layerGDim*layerGDim-1])
-        pylab.xlim([simulationTime*index_img,simulationTime*index_img+1])
-        #ax.get_yaxis().set_visible(False)
-        #ax.set_xlim([(index_img)*simulationTime, (index_img+1)*simulationTime])
-        #ax.set_ylim([headNodeIndex+1, headNodeIndex+(layer1Dim*layer1Dim)]);
-        
-        
-        #dSD =nest.GetStatus(spkdetInhibLayers[layer],keys='events')[0];
-            
-        #plot spike raster
-        ax=plt.subplot(nLayers,4,(nLayers-layer-1)*4+3);
-        plt.title(layer)
-        raster_plot(spkdetInhibLayers[layer])
-        #ax.get_yaxis().set_visible(False)
-        #ax.set_xlim([(index_img)*simulationTime, (index_img+1)*simulationTime])
-        #ax.set_ylim([headNodeIndex+1, headNodeIndex+(inhibLayer1Dim*inhibLayer1Dim)]);
-        
-    plt.show()
+if (plotLayer == 2 ):
+    PlotLayer(img,res_norm,res,index_img,index_filter)
+
+#To-DO: trainNetworkWith
     
 #Testing

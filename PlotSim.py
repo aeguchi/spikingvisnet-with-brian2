@@ -3,10 +3,10 @@ import numpy
 from Parameters import *
 from CreateNetwork import *
 
-plotGabor = 1;
-plotLayer = 0; #0:each images, 1: at end
+plotGabor = 1; 
+plotLayer = 1; #1:each stimulus, 2: at end
 
-def plotSim (img,res_norm,res, index_img):
+def PlotGabor (img,res_norm,res, index_img):
     
     if(plotGabor):
         plt.figure(1 , figsize=(20,10))
@@ -57,9 +57,10 @@ def plotSim (img,res_norm,res, index_img):
             plt.imshow(res_FRMap,interpolation='none',vmin=0, vmax=Rmax);
             plt.colorbar();
     #plt.show();
+    return 0
 
-
-    if (plotLayer==0):
+def PlotLayer (img,res_norm,res, index_img, index_filter):
+    if (plotLayer==1):
         plt.figure(2, figsize=(20,10) );
         plt.subplot(nLayers+1,3,1);
         plt.imshow(img,interpolation='none');
@@ -131,4 +132,40 @@ def plotSim (img,res_norm,res, index_img):
         
         plt.show()
 
+
+    elif (plotLayer==2):
+        
+        #         plt.figure(2);
+        #         plt.subplot(nLayers+1,3,1);
+        #         plt.imshow(img,interpolation='none');
+        #         plt.title('Input')
+        
+        for layer in range(0,nLayers):
+            #headNodeIndex = layers[layer][0]
+            
+            #plot spike raster
+            ax=plt.subplot(nLayers,4,(nLayers-layer-1)*4+1);
+            
+            plt.title(layer)
+            raster_plot(spkdetLayers[layer])
+            pylab.ylim([0,layerGDim*layerGDim-1])
+            pylab.xlim([simulationTime*index_img,simulationTime*index_img+1])
+            #ax.get_yaxis().set_visible(False)
+            #ax.set_xlim([(index_img)*simulationTime, (index_img+1)*simulationTime])
+            #ax.set_ylim([headNodeIndex+1, headNodeIndex+(layer1Dim*layer1Dim)]);
+            
+            
+            #dSD =nest.GetStatus(spkdetInhibLayers[layer],keys='events')[0];
+            
+            #plot spike raster
+            ax=plt.subplot(nLayers,4,(nLayers-layer-1)*4+3);
+            plt.title(layer)
+            raster_plot(spkdetInhibLayers[layer])
+        #ax.get_yaxis().set_visible(False)
+        #ax.set_xlim([(index_img)*simulationTime, (index_img+1)*simulationTime])
+        #ax.set_ylim([headNodeIndex+1, headNodeIndex+(inhibLayer1Dim*inhibLayer1Dim)]);
+        
+        plt.show()
+
+        
     return 0
