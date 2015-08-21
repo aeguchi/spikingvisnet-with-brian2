@@ -6,6 +6,12 @@ from brian2 import *
 nStim = 2
 nTrans = 8
 
+#Simulation Parameters
+epochNb = 1
+trialNb = 1
+testNb = 1
+
+
 #Param for Filtering:
 ksize = 31#31  # 31 the size of the Gabor kernel. If ksize = (a, b), we then have a Gabor kernel of size a x b pixels. As with many other convolution kernels, ksize is preferably odd and the kernel is a square (just for the sake of uniformity).
 bw = 1.5 #spatial bandwidth:
@@ -54,6 +60,7 @@ lRate = 0.001
 
 
 eqs_stdpSyn ='''
+             plastic : 1 (shared)
              w : volt
              dapre/dt = -apre/taupre : volt (event-driven)
              dapost/dt = -apost/taupost : volt (event-driven)
@@ -61,11 +68,11 @@ eqs_stdpSyn ='''
 eqs_stdpPre ='''
              v_post += w
              apre += Apre
-             w = clip(w+apost*lRate, 0, wmax)
+             w = clip(w+apost*lRate, 0, wmax) * plastic
              '''
 eqs_stdpPost ='''
              apost += Apost
-             w = clip(w+apre*lRate, 0, wmax)
+             w = clip(w+apre*lRate, 0, wmax) * plastic
              '''
 
 connCond = '''

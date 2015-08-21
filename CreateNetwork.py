@@ -36,7 +36,7 @@ net.add(inhibLayers);
 connGtoInput = []
 for theta in range(0,len(thetaList)):
     
-    connGtoInput.append(Synapses(layerG[theta], layers[0], pre='ve += 3*we'));
+    connGtoInput.append(Synapses(layerG[theta], layers[0],'plastic : 1 (shared)', pre='ve += 3*we* plastic'));
     connGtoInput[theta].connect(True, p=0.2)
 #connGtoInput[theta].connect(sqrt((i%layerGDim - j%layerGDim)**2 + (i/layerGDim - j/layerGDim)**2) < 0.1 * layerGDim)
 
@@ -72,12 +72,14 @@ connInEx = []
 connRecIn = []
 connRecEx = []
 for layer in range(0,nLayers):
-    connExIn.append(Synapses(layers[layer],inhibLayers[layer], 'w:1',pre='ve += we'))
+    connExIn.append(Synapses(layers[layer],inhibLayers[layer], '''w:1 
+                                                                plastic : 1 (shared)''',pre='ve += we* plastic'))
     #connExIn[layer].w = 1;
     connExIn[layer].connect(True, p=0.2)
     connExIn[layer].delay[:,:] = rand()*2*ms
     
-    connInEx.append(Synapses(inhibLayers[layer], layers[layer],'w:1', pre='vi += 3*wi'))
+    connInEx.append(Synapses(inhibLayers[layer], layers[layer],'''w:1
+                                                                plastic : 1 (shared)''', pre='vi += 3*wi* plastic'))
     #connInEx[layer].w = 1;
     connInEx[layer].connect(True, p=0.2)
     connInEx[layer].delay[:,:] = rand()*2*ms
@@ -104,3 +106,30 @@ spkdetInhibLayers = []
 for layer in range(0,nLayers):
     spkdetInhibLayers.append(SpikeMonitor(inhibLayers[layer]))
 net.add(spkdetInhibLayers)
+
+
+def plasticON(on):
+    if (on==1):
+        for theta in range(0,len(thetaList)):
+            connGtoInput[theta].plastic = True
+
+        for layer in range(0,nLayers):
+            connExIn[layer].plastic= True
+            connInEx[layer].plastic= True
+
+        for layer in range(0,nLayers-1):
+            connBottomUp[layer].plastic= True
+            connTopDown[layer].plastic= True
+
+    elif (on==0):
+        for theta in range(0,len(thetaList)):
+            connGtoInput[theta].plastic = False
+        
+        for layer in range(0,nLayers):
+            connExIn[layer].plastic= False
+            connInEx[layer].plastic= False
+        
+        for layer in range(0,nLayers-1):
+            connBottomUp[layer].plastic= False
+            connTopDown[layer].plastic= False
+    return 0
