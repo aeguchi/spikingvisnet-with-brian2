@@ -66,6 +66,9 @@ if not os.path.exists(os.path.split(os.path.realpath(__file__))[0] + "/randomise
     os.makedirs(os.path.split(os.path.realpath(__file__))[0] + "/randomised/")
 if not os.path.exists(os.path.split(os.path.realpath(__file__))[0] + "/trained/"):
     os.makedirs(os.path.split(os.path.realpath(__file__))[0] + "/trained/")
+if not os.path.exists(os.path.split(os.path.realpath(__file__))[0] + "/FR/"):
+    os.makedirs(os.path.split(os.path.realpath(__file__))[0] + "/FR/")
+
 
 img_fns = []
 for img_fn in trainingImages:
@@ -79,6 +82,16 @@ for trial in range(trialNb) :
 
     print('Trial '+ str(trial+1) + ' out of '+str(trialNb) )
     restore('initialized')
+    
+    plasticON(0)
+    RunSim()
+    
+    for layer in range(0,nLayers):
+        filep= os.path.split(os.path.realpath(__file__))[0] + '/FR/' + 'FR_b_Ex'+str(layer)+'_trial'+srt(trial)
+        with open(filep,'w') as FR
+            json.dump( spkdetLayers[layer].spike_trains() , FR)
+    
+    
     plasticON(1)
     RunSim()
     
@@ -87,7 +100,14 @@ for trial in range(trialNb) :
         restore('trained')
         plasticON(0)
         RunSim()
-    
+        
+       
+        for layer in range(0,nLayers):
+            filep= os.path.split(os.path.realpath(__file__))[0] + '/FR/' + 'FR_t_Ex'+str(layer)+'_trial'+srt(trial)+'_test'+str(test)
+            with open(filep,'w') as FR
+                json.dump( spkdetLayers[layer].spike_trains() , FR)
+            
+
     if (plotLayer == 2 ):
         PlotLayer(img,res_norm,res,index_img,index_filter)
 
