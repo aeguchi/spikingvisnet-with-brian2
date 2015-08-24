@@ -3,8 +3,8 @@ import numpy
 from Parameters import *
 from CreateNetwork import *
 
-plotGabor = 1;
-plotLayer = 1; #1:each stimulus, 2: at end
+plotGabor = 0;
+plotLayer = 0; #1:each stimulus, 2: at end
 
 def PlotGabor (img,res_norm,res, index_img):
     

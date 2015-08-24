@@ -3,8 +3,8 @@ from cmath import sqrt, log
 from brian2 import *
 
 #class Parameters:
-nStim = 2
-nTrans = 8
+nStim = 1#2
+nTrans = 1#8
 
 #Simulation Parameters
 epochNb = 1
