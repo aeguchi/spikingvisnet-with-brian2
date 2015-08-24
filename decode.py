@@ -1,3 +1,5 @@
+from itertools import groupby
+
 def Decode():
     
     FR_t=[nlayers][trialNb][testNb]
@@ -17,8 +19,29 @@ def Decode():
                 with open(filep,'w') as FR
                     FR_t[layer][trial][test] = json.load(FR)
         
-        spikes = spkdetLayers[layer].spike_trains();
-        
+    spikes = [nStim*nTrans][nLayers][LayerDim][2]
+    tmp = [trialNb*TestNb]
+                        
+        for k in range(nStim*nTrans):
+            for l in range(nLayers):
+                for n in range(LayerDim*LayerDim):
+                    for trial in range(trialNb) :
+                        for test in range(testNb):
+
+                            if (len(FR_t[l][trial][test][n])==0):
+                                condition = FR_t[l][trial][test][n]>simulationTime*k && FR_t[l][trial][test][n]<simulationTime*(k+1)
+                            else:
+                                condition = FR_t[l][trial][test][n]>simulationTime*k*ms && FR_t[l][trial][test][n]<simulationTime*(k+1)*ms
+
+                            tmp[trial*trialNb + test*testNb] = len(numpy.extract(condition,FR_t[layer][trial][test][n]))
+                
+                    tmp=numpy.sort(tmp)
+                    Pr=[len(list(group)) for key, group in groupby(tmp)]
+                    spikes[k][l][n][1] = tmp
+                    spikes[k][l][n][2] =Pr
+
+
+    
         spkcount = [len(spikes)][nStim*nTrans]
         spkStimcount = [len(spikes)][nStim]
         

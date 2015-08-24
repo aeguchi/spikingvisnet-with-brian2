@@ -1,11 +1,13 @@
 
 from imageImport import *
-
+import simplejson as json
+import serial_json2
 from PlotSim import *
 import sys
 import  glob
 #import nest
 import os
+
 #from nest import raster_plot
 #import nest.topology as topp
 
@@ -58,7 +60,7 @@ def RunSim():
 
 ### Training ###
 #trainingImages = sorted(glob.iglob("/images/training/*.png"))
-trainingImages = sorted(glob.iglob(os.path.split(os.path.realpath(__file__))[0] + "/images/training/*.png"))
+trainingImages = sorted(glob.iglob(os.path.split(os.path.realpath(__file__))[0] + "/images/test/*.png"))
 
 store('initialized')    #randomised network
 
@@ -87,9 +89,10 @@ for trial in range(trialNb) :
     RunSim()
     
     for layer in range(0,nLayers):
-        filep= os.path.split(os.path.realpath(__file__))[0] + '/FR/' + 'FR_b_Ex'+str(layer)+'_trial'+srt(trial)
-        with open(filep,'w') as FR
-            json.dump( spkdetLayers[layer].spike_trains() , FR)
+        filep= os.path.split(os.path.realpath(__file__))[0] + '/FR/' + 'FR_b_Ex'+str(layer)+'_trial'+str(trial)
+        numpy.save(filep,spkdetLayers[layer].spike_trains())
+        #with open(filep,'w') as FR:
+            #json.dump( spkdetLayers[layer].spike_trains(), FR)
     
     
     plasticON(1)
@@ -103,10 +106,11 @@ for trial in range(trialNb) :
         
        
         for layer in range(0,nLayers):
-            filep= os.path.split(os.path.realpath(__file__))[0] + '/FR/' + 'FR_t_Ex'+str(layer)+'_trial'+srt(trial)+'_test'+str(test)
-            with open(filep,'w') as FR
-                json.dump( spkdetLayers[layer].spike_trains() , FR)
-            
+            filep= os.path.split(os.path.realpath(__file__))[0] + '/FR/' + 'FR_t_Ex'+str(layer)+'_trial'+str(trial)+'_test'+str(test)
+            numpy.save(filep,spkdetLayers[layer].spike_trains())
+#            with open(filep,'w') as FR:
+#               json.dump(spkdetLayers[layer].spike_trains(), FR)
+
 
     if (plotLayer == 2 ):
         PlotLayer(img,res_norm,res,index_img,index_filter)
