@@ -84,7 +84,7 @@ for img_fn in img_fns:
             tmp = vnet.spikesG[index_filter];
             #plot(vnet.spikesG[index_filter].t/ms, vnet.spikesG[index_filter].i, '.')
             #plot(testSpikes.t/ms, testSpikes.i, '.')
-            plot(tmp.t/ms, tmp.i, '.')
+            plt.plot(tmp.t/ms, tmp.i, '.')
             
             
             tmp2 = vnet.spikesG[index_filter].spike_trains();
@@ -116,7 +116,7 @@ for img_fn in img_fns:
             
             plt.title(layer)
             #plot(vnet.spkdetLayers[layer].t/ms, vnet.spkdetLayers[layer].v[0])
-            plot(vnet.spkdetLayers[layer].t/ms, vnet.spkdetLayers[layer].i, '.')
+            plt.plot(vnet.spkdetLayers[layer].t/ms, vnet.spkdetLayers[layer].i, '.')
             #ax.get_yaxis().set_visible(False)
             #ax.set_xlim([(index_img)*simulationTime, (index_img+1)*simulationTime])
             #ax.set_ylim([headNodeIndex+1, headNodeIndex+(layer1Dim*layer1Dim)]);
@@ -140,7 +140,7 @@ for img_fn in img_fns:
             ax=plt.subplot(nLayers+1,4,(nLayers-layer)*4+3);
              
             plt.title(layer)
-            plot(vnet.spkdetInhibLayers[layer].t/ms, vnet.spkdetInhibLayers[layer].i, '.')
+            plt.plot(vnet.spkdetInhibLayers[layer].t/ms, vnet.spkdetInhibLayers[layer].i, '.')
 #             plt.plot(ts, evs,'.')
 #             #ax.get_yaxis().set_visible(False)
 #             ax.set_xlim([(index_img)*simulationTime, (index_img+1)*simulationTime])
