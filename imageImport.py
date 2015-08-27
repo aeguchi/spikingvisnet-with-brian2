@@ -1,24 +1,18 @@
-#!/usr/bin/env python
  
-import numpy as np
 import cv2
 from Parameters import *
-import matplotlib.pyplot as plt
 import math
-from numpy import mean
  
 def build_filters():
     filters = []
     for lamda in lamdaList:
         for theta in thetaList:
             for psi in psiList:
-                # cv2.getGaborKernel(ksize, sigma, theta, lambda, gamma, psi, ktype)
-                #ksize = int(lamda)+1
-                sigma = float(lamda/np.pi*math.sqrt(math.log(2)/2)*(2**bw+1)/(2**bw-1))
+
+                sigma = float(lamda/math.pi*math.sqrt(math.log(2)/2)*(2**bw+1)/(2**bw-1))
                 kern = cv2.getGaborKernel((ksize, ksize), sigma, theta, lamda, gamma, psi, ktype=cv2.CV_32F)
-                #kern /= 1.5 * kern.sum()
-                #kern /= 0.2 * kern.sum()
                 filters.append(kern)
+
     return filters
 
 
@@ -29,8 +23,10 @@ def process(img, filters):
         fimg = cv2.filter2D(img, cv2.CV_8UC3, kern)
         fimg = fimg;#/mean(fimg);
         filteredImages.append(cv2.resize(fimg,(layerGDim,layerGDim),interpolation = cv2.INTER_AREA))
-        #plt.imshow(cv2.resize(fimg,(layerGDim,layerGDim),interpolation = cv2.INTER_AREA  ))
-        plt.show()
+
+        # plt.imshow(cv2.resize(fimg,(layerGDim,layerGDim),interpolation = cv2.INTER_AREA  ))
+        # plt.show()
+        
     return filteredImages
 
 
