@@ -1,6 +1,6 @@
 import numpy as np
 from cmath import sqrt, log
-from brian2 import *
+from brian2 import ms, mV, Hz
 
 #class Parameters:
 nStim = 2
