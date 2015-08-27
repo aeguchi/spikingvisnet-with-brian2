@@ -9,118 +9,134 @@ class visnet(object):
 
     def __init__(self):
         super(visnet, self).__init__()
-        
+
+        self.net = Network(collect())
+
+        self.buildLayers()
+        self.buildConnectionsBetweenLayers()
+        self.buildSpikeMonitors()
+
     def buildVN(self):
 
-        net = Network(collect())
+        return self.net, self.layerG, self.layers, self.inhibLayers, \
+            self.spikesG, self.spkdetLayers, self.spkdetInhibLayers
 
-        # Creating Gabor input layer
-        layerG = []
+    def buildLayers(self):
+
+        # Gabor input layer
+
+        self.layerG = []
         for theta in range(0, len(thetaList)):
-            # layerG.append(NeuronGroup(layerGDim*layerGDim, eqs,
-            #                            threshold='v>1', reset='v = 0'))
-            layerG.append(PoissonGroup(
+            self.layerG.append(PoissonGroup(
                 layerGDim * layerGDim,
                 numpy.random.rand(layerGDim * layerGDim) * Hz))
-        net.add(layerG)
 
-        # Creating ExcitLayers
-        layers = []
+        self.net.add(self.layerG)
+
+        # Excitatory layers
+
+        self.layers = []
         for layer in range(0, nLayers):
-            #layers.append(NeuronGroup(layerDim*layerDim, eqs, threshold='v>1', reset='v = 0'))
-            layers.append(NeuronGroup(layerDim * layerDim, eqn_membran,
-                                      threshold='v>Vt', reset='v = Vr', refractory=2 * ms))
-            layers[layer].v = 'Vr'  # + rand() * (Vt - Vr)'
-            layers[layer].ve = 0 * mV
-            layers[layer].vi = 0 * mV
+            self.layers.append(NeuronGroup(layerDim * layerDim, eqn_membran,
+                                           threshold='v>Vt', reset='v = Vr',
+                                           refractory=2 * ms))
+            self.layers[layer].v = 'Vr'  # + rand() * (Vt - Vr)'
+            self.layers[layer].ve = 0 * mV
+            self.layers[layer].vi = 0 * mV
 
-        net.add(layers)
+        self.net.add(self.layers)
 
-        # Creating InhibLayers
-        inhibLayers = []
+        # Inhibitory self.layers
+
+        self.inhibLayers = []
         for layer in range(0, nLayers):
-            #inhibLayers.append(NeuronGroup(inhibLayerDim*inhibLayerDim, eqs, threshold='v>1', reset='v = 0'))
-            inhibLayers.append(NeuronGroup(
-                layerDim * layerDim, eqn_membran, threshold='v>Vt', reset='v = Vr', refractory=2 * ms))
-            inhibLayers[layer].v = 'Vr'  # + rand() * (Vt - Vr)'
-            inhibLayers[layer].ve = 0 * mV
-            inhibLayers[layer].vi = 0 * mV
-        net.add(inhibLayers)
+            self.inhibLayers.append(NeuronGroup(
+                layerDim * layerDim, eqn_membran, threshold='v>Vt',
+                reset='v = Vr', refractory=2 * ms))
+            self.inhibLayers[layer].v = 'Vr'  # + rand() * (Vt - Vr)'
+            self.inhibLayers[layer].ve = 0 * mV
+            self.inhibLayers[layer].vi = 0 * mV
+        self.net.add(self.inhibLayers)
+
+    def buildConnectionsBetweenLayers(self):
 
         # Connecting neurons in Gabor input layer and neurons in the first
         # ExcitLayer
+
         connGtoInput = []
         for theta in range(0, len(thetaList)):
 
             connGtoInput.append(
-                Synapses(layerG[theta], layers[0], pre='ve += 3*we'))
+                Synapses(self.layerG[theta], self.layers[0], pre='ve += 3*we'))
             connGtoInput[theta].connect(True, p=0.2)
-            #connGtoInput[theta].connect(sqrt((i%layerGDim - j%layerGDim)**2 + (i/layerGDim - j/layerGDim)**2) < 0.1 * layerGDim)
 
-            #connGtoInput.append(Synapses(layerG[theta], layers[0], 'w:1', pre='ve += w*we'));
-            #connGtoInput[theta].w = 1;
-            #connGtoInput.append(Synapses(layerG[theta], layers[0], pre='ve += 10*we'));
-            #connGtoInput[theta].connect(True, p=0.1)
-        net.add(connGtoInput)
+        self.net.add(connGtoInput)
 
-        # Connecting neurons between layers
+        # Connecting neurons between excitatory layers
+
         connBottomUp = []
         connTopDown = []
         for layer in range(0, nLayers - 1):
-            #connBottomUp.append(Synapses(layers[layer],layers[layer+1], 'w:1',pre='ve += 10*we'))
             connBottomUp.append(Synapses(
-                layers[layer], layers[layer + 1], eqs_stdpSyn, eqs_stdpPre, eqs_stdpPost))
+                self.layers[layer], self.layers[layer + 1],
+                eqs_stdpSyn, eqs_stdpPre, eqs_stdpPost))
+
             connBottomUp[layer].connect(True, p=0.1)
             connBottomUp[layer].w[:, :] = rand() * Apre
             connBottomUp[layer].delay[:, :] = rand() * 10 * ms
 
             connTopDown.append(Synapses(
-                layers[layer + 1], layers[layer], eqs_stdpSyn, eqs_stdpPre, eqs_stdpPost))
-            #connTopDown.append(Synapses(layers[layer+1],layers[layer], 'w:1',pre='ve += 10*we'))
+                self.layers[layer + 1], self.layers[layer],
+                eqs_stdpSyn, eqs_stdpPre, eqs_stdpPost))
+
             connTopDown[layer].connect(True, p=0.1)
             connTopDown[layer].w[:, :] = rand() * Apre
             connTopDown[layer].delay[:, :] = rand() * 10 * ms
 
-        net.add(connBottomUp)
-        net.add(connTopDown)
+        self.net.add(connBottomUp)
+        self.net.add(connTopDown)
 
-        # Connecting neurons within layers
+        # Connecting neurons within layers (excitatory to inhibitory and vv)
+
         connExIn = []
         connInEx = []
         connRecIn = []
         connRecEx = []
+
         for layer in range(0, nLayers):
             connExIn.append(
-                Synapses(layers[layer], inhibLayers[layer], 'w:1', pre='ve += we'))
-            #connExIn[layer].w = 1;
+                Synapses(self.layers[layer], self.inhibLayers[layer],
+                         'w:1', pre='ve += we'))
+
             connExIn[layer].connect(True, p=0.2)
             connExIn[layer].delay[:, :] = rand() * 2 * ms
 
             connInEx.append(
-                Synapses(inhibLayers[layer], layers[layer], 'w:1', pre='vi += 3*wi'))
-            #connInEx[layer].w = 1;
+                Synapses(self.inhibLayers[layer], self.layers[layer],
+                         'w:1', pre='vi += 3*wi'))
+
             connInEx[layer].connect(True, p=0.2)
             connInEx[layer].delay[:, :] = rand() * 2 * ms
-        net.add(connExIn)
-        net.add(connInEx)
+        self.net.add(connExIn)
+        self.net.add(connInEx)
 
-        spikesG = []
+    def buildSpikeMonitors(self):
+
+        self.spikesG = []
         for theta in range(0, len(thetaList)):
-            spikesG.append(SpikeMonitor(layerG[theta]))
-        net.add(spikesG)
+            self.spikesG.append(SpikeMonitor(self.layerG[theta]))
+        self.net.add(self.spikesG)
 
-        # tmp = layerG[0];
+        # tmp = self.layerG[0];
         # testSpikes = SpikeMonitor(tmp);
 
-        spkdetLayers = []
+        self.spkdetLayers = []
         for layer in range(0, nLayers):
-            spkdetLayers.append(SpikeMonitor(layers[layer]))
-            #spkdetLayers.append(StateMonitor(layers[layer], 'v', record=True))
-        net.add(spkdetLayers)
+            self.spkdetLayers.append(SpikeMonitor(self.layers[layer]))
+        self.net.add(self.spkdetLayers)
 
-        spkdetInhibLayers = []
+        self.spkdetInhibLayers = []
         for layer in range(0, nLayers):
-            spkdetInhibLayers.append(SpikeMonitor(inhibLayers[layer]))
-        net.add(spkdetInhibLayers)
-
-        return net, layerG, layers, inhibLayers, spikesG, spkdetLayers, spkdetInhibLayers
+            self.spkdetInhibLayers.append(
+                SpikeMonitor(self.inhibLayers[layer]))
+        self.net.add(self.spkdetInhibLayers)
