@@ -4,7 +4,7 @@ import sys
 import numpy,pylab as plt , glob
 #import nest
 import os
-from netarch import *
+import netarch
 #from nest import raster_plot
 #import nest.topology as topp
 plotGabor = 1;
@@ -12,7 +12,8 @@ plotLayer = 0; #0:each images, 1: at end
 
 #http://brian2.readthedocs.org/en/latest/resources/tutorials/1-intro-to-brian-neurons.html
 
-net, layerG, layers, inhibLayers, spikesG, spkdetLayers, spkdetInhibLayers = buildVN()
+vnet = netarch.visnet()
+net, layerG, layers, inhibLayers, spikesG, spkdetLayers, spkdetInhibLayers = vnet.buildVN()
 
 ### Training ###
 #trainingImages = sorted(glob.iglob("/images/training/*.png"))
