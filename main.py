@@ -18,13 +18,13 @@ vnet = netarch.visnet()
 
 ### Training ###
 #trainingImages = sorted(glob.iglob("/images/training/*.png"))
-trainingImages = sorted(glob.iglob(os.path.split(os.path.realpath(__file__))[0] + "/images/training/*.png"))
+img_fns = sorted(glob.iglob(os.path.split(os.path.realpath(__file__))[0] + "/images/training/*.png"))
 
-img_fns = []
-for img_fn in trainingImages:
-    img_fns.append(img_fn)
+# img_fns = []
+# for img_fn in trainingImages:
+#     img_fns.append(img_fn)
 
-if len(img_fns)!=nStim*nTrans:
+if len(img_fns)!= nStim*nTrans:
     print 'Error: the number of images files does not match',len(img_fns);
     sys.exit(1)
 
@@ -39,12 +39,8 @@ for img_fn in img_fns:
     
     filters = imimp.build_filters()
     res = imimp.process(img, filters)
-    
-    #convert from gabor filtered inputs to spikes
-    #normalize
-    res_norm=res/numpy.max(res);
-    res_norm=1-res_norm;
-    
+    res_norm = imimp.to_spikes(res)
+
     for index_filter in range(0,len(thetaList)):
         r = numpy.reshape(numpy.mean(res_norm[index_filter],axis=2),(layerGDim*layerGDim));
         #print r

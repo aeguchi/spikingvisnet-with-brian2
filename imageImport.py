@@ -2,6 +2,7 @@
 import cv2
 from Parameters import *
 import math
+import numpy as np
  
 def build_filters():
     filters = []
@@ -26,32 +27,43 @@ def process(img, filters):
 
         # plt.imshow(cv2.resize(fimg,(layerGDim,layerGDim),interpolation = cv2.INTER_AREA  ))
         # plt.show()
-        
+
     return filteredImages
 
 
+def to_spikes(res):
+    '''
+    Convert Gabor processed image into normalised spikes.
+    '''
 
-def imageLoad(img_fn):
-    import sys
+    res_norm = res/np.max(res)
+    res_norm = 1-res_norm
+
+    return res_norm
+
+
+
+# def imageLoad(img_fn):
+#     import sys
     
-    img_fn = 'test2.png'
+#     img_fn = 'test2.png'
     
-    img = cv2.imread(img_fn)
-    if img is None:
-        print 'Failed to load image file:', img_fn
-        sys.exit(1)
+#     img = cv2.imread(img_fn)
+#     if img is None:
+#         print 'Failed to load image file:', img_fn
+#         sys.exit(1)
     
-    filters = build_filters()
+#     filters = build_filters()
     
-    res = process(img, filters)
+#     res = process(img, filters)
     
     
-    for r in res:
-        cv2.imshow('result', r)
-        cv2.waitKey(0)
-        cv2.destroyAllWindows()
+#     for r in res:
+#         cv2.imshow('result', r)
+#         cv2.waitKey(0)
+#         cv2.destroyAllWindows()
         
-    return res;
+#     return res;
         
 
 
