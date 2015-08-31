@@ -144,3 +144,14 @@ class visnet(object):
             self.spkdetInhibLayers.append(
                 br.SpikeMonitor(self.inhibLayers[layer]))
         self.net.add(self.spkdetInhibLayers)
+
+    def setGaborFiringRates(self, res_norm):
+
+        for index_filter in range(0, len(thetaList)):
+
+            r = np.reshape(np.mean(res_norm[index_filter], axis=2),
+                           (layerGDim * layerGDim))
+            # print r
+            self.layerG[index_filter].rates = r * Rmax
+            # To be fixed
+            # print vnet.layerG[index_filter].rates
