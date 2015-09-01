@@ -57,6 +57,7 @@ eqs_stdpSyn ='''
              w : volt
              dapre/dt = -apre/taupre : volt (event-driven)
              dapost/dt = -apost/taupost : volt (event-driven)
+             plastic: boolean (shared)
              '''
 eqs_stdpPre ='''
              v_post += w
