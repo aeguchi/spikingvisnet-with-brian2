@@ -4,3 +4,4 @@ syntax: glob
 images/temp/*
 *.pyc
 *inputGen.pl~
+

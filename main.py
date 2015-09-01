@@ -28,7 +28,9 @@ if len(img_fns)!= nStim*nTrans:
     print 'Error: the number of images files does not match',len(img_fns);
     sys.exit(1)
 
-index_img=0;
+index_img=0
+
+vnet.setSynapticPlasticity(False)
 
 for img_fn in img_fns:
 
