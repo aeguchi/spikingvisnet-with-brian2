@@ -58,7 +58,7 @@ for img_fn in img_fns:
 
     # plot each image set
 
-    vplotter.plotGaborInput(img, res, res_norm)
-    vplotter.plotLayers(img, plotLayer=plotLayer)
+    vplotter.plotGaborInput(img, index_img, res, res_norm)
+    vplotter.plotLayers(img, index_img, plotLayer=plotLayer)
 
     index_img += 1

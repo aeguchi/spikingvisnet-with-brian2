@@ -13,9 +13,9 @@ class plotter(object):
 
         self.vnet = vnet
 
-    def plotGaborInput(self, img, res, res_norm):
+    def plotGaborInput(self, img, index_img, res, res_norm):
 
-        plt.figure(1)
+        plt.figure(1 , figsize=(20,10))
         # plot input Image
         plt.subplot(5, 3, 1)
         plt.imshow(img, interpolation='none')
@@ -38,12 +38,18 @@ class plotter(object):
             #plot(self.vnet.spikesG[index_filter].t/ms, self.vnet.spikesG[index_filter].i, '.')
             #plot(testSpikes.t/ms, testSpikes.i, '.')
             plt.plot(tmp.t / ms, tmp.i, '.')
+            plt.ylim([0,layerGDim*layerGDim-1])
+            plt.xlim([simulationTime*index_img,simulationTime*(index_img+1)])
 
             tmp2 = self.vnet.spikesG[index_filter].spike_trains()
             for row_tmp in range(layerGDim):
                 for col_tmp in range(layerGDim):
                     index_tmp = row_tmp * layerGDim + col_tmp
-                    res_FRMap[row_tmp][col_tmp] = len(tmp2[index_tmp])
+                    if (len(tmp2[index_tmp])==0):
+                        condition = tmp2[index_tmp]>simulationTime*index_img
+                    else:
+                        condition = tmp2[index_tmp]>simulationTime*index_img*ms
+                    res_FRMap[row_tmp][col_tmp] = len(np.extract(condition,tmp2[index_tmp]));
 
             # plot FR map
             plt.subplot(5, 3, (index_filter + 1) * 3 + 3)
@@ -52,14 +58,14 @@ class plotter(object):
             plt.imshow(res_FRMap, interpolation='none', vmin=0, vmax=Rmax)
             plt.colorbar()
 
-    def plotLayers(self, img, plotLayer=0):
+    def plotLayers(self, img, index_img, plotLayer=0):
 
         if (plotLayer == 0):
 
-            plt.figure(2)
+            plt.figure(2, figsize=(20,10) );
+            plt.title('Input')
             plt.subplot(nLayers + 1, 3, 1)
             plt.imshow(img, interpolation='none')
-            plt.title('Input')
 
             for layer in range(0, nLayers):
 
@@ -67,12 +73,14 @@ class plotter(object):
                 # plot spike raster
                 ax = plt.subplot(nLayers + 1, 4, (nLayers - layer) * 4 + 1)
 
-                plt.title(layer)
+                plt.title('Excitatory layer '+str(layer))
                 # plot(self.vnet.spkdetLayers[layer].t/ms,
                 #      self.vnet.spkdetLayers[layer].v[0])
                 plt.plot(
                     self.vnet.spkdetLayers[layer].t / ms,
                     self.vnet.spkdetLayers[layer].i, '.')
+                plt.ylim([0,layerGDim*layerGDim-1])
+                plt.xlim([simulationTime*index_img,simulationTime*(index_img+1)])
                 # ax.get_yaxis().set_visible(False)
                 # ax.set_xlim([(index_img)*simulationTime,
                 #              (index_img+1)*simulationTime])
@@ -85,7 +93,12 @@ class plotter(object):
                 for row_tmp in range(layerDim):
                     for col_tmp in range(layerDim):
                         index_tmp = row_tmp * layerGDim + col_tmp
-                        ex_FRMap[row_tmp][col_tmp] = len(tmp2[index_tmp])
+                        if (len(tmp2[index_tmp])==0):
+                            condition = tmp2[index_tmp]>simulationTime*index_img
+                        else:
+                            condition = tmp2[index_tmp]>simulationTime*index_img*ms
+                        ex_FRMap[row_tmp][col_tmp] = len(np.extract(condition,tmp2[index_tmp]));
+                        
 
                 plt.subplot(nLayers + 1, 4, (nLayers - layer) * 4 + 2)
                 # if(index_filter == 0):
@@ -97,7 +110,9 @@ class plotter(object):
                 # plot spike raster
                 ax = plt.subplot(nLayers + 1, 4, (nLayers - layer) * 4 + 3)
 
-                plt.title(layer)
+                plt.title('Inhibitory layer '+str(layer))
+                plt.ylim([0,layerGDim*layerGDim-1])
+                plt.xlim([simulationTime*index_img,simulationTime*(index_img+1)])
                 plt.plot(
                     self.vnet.spkdetInhibLayers[layer].t / ms,
                     self.vnet.spkdetInhibLayers[layer].i, '.')
@@ -124,6 +139,7 @@ class plotter(object):
                 plt.imshow(
                     inhib_FRMap, interpolation='none', vmin=0,
                     vmax=inhib_FRMap.max())
+                plt.title('Firing Rate Map')
                 plt.colorbar()
 
             plt.show()
@@ -143,6 +159,8 @@ class plotter(object):
 
                 plt.title(layer)
                 raster_plot(self.vnet.spkdetLayers[layer])
+                pylab.ylim([0,layerGDim*layerGDim-1])
+                pylab.xlim([simulationTime*index_img,simulationTime*index_img+1])
                 # ax.get_yaxis().set_visible(False)
                 #ax.set_xlim([(index_img)*simulationTime, (index_img+1)*simulationTime])
                 #ax.set_ylim([headNodeIndex+1, headNodeIndex+(layer1Dim*layer1Dim)]);
