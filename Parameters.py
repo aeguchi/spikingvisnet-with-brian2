@@ -62,11 +62,11 @@ eqs_stdpSyn ='''
 eqs_stdpPre ='''
              v_post += w
              apre += Apre
-             w = clip(w+apost*lRate, 0, wmax)
+             w = clip(w+plastic*apost*lRate, 0, wmax)
              '''
 eqs_stdpPost ='''
              apost += Apost
-             w = clip(w+apre*lRate, 0, wmax)
+             w = clip(w+plastic*apre*lRate, 0, wmax)
              '''
 
 connCond = '''
