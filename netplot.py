@@ -58,7 +58,7 @@ class plotter(object):
             plt.imshow(res_FRMap, interpolation='none', vmin=0, vmax=Rmax)
             plt.colorbar()
 
-    def plotLayers(self, img, index_img, plotLayer=0):
+    def plotLayers(self, img, index_img, FRrecTmp, plotLayer=0):
 
         # if (plotLayer == 0):
             # plot input image
@@ -92,6 +92,8 @@ class plotter(object):
             plt.imshow(
                 bind_FRMap, interpolation='none', vmin=0, vmax=bind_FRMap.max())
             plt.colorbar()
+            FRrecTmp[0]=bind_FRMap;
+            
             
 
             for layer in range(0, nLayers):
@@ -115,12 +117,13 @@ class plotter(object):
                         else:
                             condition = tmp2[index_tmp] > simulationTime * index_img * ms
                         ex_FRMap[row_tmp][col_tmp] = len(np.extract(condition, tmp2[index_tmp]));
-                        
                 
                 plt.subplot(nLayers + 1, 4, (nLayers - layer) * 4 + 2)
                 plt.imshow(
                     ex_FRMap, interpolation='none', vmin=0, vmax=ex_FRMap.max())
                 plt.colorbar()
+                FRrecTmp[layer+1]=ex_FRMap;
+                
                 
                 # plot spike raster of inhibitory
                 ax = plt.subplot(nLayers + 1, 4, (nLayers - layer) * 4 + 3)
@@ -147,7 +150,7 @@ class plotter(object):
                 plt.title('Firing Rate Map')
                 plt.colorbar()
 
-            plt.show()
+            #plt.show()
 
         # To-DO: trainNetworkWith
         # if (plotLayer == 1):
