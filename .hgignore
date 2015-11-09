@@ -5,3 +5,6 @@ images/temp/*
 *.pyc
 *inputGen.pl~
 
+*~
+matlabGabor/*
+*.pyc.*
