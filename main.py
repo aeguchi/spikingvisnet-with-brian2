@@ -105,7 +105,8 @@ for index_obj in range(numObj_test):
     
         # plot each image set
     
-        vplotter.plotGaborInput(img, index_img, res, res_norm)
+        if plotGabor:
+            vplotter.plotGaborInput(img, index_img, res, res_norm)
         vplotter.plotLayers(img, index_img, plotLayer=plotLayer)
     
         #index_img += 1
