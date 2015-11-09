@@ -68,7 +68,26 @@ class visnet(object):
             self.inhibLayers[layer].ve = 0 * mV
             self.inhibLayers[layer].vi = 0 * mV
         self.net.add(self.inhibLayers)
-
+        
+        
+        #binding layer
+        self.bindingLayer = br.NeuronGroup(
+            layerDim * layerDim,
+            eqn_membran,
+            threshold='v>Vt',
+            reset='v = Vr',
+            refractory=2 * ms
+        )
+        self.bindingLayer.v = 'Vr'  # + br.rand() * (Vt - Vr)'
+        self.bindingLayer.ve = 0 * mV
+        self.bindingLayer.vi = 0 * mV      
+        self.net.add(self.bindingLayer) 
+        
+        
+        
+        
+        
+        
     def buildConnectionsBetweenLayers(self):
 
         # Connecting neurons in Gabor input layer and neurons in the first
@@ -109,28 +128,28 @@ class visnet(object):
             self.connBottomUp[layer].w[:, :] = br.rand() * Apre
             self.connBottomUp[layer].delay[:, :] = br.rand() * 10 * ms
 
-            self.connTopDown.append(br.Synapses(
-                self.layers[layer + 1],
-                self.layers[layer],
-                eqs_stdpSyn,
-                eqs_stdpPre,
-                eqs_stdpPost
-            )
-            )
-
-            self.connTopDown[layer].connect(True, p=0.1)
-            self.connTopDown[layer].w[:, :] = br.rand() * Apre
-            self.connTopDown[layer].delay[:, :] = br.rand() * 10 * ms
+#             self.connTopDown.append(br.Synapses(
+#                 self.layers[layer + 1],
+#                 self.layers[layer],
+#                 eqs_stdpSyn,
+#                 eqs_stdpPre,
+#                 eqs_stdpPost
+#             )
+#             )
+# 
+#             self.connTopDown[layer].connect(True, p=0.1)
+#             self.connTopDown[layer].w[:, :] = br.rand() * Apre
+#             self.connTopDown[layer].delay[:, :] = br.rand() * 10 * ms
 
         self.net.add(self.connBottomUp)
-        self.net.add(self.connTopDown)
+        # self.net.add(self.connTopDown)
 
         # Connecting neurons within layers (excitatory to inhibitory and vv)
 
         self.connExIn = []
         self.connInEx = []
-        connRecIn = []
-        connRecEx = []
+        # connRecIn = []
+        # connRecEx = []
 
         for layer in range(0, nLayers):
             self.connExIn.append(
@@ -148,6 +167,27 @@ class visnet(object):
             self.connInEx[layer].delay[:, :] = br.rand() * 2 * ms
         self.net.add(self.connExIn)
         self.net.add(self.connInEx)
+        
+        
+        
+        self.connExBind = []
+        
+        for layer in range(0, nLayers - 1):
+
+            self.connExBind.append(br.Synapses(
+                self.layers[layer],
+                self.bindingLayer,
+                eqs_stdpSyn,
+                eqs_stdpPre,
+                eqs_stdpPost
+            )
+            )
+
+            self.connExBind[layer].connect(True, p=0.2)
+            self.connExBind[layer].w[:, :] = br.rand() * Apre
+            self.connExBind[layer].delay[:, :] = br.rand() * 10 * ms
+        self.net.add(self.connExBind)
+
 
     def buildSpikeMonitors(self):
 
@@ -175,6 +215,9 @@ class visnet(object):
             self.spkdetInhibLayers.append(
                 br.SpikeMonitor(self.inhibLayers[layer]))
         self.net.add(self.spkdetInhibLayers)
+        
+        self.spkdetBindingLayer = br.SpikeMonitor(self.bindingLayer)
+        self.net.add(self.spkdetBindingLayer)
 
     def setGaborFiringRates(self, res_norm):
 
