@@ -15,7 +15,7 @@ class plotter(object):
 
     def plotGaborInput(self, img, index_img, res, res_norm):
 
-        plt.figure(1 , figsize=(20,10))
+        plt.figure(1 , figsize=(20, 10))
         # plot input Image
         plt.subplot(5, 3, 1)
         plt.imshow(img, interpolation='none')
@@ -35,21 +35,21 @@ class plotter(object):
             if(index_filter == 0):
                 plt.title('Raster Plot')
             tmp = self.vnet.spikesG[index_filter]
-            #plot(self.vnet.spikesG[index_filter].t/ms, self.vnet.spikesG[index_filter].i, '.')
-            #plot(testSpikes.t/ms, testSpikes.i, '.')
+            # plot(self.vnet.spikesG[index_filter].t/ms, self.vnet.spikesG[index_filter].i, '.')
+            # plot(testSpikes.t/ms, testSpikes.i, '.')
             plt.plot(tmp.t / ms, tmp.i, '.')
-            plt.ylim([0,layerGDim*layerGDim-1])
-            plt.xlim([simulationTime*index_img,simulationTime*(index_img+1)])
+            plt.ylim([0, layerGDim * layerGDim - 1])
+            plt.xlim([simulationTime * index_img, simulationTime * (index_img + 1)])
 
             tmp2 = self.vnet.spikesG[index_filter].spike_trains()
             for row_tmp in range(layerGDim):
                 for col_tmp in range(layerGDim):
                     index_tmp = row_tmp * layerGDim + col_tmp
-                    if (len(tmp2[index_tmp])==0):
-                        condition = tmp2[index_tmp]>simulationTime*index_img
+                    if (len(tmp2[index_tmp]) == 0):
+                        condition = tmp2[index_tmp] > simulationTime * index_img
                     else:
-                        condition = tmp2[index_tmp]>simulationTime*index_img*ms
-                    res_FRMap[row_tmp][col_tmp] = len(np.extract(condition,tmp2[index_tmp]));
+                        condition = tmp2[index_tmp] > simulationTime * index_img * ms
+                    res_FRMap[row_tmp][col_tmp] = len(np.extract(condition, tmp2[index_tmp]));
 
             # plot FR map
             plt.subplot(5, 3, (index_filter + 1) * 3 + 3)
@@ -60,34 +60,34 @@ class plotter(object):
 
     def plotLayers(self, img, index_img, plotLayer=0):
 
-        if (plotLayer == 0):
-            #plot input image
-            plt.figure(2, figsize=(20,10) );
+        # if (plotLayer == 0):
+            # plot input image
+            plt.figure(2, figsize=(20, 10));
             plt.title('Input')
             plt.subplot(nLayers + 1, 3, 1)
             plt.imshow(img, interpolation='none')
             
-            #plot binding layer
-            #plot spike raster of binding layer
+            # plot binding layer
+            # plot spike raster of binding layer
             plt.subplot(nLayers + 1, 3, 2)
             plt.title('Binding layer')
             plt.plot(
                 self.vnet.spkdetBindingLayer.t / ms,
                 self.vnet.spkdetBindingLayer.i, '.')
-            plt.ylim([0,layerGDim*layerGDim-1])
-            plt.xlim([simulationTime*index_img,simulationTime*(index_img+1)])
+            plt.ylim([0, layerGDim * layerGDim - 1])
+            plt.xlim([simulationTime * index_img, simulationTime * (index_img + 1)])
             
-            #plot FR map of bindingLayer
+            # plot FR map of bindingLayer
             bind_FRMap = np.zeros((layerDim, layerDim))
             tmp2 = self.vnet.spkdetBindingLayer.spike_trains()
             for row_tmp in range(layerDim):
                 for col_tmp in range(layerDim):
                     index_tmp = row_tmp * layerGDim + col_tmp
-                    if (len(tmp2[index_tmp])==0):
-                        condition = tmp2[index_tmp]>simulationTime*index_img
+                    if (len(tmp2[index_tmp]) == 0):
+                        condition = tmp2[index_tmp] > simulationTime * index_img
                     else:
-                        condition = tmp2[index_tmp]>simulationTime*index_img*ms
-                    bind_FRMap[row_tmp][col_tmp] = len(np.extract(condition,tmp2[index_tmp]));
+                        condition = tmp2[index_tmp] > simulationTime * index_img * ms
+                    bind_FRMap[row_tmp][col_tmp] = len(np.extract(condition, tmp2[index_tmp]));
             plt.subplot(nLayers + 1, 3, 3)
             plt.imshow(
                 bind_FRMap, interpolation='none', vmin=0, vmax=bind_FRMap.max())
@@ -95,26 +95,26 @@ class plotter(object):
             
 
             for layer in range(0, nLayers):
-                #plot spike raster of excitatory
+                # plot spike raster of excitatory
                 ax = plt.subplot(nLayers + 1, 4, (nLayers - layer) * 4 + 1)
-                plt.title('Excitatory layer '+str(layer))
+                plt.title('Excitatory layer ' + str(layer))
                 plt.plot(
                     self.vnet.spkdetLayers[layer].t / ms,
                     self.vnet.spkdetLayers[layer].i, '.')
-                plt.ylim([0,layerGDim*layerGDim-1])
-                plt.xlim([simulationTime*index_img,simulationTime*(index_img+1)])
+                plt.ylim([0, layerGDim * layerGDim - 1])
+                plt.xlim([simulationTime * index_img, simulationTime * (index_img + 1)])
                 
-                #plot FR map of excitatory
+                # plot FR map of excitatory
                 ex_FRMap = np.zeros((layerDim, layerDim))
                 tmp2 = self.vnet.spkdetLayers[layer].spike_trains()
                 for row_tmp in range(layerDim):
                     for col_tmp in range(layerDim):
                         index_tmp = row_tmp * layerGDim + col_tmp
-                        if (len(tmp2[index_tmp])==0):
-                            condition = tmp2[index_tmp]>simulationTime*index_img
+                        if (len(tmp2[index_tmp]) == 0):
+                            condition = tmp2[index_tmp] > simulationTime * index_img
                         else:
-                            condition = tmp2[index_tmp]>simulationTime*index_img*ms
-                        ex_FRMap[row_tmp][col_tmp] = len(np.extract(condition,tmp2[index_tmp]));
+                            condition = tmp2[index_tmp] > simulationTime * index_img * ms
+                        ex_FRMap[row_tmp][col_tmp] = len(np.extract(condition, tmp2[index_tmp]));
                         
                 
                 plt.subplot(nLayers + 1, 4, (nLayers - layer) * 4 + 2)
@@ -122,12 +122,12 @@ class plotter(object):
                     ex_FRMap, interpolation='none', vmin=0, vmax=ex_FRMap.max())
                 plt.colorbar()
                 
-                #plot spike raster of inhibitory
+                # plot spike raster of inhibitory
                 ax = plt.subplot(nLayers + 1, 4, (nLayers - layer) * 4 + 3)
 
-                plt.title('Inhibitory layer '+str(layer))
-                plt.ylim([0,layerGDim*layerGDim-1])
-                plt.xlim([simulationTime*index_img,simulationTime*(index_img+1)])
+                plt.title('Inhibitory layer ' + str(layer))
+                plt.ylim([0, layerGDim * layerGDim - 1])
+                plt.xlim([simulationTime * index_img, simulationTime * (index_img + 1)])
                 plt.plot(
                     self.vnet.spkdetInhibLayers[layer].t / ms,
                     self.vnet.spkdetInhibLayers[layer].i, '.')
@@ -150,34 +150,34 @@ class plotter(object):
             plt.show()
 
         # To-DO: trainNetworkWith
-        if (plotLayer == 1):
+        # if (plotLayer == 1):
         #         plt.figure(2);
         #         plt.subplot(nLayers+1,3,1);
         #         plt.imshow(img,interpolation='none');
         #         plt.title('Input')
 
-            for layer in range(0, nLayers):
-                #headNodeIndex = self.vnet.layers[layer][0]
-
-                # plot spike raster
-                ax = plt.subplot(nLayers, 4, (nLayers - layer - 1) * 4 + 1)
-
-                plt.title(layer)
-                raster_plot(self.vnet.spkdetLayers[layer])
-                pylab.ylim([0,layerGDim*layerGDim-1])
-                pylab.xlim([simulationTime*index_img,simulationTime*index_img+1])
-                # ax.get_yaxis().set_visible(False)
-                #ax.set_xlim([(index_img)*simulationTime, (index_img+1)*simulationTime])
-                #ax.set_ylim([headNodeIndex+1, headNodeIndex+(layer1Dim*layer1Dim)]);
-
-                #dSD =nest.GetStatus(self.vnet.spkdetInhibLayers[layer],keys='events')[0];
-
-                # plot spike raster
-                ax = plt.subplot(nLayers, 4, (nLayers - layer - 1) * 4 + 3)
-                plt.title(layer)
-                raster_plot(self.vnet.spkdetInhibLayers[layer])
-                # ax.get_yaxis().set_visible(False)
-                #ax.set_xlim([(index_img)*simulationTime, (index_img+1)*simulationTime])
-                #ax.set_ylim([headNodeIndex+1, headNodeIndex+(inhibLayer1Dim*inhibLayer1Dim)]);
-
-            plt.show()
+#             for layer in range(0, nLayers):
+#                 # headNodeIndex = self.vnet.layers[layer][0]
+# 
+#                 # plot spike raster
+#                 ax = plt.subplot(nLayers, 4, (nLayers - layer - 1) * 4 + 1)
+# 
+#                 plt.title(layer)
+#                 raster_plot(self.vnet.spkdetLayers[layer])
+#                 pylab.ylim([0, layerGDim * layerGDim - 1])
+#                 pylab.xlim([simulationTime * index_img, simulationTime * index_img + 1])
+#                 # ax.get_yaxis().set_visible(False)
+#                 # ax.set_xlim([(index_img)*simulationTime, (index_img+1)*simulationTime])
+#                 # ax.set_ylim([headNodeIndex+1, headNodeIndex+(layer1Dim*layer1Dim)]);
+# 
+#                 # dSD =nest.GetStatus(self.vnet.spkdetInhibLayers[layer],keys='events')[0];
+# 
+#                 # plot spike raster
+#                 ax = plt.subplot(nLayers, 4, (nLayers - layer - 1) * 4 + 3)
+#                 plt.title(layer)
+#                 raster_plot(self.vnet.spkdetInhibLayers[layer])
+#                 # ax.get_yaxis().set_visible(False)
+#                 # ax.set_xlim([(index_img)*simulationTime, (index_img+1)*simulationTime])
+#                 # ax.set_ylim([headNodeIndex+1, headNodeIndex+(inhibLayer1Dim*inhibLayer1Dim)]);
+# 
+#             plt.show()

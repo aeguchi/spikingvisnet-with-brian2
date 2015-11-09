@@ -85,9 +85,6 @@ class visnet(object):
         
         
         
-        
-        
-        
     def buildConnectionsBetweenLayers(self):
 
         # Connecting neurons in Gabor input layer and neurons in the first
@@ -103,15 +100,17 @@ class visnet(object):
                             pre='ve += 3*we'
                             )
             )
+            for cellIndex in range(layerDim*layerDim):
+                self.connGtoInput[theta].connect('i==cellIndex', p=pConnections_connGtoInput)
 
-            self.connGtoInput[theta].connect(True, p=0.2)
+            #self.connGtoInput[theta].connect(True, p=prob_GtoInput)
 
         self.net.add(self.connGtoInput)
 
         # Connecting neurons between excitatory layers
 
         self.connBottomUp = []
-        self.connTopDown = []
+        #self.connTopDown = []
 
         for layer in range(0, nLayers - 1):
 
@@ -124,9 +123,12 @@ class visnet(object):
             )
             )
 
-            self.connBottomUp[layer].connect(True, p=0.1)
+
+            for cellIndex in range(layerDim*layerDim):
+                self.connBottomUp[layer].connect('i==cellIndex', p=pConnections_connBottomUp)
+            #self.connBottomUp[layer].connect(True, p=prob_connBottomUp)
             self.connBottomUp[layer].w[:, :] = br.rand() * Apre
-            self.connBottomUp[layer].delay[:, :] = br.rand() * 10 * ms
+            self.connBottomUp[layer].delay[:, :] = br.rand() * delayConst_connBottomUp
 
 #             self.connTopDown.append(br.Synapses(
 #                 self.layers[layer + 1],
@@ -152,19 +154,25 @@ class visnet(object):
         # connRecEx = []
 
         for layer in range(0, nLayers):
+            #Excitatory -> Inhibitory
             self.connExIn.append(
                 br.Synapses(self.layers[layer], self.inhibLayers[layer],
-                            'w:1', pre='ve += we'))
+                            'w:1', pre='ve += 3*we'))
+            for cellIndex in range(layerDim*layerDim):
+                self.connExIn[layer].connect('j==cellIndex', p=pConnections_connExIn)
+            #self.connExIn[layer].connect(True, p=prob_connExIn)
+            self.connExIn[layer].delay[:, :] = br.rand() * delayConst_connExIn
 
-            self.connExIn[layer].connect(True, p=0.2)
-            self.connExIn[layer].delay[:, :] = br.rand() * 2 * ms
 
+            #Inhibitory -> Excitatotry 
             self.connInEx.append(
                 br.Synapses(self.inhibLayers[layer], self.layers[layer],
                             'w:1', pre='vi += 3*wi'))
 
-            self.connInEx[layer].connect(True, p=0.2)
-            self.connInEx[layer].delay[:, :] = br.rand() * 2 * ms
+            for cellIndex in range(layerDim*layerDim):
+                self.connInEx[layer].connect('j==cellIndex', p=pConnections_connInEx);
+            #self.connInEx[layer].connect(True, p=prob_connInEx)
+            self.connInEx[layer].delay[:, :] = br.rand() * delayConst_connInEx
         self.net.add(self.connExIn)
         self.net.add(self.connInEx)
         
@@ -183,9 +191,12 @@ class visnet(object):
             )
             )
 
-            self.connExBind[layer].connect(True, p=0.2)
+            for cellIndex in range(layerDim*layerDim):
+                self.connExBind[layer].connect('j==cellIndex', p=pConnections_connExBind)
+            
+            #self.connExBind[layer].connect(True, p=prob_connExBind)
             self.connExBind[layer].w[:, :] = br.rand() * Apre
-            self.connExBind[layer].delay[:, :] = br.rand() * 10 * ms
+            self.connExBind[layer].delay[:, :] = br.rand() * delayConst_connExBind
         self.net.add(self.connExBind)
 
 
@@ -230,11 +241,25 @@ class visnet(object):
             # To be fixed
             # print vnet.layerG[index_filter].rates
 
+    def traceReset(self):
+        for layer in range(nLayers):
+            self.layers[layer].v = 'Vr'  # + br.rand() * (Vt - Vr)'
+            self.layers[layer].ve = 0 * mV
+            self.layers[layer].vi = 0 * mV
+
+        for layer in range(nLayers):
+            self.inhibLayers[layer].v = 'Vr'  # + br.rand() * (Vt - Vr)'
+            self.inhibLayers[layer].ve = 0 * mV
+            self.inhibLayers[layer].vi = 0 * mV
+
+        self.bindingLayer.v = 'Vr'  # + br.rand() * (Vt - Vr)'
+        self.bindingLayer.ve = 0 * mV
+        self.bindingLayer.vi = 0 * mV
+        
     def setSynapticPlasticity(self, synapticBool):
 
-        for connection in [self.connGtoInput, self.connBottomUp,
-                           self.connTopDown, self.connExIn, self.connInEx]:
-
+#        for connection in [self.connGtoInput, self.connBottomUp,self.connTopDown, self.connExIn, self.connInEx]:
+        for connection in [self.connGtoInput, self.connBottomUp,self.connExIn, self.connInEx, self.connExBind]:    
             for syn in self.connBottomUp:
                 syn.plastic = synapticBool
 
