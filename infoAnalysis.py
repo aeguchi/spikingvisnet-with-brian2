@@ -6,7 +6,7 @@ import os;
 
 plotAllSingleCellInfo = 0;
 
-ExperimentName = "practice";
+ExperimentName = "BO_single";
 layer = 2; #0: gabor, 1: 1st layer ..
 
 phases = ['FR_0_blank.pkl', 'FR_1_trained.pkl'];
