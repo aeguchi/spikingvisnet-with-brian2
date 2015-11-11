@@ -6,6 +6,8 @@ from brian2 import ms, mV, Hz
 # nStim = 2
 # nTrans = 8
 
+experimentName = "BOtest"
+
 #STRUCTURE OF THE NETWORK
 nLayers = 2
 layerGDim = 20;

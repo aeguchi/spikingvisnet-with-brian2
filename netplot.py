@@ -87,7 +87,7 @@ class plotter(object):
                         condition = tmp2[index_tmp] > simulationTime * index_img
                     else:
                         condition = tmp2[index_tmp] > simulationTime * index_img * ms
-                    bind_FRMap[row_tmp][col_tmp] = len(np.extract(condition, tmp2[index_tmp]));
+                    bind_FRMap[row_tmp,col_tmp] = len(np.extract(condition, tmp2[index_tmp]));
             plt.subplot(nLayers + 1, 3, 3)
             plt.imshow(
                 bind_FRMap, interpolation='none', vmin=0, vmax=bind_FRMap.max())
@@ -116,7 +116,7 @@ class plotter(object):
                             condition = tmp2[index_tmp] > simulationTime * index_img
                         else:
                             condition = tmp2[index_tmp] > simulationTime * index_img * ms
-                        ex_FRMap[row_tmp][col_tmp] = len(np.extract(condition, tmp2[index_tmp]));
+                        ex_FRMap[row_tmp,col_tmp] = len(np.extract(condition, tmp2[index_tmp]));
                 
                 plt.subplot(nLayers + 1, 4, (nLayers - layer) * 4 + 2)
                 plt.imshow(
@@ -141,7 +141,7 @@ class plotter(object):
                 for row_tmp in range(layerDim):
                     for col_tmp in range(layerDim):
                         index_tmp = row_tmp * layerGDim + col_tmp
-                        inhib_FRMap[row_tmp][col_tmp] = len(tmp2[index_tmp])
+                        inhib_FRMap[row_tmp,col_tmp] = len(tmp2[index_tmp])
 
                 plt.subplot(nLayers + 1, 4, (nLayers - layer) * 4 + 4)
                 plt.imshow(
