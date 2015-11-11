@@ -58,7 +58,7 @@ class plotter(object):
             plt.imshow(res_FRMap, interpolation='none', vmin=0, vmax=Rmax)
             plt.colorbar()
 
-    def plotLayers(self, img, index_img, FRrecTmp, plotLayer=0):
+    def plotLayers(self, img, index_img, FRrecTmp):
 
         # if (plotLayer == 0):
             # plot input image
@@ -151,36 +151,3 @@ class plotter(object):
                 plt.colorbar()
 
             #plt.show()
-
-        # To-DO: trainNetworkWith
-        # if (plotLayer == 1):
-        #         plt.figure(2);
-        #         plt.subplot(nLayers+1,3,1);
-        #         plt.imshow(img,interpolation='none');
-        #         plt.title('Input')
-
-#             for layer in range(0, nLayers):
-#                 # headNodeIndex = self.vnet.layers[layer][0]
-# 
-#                 # plot spike raster
-#                 ax = plt.subplot(nLayers, 4, (nLayers - layer - 1) * 4 + 1)
-# 
-#                 plt.title(layer)
-#                 raster_plot(self.vnet.spkdetLayers[layer])
-#                 pylab.ylim([0, layerGDim * layerGDim - 1])
-#                 pylab.xlim([simulationTime * index_img, simulationTime * index_img + 1])
-#                 # ax.get_yaxis().set_visible(False)
-#                 # ax.set_xlim([(index_img)*simulationTime, (index_img+1)*simulationTime])
-#                 # ax.set_ylim([headNodeIndex+1, headNodeIndex+(layer1Dim*layer1Dim)]);
-# 
-#                 # dSD =nest.GetStatus(self.vnet.spkdetInhibLayers[layer],keys='events')[0];
-# 
-#                 # plot spike raster
-#                 ax = plt.subplot(nLayers, 4, (nLayers - layer - 1) * 4 + 3)
-#                 plt.title(layer)
-#                 raster_plot(self.vnet.spkdetInhibLayers[layer])
-#                 # ax.get_yaxis().set_visible(False)
-#                 # ax.set_xlim([(index_img)*simulationTime, (index_img+1)*simulationTime])
-#                 # ax.set_ylim([headNodeIndex+1, headNodeIndex+(inhibLayer1Dim*inhibLayer1Dim)]);
-# 
-#             plt.show()

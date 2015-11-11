@@ -1,0 +1,15 @@
+3
+4
+circle_x00_y00.png
+circle_x00_y01.png
+circle_x01_y00.png
+circle_x01_y01.png
+rectangle_x00_y00.png
+rectangle_x00_y01.png
+rectangle_x01_y00.png
+rectangle_x01_y01.png
+triangle_x00_y00.png
+triangle_x00_y01.png
+triangle_x01_y00.png
+triangle_x01_y01.png
+
