@@ -98,6 +98,9 @@ for phase in [0,1,2]:
             FRrec[index_obj,index_trans]=FRrecTmp;
             if (plotActivities):
                 plt.show();
+                
+            if phase==0 or phase == 2:
+                vnet.traceReset();
         
     
             # index_img += 1

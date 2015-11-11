@@ -6,8 +6,8 @@ from brian2 import ms, mV, Hz
 # nStim = 2
 # nTrans = 8
 
-experimentName = "practice"
-imageFolder = "practice"
+experimentName = "BO_single"
+imageFolder = "BO_single_imgs"
 
 #STRUCTURE OF THE NETWORK
 nLayers = 2
@@ -29,10 +29,10 @@ sigma = 0.5 # the standard deviation of the Gaussian function used in the Gabor 
 
 
 #synapse params
-delayConst_connBottomUp = 10*ms;
-delayConst_connExIn = 10*ms;
-delayConst_connInEx = 10*ms;
-delayConst_connExBind = 10*ms;
+delayConst_connBottomUp = 5*ms;
+delayConst_connExIn = 5*ms;
+delayConst_connInEx = 5*ms;
+delayConst_connExBind = 5*ms;
 
 nConnections_connGtoInput = 50;
 nConnections_connBottomUp = 100;
@@ -53,9 +53,10 @@ pConnections_connExBind = float(nConnections_connExBind)/(layerDim*layerDim);
 #     #v_th : volt  # neuron-specific threshold
 #     #v_r : volt  # neuron-specific reset
 #     '''
+
 taum = 20*ms
-taue = 5*ms
-taui = 10*ms
+taue = 5*ms;
+taui = 10*ms;
 Vt = -50*mV
 Vr = -60*mV
 El = -60*mV#-49*mV
@@ -73,7 +74,9 @@ wi = (-20*4.5/10)*mV # inhibitory synaptic weight
     
 #eqn for STDP ; for usage, see http://brian2.readthedocs.org/en/latest/resources/tutorials/2-intro-to-brian-synapses.html
 
-taupre = taupost = 20*ms
+
+const = 10;
+taupre = taupost = 20*ms  * const;
 wmax = 20 *mV #200 *mV
 Apre = 2.0 *mV #20*mV
 Apost = -Apre*taupre/taupost*1.05
