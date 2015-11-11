@@ -6,7 +6,8 @@ from brian2 import ms, mV, Hz
 # nStim = 2
 # nTrans = 8
 
-experimentName = "BOtest"
+experimentName = "practice"
+imageFolder = "practice"
 
 #STRUCTURE OF THE NETWORK
 nLayers = 2
@@ -23,7 +24,6 @@ lamdaList = [12.0]; #wavelength: the wavelength of the sinusoidal factor in the 
 gamma = 0.5 #aspect ratio:  the spatial aspect ratio.
 #psiList = [0, np.pi, -np.pi/2, np.pi/2]#phase shift:  phase offset
 psiList = [0]#phase shift:  phase offset
-imageFolder = "BO_single_imgs"
 sigma = 0.5 # the standard deviation of the Gaussian function used in the Gabor filter.
 
 
@@ -77,7 +77,7 @@ taupre = taupost = 20*ms
 wmax = 20 *mV #200 *mV
 Apre = 2.0 *mV #20*mV
 Apost = -Apre*taupre/taupost*1.05
-lRate = 0.001
+lRate = 0.1#0.001
 
 
 eqs_stdpSyn ='''
