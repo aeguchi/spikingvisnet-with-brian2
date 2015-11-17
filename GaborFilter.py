@@ -17,101 +17,113 @@ class GaborFilter(object):
     """Gabor filter"""
 
     def __init__(self):
-        self.filtering()
-
-    def filtering(self):
-        # file
-        psi = [0, np.pi, -np.pi / 2, np.pi / 2];
-        scale = lamdaList;
-        orient = thetaList;
+        #self.filtering()
+        self.psi = psiList;
+        self.scale = lamdaList;
+        self.orient = thetaList;
         # gamma
         # set
-        paddingColor = 128;
         
-        fileList_train = np.genfromtxt(os.path.split(os.path.realpath(__file__))[0] + "/images/" + imageFolder + "/fileList_train.txt", dtype='str');
-        numObj_train = int(fileList_train[0]);
-        numTrans_train = int(fileList_train[1]);
+    def resizeImg(self, img):
+        resized = scipy.misc.imresize(img,(layerGDim,layerGDim));
+        return resized;
+        
 
-        for index_obj in range(numObj_train):
-            for index_trans in range(numTrans_train):
-                print "obj: " + str(index_obj) + ", trans: " + str(index_trans);
-                index_img = index_obj * numTrans_train + index_trans;
-                file = os.path.split(os.path.realpath(__file__))[0] + "/images/" + imageFolder + "/train/" + fileList_train[index_obj * numTrans_train + index_trans + 2];
-                # img = cv2.imread(img_fn)
-                I = scipy.misc.imread(file, flatten=True)
-                fsize = len(I) * len(I);
-                originalImageD = np.array(([len(I), len(I)]));
-                paddedImageD = 2 * originalImageD;
-                imageSize = len(I);
-                ss = len(scale);
-                ors = len(orient);
-                ps = len(psi);
-                # FI = np.array((ss, ors, ps));
-                # GF = np.array((ss, ors, ps));
-                # minF = np.zeros((ss, ors, ps));
-                # maxF = np.zeros((ss, ors, ps));
+    def filtering(self, I):
+        # file
+      
+        #fileList_train = np.genfromtxt(os.path.split(os.path.realpath(__file__))[0] + "/images/" + imageFolder + "/fileList_train.txt", dtype='str');
+        #numObj_train = int(fileList_train[0]);
+        #numTrans_train = int(fileList_train[1]);
 
-        
-                # print I;
-        
-                print 'Filtering image: ' + file;
-                print 'Orientations: ' + str(np.degrees(orient)) + ' (degrees)';
-                print 'Wavelengths: ' + str(scale) + ' (pixels)';
-                print 'Phases: ' + str(np.degrees(psi)) + ' (degrees)';
-        
-                # pylab.imshow(I);
-                # pylab.show();
-                
-        
-             
-                # Create a new image of twice the dimensions
-                # and copy the original image into the center.
-                # This resulting image is then convolved, and
-                # we only keep convolution result values for the
-                # part of the image where the original image 
-                # is located.
-         
-                # Make padded image, set to provided background color
-                paddedImage = paddingColor * np.ones((paddedImageD[0], paddedImageD[1]));
-         
-                # Copy original image into center of padded image
-                top = paddedImageD[0] / 2 - imageSize / 2 - 1;
-                left = paddedImageD[1] / 2 - imageSize / 2 - 1;
-                paddedImage[left:left + imageSize, top:top + imageSize] = I;
-        
-                # pylab.imshow(paddedImage,interpolation='none');
-                # pylab.show();
-        
-        
-                for p in range(ps):
-                    for s in range(ss):
-                        for o in range(ors):
-                            # GF[s, o, p] = self.gabor_fn(psi[p], scale[s], orient[o]);
-                            gf = self.gabor_fn(psi[p], scale[s], orient[o]);
-                            gf = gf - numpy.mean(gf);
-                            gf = gf / numpy.linalg.norm(gf[:]);
-                
-                            # Convolve padded image with Gabor filter
-                            tmp = scipy.signal.convolve2d(paddedImage, gf, 'same');
-                         # Copy out part of padded image convolution that corresponds to
-                         # the original image
-                            fi = tmp[(paddedImageD[0] - originalImageD[0]) / 2:(paddedImageD[0] - originalImageD[0]) / 2 + originalImageD[0], (paddedImageD[1] - originalImageD[1]) / 2:(paddedImageD[1] - originalImageD[1]) / 2 + originalImageD[1]]
+        #for index_obj in range(numObj_train):
+        #    for index_trans in range(numTrans_train):
+        #print "obj: " + str(index_obj) + ", trans: " + str(index_trans);
+        #index_img = index_obj * numTrans + index_trans;
+        #file = os.path.split(os.path.realpath(__file__))[0] + "/images/" + imageFolder + "/train/" + fileList_train[index_img + 2];
+        # img = cv2.imread(img_fn)
+        #I = scipy.misc.imread(file, flatten=True)
+        #fsize = len(I) * len(I);
+        imgDim = len(I);
+        originalImageD = np.array(([imgDim, imgDim]));
+        paddedImageD = 2 * originalImageD;
+        ss = len(self.scale);
+        ors = len(self.orient);
+        ps = len(self.psi);
+        # FI = np.array((ss, ors, ps));
+        # GF = np.array((ss, ors, ps));
+        # minF = np.zeros((ss, ors, ps));
+        # maxF = np.zeros((ss, ors, ps));
 
-                         # Normalize with selfconvolution of gabor filter to control for
-                         # varying size of gabor filer for diffrent parameter
-                         # combinations
-                            fi = fi / np.linalg.norm(fi[:]);
-                         
-                           # Cut away negatives
-                            fi[fi < 0] = 0;
-                            
-                            # Display minimum and maximum convolved image values
-                            minF = np.min(np.min(fi));
-                            maxF = np.max(np.max(fi));
-                            # pylab.figure();
-                            pylab.subplot(ss, ors, ((s) * ors) + o + 1);
-                            pylab.imshow(fi, interpolation='none');
-                pylab.show()
+
+        # print I;
+
+        #print 'Filtering image: ' + file;
+#         print 'Orientations: ' + str(np.degrees(orient)) + ' (degrees)';
+#         print 'Wavelengths: ' + str(scale) + ' (pixels)';
+#         print 'Phases: ' + str(np.degrees(psi)) + ' (degrees)';
+
+        # pylab.imshow(I);
+        # pylab.show();
+        
+
+     
+        # Create a new image of twice the dimensions
+        # and copy the original image into the center.
+        # This resulting image is then convolved, and
+        # we only keep convolution result values for the
+        # part of the image where the original image 
+        # is located.
+ 
+        # Make padded image, set to provided background color
+        paddedImage = paddingColor * np.ones((paddedImageD[0], paddedImageD[1]));
+ 
+        # Copy original image into center of padded image
+        top = paddedImageD[0] / 2 - imgDim / 2 - 1;
+        left = paddedImageD[1] / 2 - imgDim / 2 - 1;
+        paddedImage[left:left + imgDim, top:top + imgDim] = I;
+
+        # pylab.imshow(paddedImage,interpolation='none');
+        # pylab.show();
+
+
+        gf_list = [[[[] for k in range(ors)] for j in range(ss)] for i in range(ps)];
+        for p in range(ps):
+            for s in range(ss):
+                for o in range(ors):
+                    # GF[s, o, p] = self.gabor_fn(psi[p], scale[s], orient[o]);
+                    gf = self.gabor_fn(self.psi[p], self.scale[s], self.orient[o]);
+                    gf = gf - numpy.mean(gf);
+                    gf = gf / numpy.linalg.norm(gf[:]);
+        
+                    # Convolve padded image with Gabor filter
+                    tmp = scipy.signal.convolve2d(paddedImage, gf, 'same');
+                 # Copy out part of padded image convolution that corresponds to
+                 # the original image
+                    fi = tmp[(paddedImageD[0] - originalImageD[0]) / 2:(paddedImageD[0] - originalImageD[0]) / 2 + originalImageD[0], (paddedImageD[1] - originalImageD[1]) / 2:(paddedImageD[1] - originalImageD[1]) / 2 + originalImageD[1]]
+
+
+                    #resize
+                    #fi = self.resizeImg(fi);
+
+                 # Normalize with selfconvolution of gabor filter to control for
+                 # varying size of gabor filer for diffrent parameter
+                 # combinations
+                    fi = fi / np.linalg.norm(fi[:]);
+                 
+                   # Cut away negatives
+                    fi[fi < 0] = 0;
+                    
+                    # Display minimum and maximum convolved image values
+                    minF = np.min(np.min(fi));
+                    maxF = np.max(np.max(fi));
+                    # pylab.figure();
+                    #pylab.subplot(ss, ors, ((s) * ors) + o + 1);
+                    #pylab.imshow(fi, interpolation='none');
+                    gf_list[p][s][o]=fi;
+            
+        #pylab.show()
+        return gf_list;
     
 
     def gabor_fn(self, psi, lmd, theta):
@@ -153,3 +165,16 @@ class GaborFilter(object):
         # end
         
         # http://www.mathworks.com/matlabcentral/fileexchange/23253
+        
+        
+    def scaleToUnit(self,res):
+        '''
+        Convert Gabor processed image into normalised spikes.
+        '''
+    
+        tmp = np.array(res)
+        #print tmp.shape
+        res_norm = tmp/np.max(tmp)
+        #res_norm = 1-res_norm
+    
+        return res_norm
