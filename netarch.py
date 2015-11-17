@@ -254,7 +254,6 @@ class visnet(object):
             self.layers[layer].v = 'Vr'  # + br.rand() * (Vt - Vr)'
             self.layers[layer].ve = 0 * mV
             self.layers[layer].vi = 0 * mV
-            
             self.inhibLayers[layer].v = 'Vr'  # + br.rand() * (Vt - Vr)'
             self.inhibLayers[layer].ve = 0 * mV
             self.inhibLayers[layer].vi = 0 * mV
@@ -262,6 +261,8 @@ class visnet(object):
         self.bindingLayer.v = 'Vr'  # + br.rand() * (Vt - Vr)'
         self.bindingLayer.ve = 0 * mV
         self.bindingLayer.vi = 0 * mV
+        
+        #print "Trace reset"
         
     def setSynapticPlasticity(self, synapticBool):
 

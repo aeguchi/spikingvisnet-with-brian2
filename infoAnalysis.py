@@ -7,7 +7,8 @@ import os;
 plotAllSingleCellInfo = 0;
 
 ExperimentName = "BO_single";
-layer = 2; #0: gabor, 1: 1st layer ..
+layer = 1; #0: bindingLayer, 1: 1st layer ..
+plotMode = 1; #0:normal 1:max
 
 phases = ['FR_0_blank.pkl', 'FR_1_trained.pkl'];
 
@@ -21,8 +22,9 @@ for phase in phases:
     
     FR_layer = FR[:,:,layer,:,:];
     
-    FR_norm = (FR-FR[:,:,layer,:,:].min())/(FR[:,:,layer,:,:].max()-FR[:,:,layer,:,:].min());
-    FR = FR_norm;
+    if FR[:,:,layer,:,:].max()>0.001:
+        FR_norm = (FR-FR[:,:,layer,:,:].min())/(FR[:,:,layer,:,:].max()-FR[:,:,layer,:,:].min());
+        FR = FR_norm;
     
     #settings
     numBins =  3;##numTrans;   #can be adjusted
@@ -83,6 +85,9 @@ for phase in phases:
         IRs = IRs_weighted;
     
     IRs_reshaped = np.reshape(IRs,(numObj,numCells*numCells));
+    if plotMode==1:
+        IRs_reshaped = np.max(IRs_reshaped,axis=0);
+    
     IRs_sorted = np.transpose(np.sort(IRs_reshaped));
     reversed_arr = IRs_sorted[::-1]
 
@@ -90,6 +95,7 @@ for phase in phases:
     plt.plot(reversed_arr);
     plt.ylim([-0.05, np.log2(numObj)+0.05]);
     plt.xlim([0, numCells*numCells])
+    plt.title(phase);    
     index+=1;
     
     

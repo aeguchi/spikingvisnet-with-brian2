@@ -19,9 +19,9 @@ import pickle
 import errno
 
 plotGabor = 0;
-plotActivities = 0;
-phases = [0,1,2] #testing only [0], testing and training [0,2]
-
+plotActivities = 1;
+#phases = [0,1,2] #testing only [0], testing and training [0,2]
+phases = [1];
 
 try:
     os.makedirs("Results");
@@ -48,8 +48,8 @@ fileList_test = np.genfromtxt(os.path.split(os.path.realpath(__file__))[0] + "/i
 numObj_test = int(fileList_test[0]);
 numTrans_test = int(fileList_test[1]);
 
-for phase in [0,1,2]:
-    print "*** simulation phase: " + str(phase);
+for phase in phases:
+    print "*** simulation phase: " + str(phase) + " ***";
     if phase==1:
         vnet.setSynapticPlasticity(True)
         numObj = numObj_test;
@@ -63,7 +63,7 @@ for phase in [0,1,2]:
     FRrec = np.zeros((numObj_test,numTrans_test,nLayers+1, layerDim, layerDim));#1st layer is binding layer
     for index_obj in range(numObj):
         for index_trans in range(numTrans):
-            print " ** Stimuli: " +str(phase) + " obj: " + str(index_obj) + ", trans: " + str(index_trans) +" **";
+            print " ** obj: " + str(index_obj) + ", trans: " + str(index_trans) +" **";
             index_img = index_obj * numTrans + index_trans;
             img_fn = os.path.split(os.path.realpath(__file__))[0] + "/images/" + imageFolder + "/train/" + fileList_train[index_img + 2];
             # print img_fn
@@ -97,8 +97,6 @@ for phase in [0,1,2]:
             vnet.setGaborFiringRates(res_norm)
         
             # run visnet simulation!
-        
-            print " ** running a simulation **"
             vnet.net.run(simulationTime * ms)
         
             # plot each image set
@@ -106,15 +104,16 @@ for phase in [0,1,2]:
                 vplotter.plotGaborInput(inputImage, index_img, res, res_norm)
             FRrecTmp = np.zeros((nLayers+1, layerDim, layerDim));
             vplotter.plotLayers(inputImage, index_img, FRrecTmp)
+            
             FRrec[index_obj,index_trans]=FRrecTmp;
             if (plotActivities):
                 plt.show();
                 
             if phase==0 or phase == 2:
                 vnet.traceReset();
-                #print "reset"
-
+                
         vnet.traceReset();
+        
     if phase==0:
         pickle.dump(FRrec, open("Results/"+experimentName+"/FR_0_blank.pkl", "wb"))
     elif phase==2:

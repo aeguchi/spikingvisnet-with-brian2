@@ -79,9 +79,9 @@ wi = (-20*4.5/10)*mV # inhibitory synaptic weight
 const = 10;
 taupre = taupost = 20*ms  * const;
 wmax = 20 *mV #200 *mV
-Apre = 2.0 *mV #20*mV
+Apre = 3.0 *mV #20*mV
 Apost = -Apre*taupre/taupost*1.05
-lRate = 0.1#0.001
+lRate = 0.01#0.001
 
 
 eqs_stdpSyn ='''
