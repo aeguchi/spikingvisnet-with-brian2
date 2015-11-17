@@ -97,7 +97,7 @@ class visnet(object):
                 br.Synapses(self.layerG[theta],
                             self.layers[0],
                             'plastic: boolean (shared)',
-                            pre='ve += 3*we'
+                            pre='ve += 5*we'
                             )
             )
             for cellIndex in range(layerDim*layerDim):
@@ -231,23 +231,30 @@ class visnet(object):
         self.net.add(self.spkdetBindingLayer)
 
     def setGaborFiringRates(self, res_norm):
-
-        for index_filter in range(0, len(thetaList)):
-
-            r = np.reshape(np.mean(res_norm[index_filter], axis=2),
-                           (layerGDim * layerGDim))
-            # print r
-            self.layerG[index_filter].rates = r * Rmax
-            # To be fixed
-            # print vnet.layerG[index_filter].rates
+        ps = len(psiList);
+        ss = len(lamdaList);
+        ors = len(thetaList);
+        
+        for p in range(ps):
+            for s in range(ss):
+                for o in range(ors):
+        #for index_filter in range(0, len(res_norm)):
+                    index_filter = p*(ss*ors)+s*ors+o;
+                    #tmp = np.array(res_norm[p][s][o]);
+                    #print tmp.shape
+                    r = np.reshape(np.array(res_norm[p][s][o]),layerGDim * layerGDim);
+                    #r = np.reshape(np.mean(tmp, axis=3),(layerGDim * layerGDim))
+                    # print r
+                    self.layerG[index_filter].rates = r * Rmax
+                    # To be fixed
+                    # print vnet.layerG[index_filter].rates
 
     def traceReset(self):
         for layer in range(nLayers):
             self.layers[layer].v = 'Vr'  # + br.rand() * (Vt - Vr)'
             self.layers[layer].ve = 0 * mV
             self.layers[layer].vi = 0 * mV
-
-        for layer in range(nLayers):
+            
             self.inhibLayers[layer].v = 'Vr'  # + br.rand() * (Vt - Vr)'
             self.inhibLayers[layer].ve = 0 * mV
             self.inhibLayers[layer].vi = 0 * mV

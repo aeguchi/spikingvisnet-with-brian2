@@ -25,6 +25,7 @@ gamma = 0.5 #aspect ratio:  the spatial aspect ratio.
 #psiList = [0, np.pi, -np.pi/2, np.pi/2]#phase shift:  phase offset
 psiList = [0]#phase shift:  phase offset
 sigma = 0.5 # the standard deviation of the Gaussian function used in the Gabor filter.
+paddingColor = 128;
 
 
 
