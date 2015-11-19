@@ -17,7 +17,7 @@ inhibLayerDim = 10;
 
 
 #Param for Filtering:
-ksize = 31#31  # 31 the size of the Gabor kernel. If ksize = (a, b), we then have a Gabor kernel of size a x b pixels. As with many other convolution kernels, ksize is preferably odd and the kernel is a square (just for the sake of uniformity).
+#ksize = 31#31  # 31 the size of the Gabor kernel. If ksize = (a, b), we then have a Gabor kernel of size a x b pixels. As with many other convolution kernels, ksize is preferably odd and the kernel is a square (just for the sake of uniformity).
 bw = 1.5 #spatial bandwidth:
 thetaList = [0, np.pi/4, np.pi/2, np.pi*3/4]  #0 #orientation: the orientation of the normal to the parallel stripes of the Gabor function.
 lamdaList = [2.0]; #wavelength: the wavelength of the sinusoidal factor in the above equation.
@@ -36,10 +36,10 @@ delayConst_connInEx = 5*ms;
 delayConst_connExBind = 5*ms;
 
 nConnections_connGtoInput = 50;
-nConnections_connBottomUp = 100;
+nConnections_connBottomUp = 50;
 nConnections_connExIn = 10;
 nConnections_connInEx = 10;
-nConnections_connExBind = 20;
+nConnections_connExBind = 10;
 
 pConnections_connGtoInput = float(nConnections_connGtoInput)/(layerGDim*layerGDim);
 pConnections_connBottomUp = float(nConnections_connBottomUp)/(layerDim*layerDim);
@@ -76,12 +76,14 @@ wi = (-20*4.5/10)*mV # inhibitory synaptic weight
 #eqn for STDP ; for usage, see http://brian2.readthedocs.org/en/latest/resources/tutorials/2-intro-to-brian-synapses.html
 
 
-const = 10;
-taupre = taupost = 20*ms  * const;
+const = 5;
+taupre = 5*ms  * const;
+taupost = 20*ms  * const;
 wmax = 20 *mV #200 *mV
 Apre = 3.0 *mV #20*mV
 Apost = -Apre*taupre/taupost*1.05
 lRate = 0.01#0.001
+conductanceConst = 1;
 
 
 eqs_stdpSyn ='''
@@ -91,7 +93,7 @@ eqs_stdpSyn ='''
              plastic: boolean (shared)
              '''
 eqs_stdpPre ='''
-             v_post += w
+             v_post += conductanceConst*w
              apre += Apre
              w = clip(w+plastic*apost*lRate, 0, wmax)
              '''
@@ -105,7 +107,9 @@ connCond = '''
         '''
 
 
-simulationTime = 250;
+#simulationTime = 100;
+trainingTime = 100# * ms;
+testingTime = 1000# * ms;
 
 #PARAM FOR NEURONS
 # I_e = 180.0 * nA;         # (nA) external current

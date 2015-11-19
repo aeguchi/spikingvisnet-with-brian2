@@ -97,7 +97,7 @@ class visnet(object):
                 br.Synapses(self.layerG[theta],
                             self.layers[0],
                             'plastic: boolean (shared)',
-                            pre='ve += 5*we'
+                            pre='ve += 8*we'
                             )
             )
             for cellIndex in range(layerDim*layerDim):
@@ -262,7 +262,7 @@ class visnet(object):
         self.bindingLayer.ve = 0 * mV
         self.bindingLayer.vi = 0 * mV
         
-        #print "Trace reset"
+        print "Trace reset"
         
     def setSynapticPlasticity(self, synapticBool):
 
