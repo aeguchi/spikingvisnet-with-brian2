@@ -1,9 +1,6 @@
 
 from Parameters import *
 
-#import imageImport as imimp
-#import cv2
-
 import netarch
 import netplot
 import GaborFilter
@@ -19,9 +16,9 @@ import pickle
 import errno
 
 plotGabor = 0;
-plotActivities = 1;
-#phases = [0,1,2] #testing only [0], testing and training [0,2]
-phases = [1];
+plotActivities = 0;
+phases = [0,1,1,1,1,1,2] #0:testing before training 1:training 2:testing after training
+#phases = [1];
 
 try:
     os.makedirs("Results");
@@ -97,13 +94,19 @@ for phase in phases:
             vnet.setGaborFiringRates(res_norm)
         
             # run visnet simulation!
+            if phase in [0,2]:
+                simulationTime = testingTime;
+            else:
+                simulationTime = trainingTime;
+            
             vnet.net.run(simulationTime * ms)
+            
         
             # plot each image set
             if plotGabor:
-                vplotter.plotGaborInput(inputImage, index_img, res, res_norm)
+                vplotter.plotGaborInput(inputImage, index_img, res, res_norm,simulationTime)
             FRrecTmp = np.zeros((nLayers+1, layerDim, layerDim));
-            vplotter.plotLayers(inputImage, index_img, FRrecTmp)
+            vplotter.plotLayers(inputImage, index_img, FRrecTmp,simulationTime)
             
             FRrec[index_obj,index_trans]=FRrecTmp;
             if (plotActivities):
@@ -118,3 +121,4 @@ for phase in phases:
         pickle.dump(FRrec, open("Results/"+experimentName+"/FR_0_blank.pkl", "wb"))
     elif phase==2:
         pickle.dump(FRrec, open("Results/"+experimentName+"/FR_1_trained.pkl", "wb"))
+    print "*** DONE ***"
