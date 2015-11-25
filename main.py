@@ -1,9 +1,13 @@
+# date: 24/11/15
+# author: Akihiro Eguchi
+# description: a main code to run spiking network model.
 
 from Parameters import *
 
 import netarch
 import netplot
 import GaborFilter
+import InfoAnalysis
 
 import numpy as np
 import pylab as plt
@@ -18,6 +22,7 @@ import errno
 plotGabor = 0;
 plotActivities = 0;
 phases = [0,1,1,1,1,1,2] #0:testing before training 1:training 2:testing after training
+#phases = [0,1,2]
 #phases = [1];
 
 try:
@@ -37,6 +42,7 @@ print "*** constructing the network ***"
 vnet = netarch.visnet()
 vplotter = netplot.plotter(vnet)
 gf = GaborFilter.GaborFilter();
+ia = InfoAnalysis.InfoAnalysis()
 
 fileList_train = np.genfromtxt(os.path.split(os.path.realpath(__file__))[0] + "/images/" + imageFolder + "/fileList_train.txt", dtype='str');
 numObj_train = int(fileList_train[0]);
@@ -72,18 +78,23 @@ for phase in phases:
             if inputImage is None:
                 print 'Failed to load image file:', img_fn
                 sys.exit(1)
+            elif len(inputImage.shape)==3:
+                inputImage = np.mean(inputImage[:,:,0:2],2);
 
             #plt.imshow(I,cmap=plt.gray(),interpolation='none');
             #plt.colorbar();
             #plt.show()    
 
             resizedImage = gf.resizeImg(inputImage);
+            #print resizedImage
             
 #             plt.imshow(I,cmap=plt.gray(),interpolation='none');
 #             plt.colorbar();
 #             plt.show()          
             
             res = gf.filtering(resizedImage);
+            
+            #res = np.power(res,2);
             
 
             
@@ -114,11 +125,13 @@ for phase in phases:
                 
             if phase==0 or phase == 2:
                 vnet.traceReset();
-                
-        vnet.traceReset();
+        if phase==1:
+            vnet.traceReset();
         
     if phase==0:
         pickle.dump(FRrec, open("Results/"+experimentName+"/FR_0_blank.pkl", "wb"))
     elif phase==2:
         pickle.dump(FRrec, open("Results/"+experimentName+"/FR_1_trained.pkl", "wb"))
     print "*** DONE ***"
+    
+ia.singleCellInfo();

@@ -79,8 +79,8 @@ class GaborFilter(object):
         paddedImage = paddingColor * np.ones((paddedImageD[0], paddedImageD[1]));
  
         # Copy original image into center of padded image
-        top = paddedImageD[0] / 2 - imgDim / 2 - 1;
-        left = paddedImageD[1] / 2 - imgDim / 2 - 1;
+        top = paddedImageD[0] / 2 - imgDim / 2;
+        left = paddedImageD[1] / 2 - imgDim / 2;
         paddedImage[left:left + imgDim, top:top + imgDim] = I;
 
         # pylab.imshow(paddedImage,interpolation='none');
@@ -98,6 +98,8 @@ class GaborFilter(object):
         
                     # Convolve padded image with Gabor filter
                     tmp = scipy.signal.convolve2d(paddedImage, gf, 'same');
+                    #tmp = paddedImage;
+                    
                  # Copy out part of padded image convolution that corresponds to
                  # the original image
                     fi = tmp[(paddedImageD[0] - originalImageD[0]) / 2:(paddedImageD[0] - originalImageD[0]) / 2 + originalImageD[0], (paddedImageD[1] - originalImageD[1]) / 2:(paddedImageD[1] - originalImageD[1]) / 2 + originalImageD[1]]
