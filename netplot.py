@@ -1,3 +1,6 @@
+# date: 24/11/15
+# author: Akihiro Eguchi
+# description: a class to plot results
 
 import pylab as plt
 
@@ -61,6 +64,8 @@ class plotter(object):
                                 condition = tmp2[index_tmp] > self.timeBegin * ms
                             res_FRMap[row_tmp][col_tmp] = len(np.extract(condition, tmp2[index_tmp]));
         
+                    res_FRMap = res_FRMap/(float(simulationTime)/1000);
+                    
                     # plot FR map
                     plt.subplot(5, 3, (index_filter + 1) * 3 + 3)
                     if(index_filter == 0):
@@ -95,6 +100,8 @@ class plotter(object):
                 else:
                     condition = tmp2[index_tmp] > self.timeBegin * ms
                 bind_FRMap[row_tmp, col_tmp] = len(np.extract(condition, tmp2[index_tmp]));
+        bind_FRMap = bind_FRMap/(float(simulationTime)/1000);
+        
         plt.subplot(nLayers + 1, 3, 3)
         plt.imshow(
             bind_FRMap, cmap='jet', interpolation='none', vmin=0, vmax=bind_FRMap.max())
@@ -124,6 +131,7 @@ class plotter(object):
                     else:
                         condition = tmp2[index_tmp] > self.timeBegin * ms
                     ex_FRMap[row_tmp, col_tmp] = len(np.extract(condition, tmp2[index_tmp]));
+            ex_FRMap = ex_FRMap/(float(simulationTime)/1000);
             
             plt.subplot(nLayers + 1, 4, (nLayers - layer) * 4 + 2)
             plt.imshow(
@@ -149,6 +157,7 @@ class plotter(object):
                 for col_tmp in range(layerDim):
                     index_tmp = row_tmp * layerGDim + col_tmp
                     inhib_FRMap[row_tmp, col_tmp] = len(tmp2[index_tmp])
+            inhib_FRMap = inhib_FRMap/(float(simulationTime)/1000);
 
             plt.subplot(nLayers + 1, 4, (nLayers - layer) * 4 + 4)
             plt.imshow(

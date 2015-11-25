@@ -1,3 +1,7 @@
+# date: 24/11/15
+# author: Akihiro Eguchi
+# description: a class to construct the network structure
+
 
 from Parameters import *
 import brian2 as br
@@ -41,7 +45,7 @@ class visnet(object):
                                eqn_membran,  # differential equations
                                threshold='v>Vt',  # spike condition
                                reset='v = Vr',  # code to execute on reset
-                               refractory=2 * ms  # length of refractory period
+                               refractory=refractoryPeriod  # length of refractory period
                                )
             )
 
@@ -96,12 +100,14 @@ class visnet(object):
             self.connGtoInput.append(
                 br.Synapses(self.layerG[theta],
                             self.layers[0],
-                            'plastic: boolean (shared)',
-                            pre='ve += 8*we'
+                            eqs_G2LSyn,
+                            pre=eqs_G2LPre
                             )
             )
+            #self.connGtoInput[theta].connect(connCond, p=pConnections_connGtoInput)
             for cellIndex in range(layerDim*layerDim):
                 self.connGtoInput[theta].connect('i==cellIndex', p=pConnections_connGtoInput)
+                #self.connGtoInput[theta].connect(connCond2, p=pConnections_connGtoInput)
 
             #self.connGtoInput[theta].connect(True, p=prob_GtoInput)
 
@@ -128,7 +134,7 @@ class visnet(object):
                 self.connBottomUp[layer].connect('i==cellIndex', p=pConnections_connBottomUp)
             #self.connBottomUp[layer].connect(True, p=prob_connBottomUp)
             self.connBottomUp[layer].w[:, :] = br.rand() * Apre
-            self.connBottomUp[layer].delay[:, :] = br.rand() * delayConst_connBottomUp
+            self.connBottomUp[layer].delay[:, :] = br.rand() * delayConst_connBottomUp if delayRandOn else delayConst_connBottomUp
 
 #             self.connTopDown.append(br.Synapses(
 #                 self.layers[layer + 1],
@@ -157,22 +163,22 @@ class visnet(object):
             #Excitatory -> Inhibitory
             self.connExIn.append(
                 br.Synapses(self.layers[layer], self.inhibLayers[layer],
-                            'w:1', pre='ve += 3*we'))
+                            eqs_E2ISyn, pre=eqs_E2IPre))
             for cellIndex in range(layerDim*layerDim):
                 self.connExIn[layer].connect('j==cellIndex', p=pConnections_connExIn)
             #self.connExIn[layer].connect(True, p=prob_connExIn)
-            self.connExIn[layer].delay[:, :] = br.rand() * delayConst_connExIn
+            self.connExIn[layer].delay[:, :] = br.rand() * delayConst_connExIn if delayRandOn else delayConst_connExIn
 
 
             #Inhibitory -> Excitatotry 
             self.connInEx.append(
                 br.Synapses(self.inhibLayers[layer], self.layers[layer],
-                            'w:1', pre='vi += 3*wi'))
+                            eqs_I2ESyn, pre=eqs_I2EPre))
 
             for cellIndex in range(layerDim*layerDim):
                 self.connInEx[layer].connect('j==cellIndex', p=pConnections_connInEx);
             #self.connInEx[layer].connect(True, p=prob_connInEx)
-            self.connInEx[layer].delay[:, :] = br.rand() * delayConst_connInEx
+            self.connInEx[layer].delay[:, :] = br.rand() * delayConst_connInEx if delayRandOn else delayConst_connInEx
         self.net.add(self.connExIn)
         self.net.add(self.connInEx)
         
@@ -180,7 +186,7 @@ class visnet(object):
         
         self.connExBind = []
         
-        for layer in range(0, nLayers - 1):
+        for layer in range(0, nLayers):
 
             self.connExBind.append(br.Synapses(
                 self.layers[layer],
@@ -196,7 +202,7 @@ class visnet(object):
             
             #self.connExBind[layer].connect(True, p=prob_connExBind)
             self.connExBind[layer].w[:, :] = br.rand() * Apre
-            self.connExBind[layer].delay[:, :] = br.rand() * delayConst_connExBind
+            self.connExBind[layer].delay[:, :] = br.rand() * delayConst_connExBind if delayRandOn else delayConst_connExBind
         self.net.add(self.connExBind)
 
 
@@ -257,10 +263,19 @@ class visnet(object):
             self.inhibLayers[layer].v = 'Vr'  # + br.rand() * (Vt - Vr)'
             self.inhibLayers[layer].ve = 0 * mV
             self.inhibLayers[layer].vi = 0 * mV
+            self.connExBind[layer].apre[:,:] = 0;
+            self.connExBind[layer].apost[:,:] = 0;
+            
+        for layer in range(0, nLayers - 1):
+            self.connBottomUp[layer].apre[:,:] = 0;
+            self.connBottomUp[layer].apost[:,:] = 0;
 
         self.bindingLayer.v = 'Vr'  # + br.rand() * (Vt - Vr)'
         self.bindingLayer.ve = 0 * mV
         self.bindingLayer.vi = 0 * mV
+        
+        
+        
         
         print "Trace reset"
         
