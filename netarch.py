@@ -50,8 +50,8 @@ class visnet(object):
             )
 
             self.layers[layer].v = 'Vr'  # + br.rand() * (Vt - Vr)'
-            self.layers[layer].ve = 0 * mV
-            self.layers[layer].vi = 0 * mV
+            self.layers[layer].ge = 0
+            self.layers[layer].gi = 0
 
         self.net.add(self.layers)
 
@@ -69,8 +69,8 @@ class visnet(object):
             )
 
             self.inhibLayers[layer].v = 'Vr'  # + br.rand() * (Vt - Vr)'
-            self.inhibLayers[layer].ve = 0 * mV
-            self.inhibLayers[layer].vi = 0 * mV
+            self.inhibLayers[layer].ge = 0
+            self.inhibLayers[layer].gi = 0
         self.net.add(self.inhibLayers)
         
         
@@ -83,8 +83,8 @@ class visnet(object):
             refractory=2 * ms
         )
         self.bindingLayer.v = 'Vr'  # + br.rand() * (Vt - Vr)'
-        self.bindingLayer.ve = 0 * mV
-        self.bindingLayer.vi = 0 * mV      
+        self.bindingLayer.ge = 0
+        self.bindingLayer.gi = 0      
         self.net.add(self.bindingLayer) 
         
         
@@ -111,6 +111,7 @@ class visnet(object):
 
             #self.connGtoInput[theta].connect(True, p=prob_GtoInput)
 
+            self.connGtoInput[theta].delay[:, :] = br.rand() * delayConst_G2Input if delayRandOn else delayConst_G2Input
         self.net.add(self.connGtoInput)
 
         # Connecting neurons between excitatory layers
@@ -124,8 +125,8 @@ class visnet(object):
                 self.layers[layer],
                 self.layers[layer + 1],
                 eqs_stdpSyn,
-                eqs_stdpPre,
-                eqs_stdpPost
+                pre = eqs_stdpPre,
+                post = eqs_stdpPost
             )
             )
 
@@ -133,7 +134,7 @@ class visnet(object):
             for cellIndex in range(layerDim*layerDim):
                 self.connBottomUp[layer].connect('i==cellIndex', p=pConnections_connBottomUp)
             #self.connBottomUp[layer].connect(True, p=prob_connBottomUp)
-            self.connBottomUp[layer].w[:, :] = br.rand() * Apre
+            self.connBottomUp[layer].w[:, :] = br.rand() * gmax
             self.connBottomUp[layer].delay[:, :] = br.rand() * delayConst_connBottomUp if delayRandOn else delayConst_connBottomUp
 
 #             self.connTopDown.append(br.Synapses(
@@ -192,8 +193,8 @@ class visnet(object):
                 self.layers[layer],
                 self.bindingLayer,
                 eqs_stdpSyn,
-                eqs_stdpPre,
-                eqs_stdpPost
+                pre = eqs_stdpPre,
+                post = eqs_stdpPost
             )
             )
 
@@ -201,7 +202,7 @@ class visnet(object):
                 self.connExBind[layer].connect('j==cellIndex', p=pConnections_connExBind)
             
             #self.connExBind[layer].connect(True, p=prob_connExBind)
-            self.connExBind[layer].w[:, :] = br.rand() * Apre
+            self.connExBind[layer].w[:, :] = br.rand() * gmax
             self.connExBind[layer].delay[:, :] = br.rand() * delayConst_connExBind if delayRandOn else delayConst_connExBind
         self.net.add(self.connExBind)
 
@@ -258,21 +259,21 @@ class visnet(object):
     def traceReset(self):
         for layer in range(nLayers):
             self.layers[layer].v = 'Vr'  # + br.rand() * (Vt - Vr)'
-            self.layers[layer].ve = 0 * mV
-            self.layers[layer].vi = 0 * mV
+            self.layers[layer].ge = 0
+            self.layers[layer].gi = 0
             self.inhibLayers[layer].v = 'Vr'  # + br.rand() * (Vt - Vr)'
-            self.inhibLayers[layer].ve = 0 * mV
-            self.inhibLayers[layer].vi = 0 * mV
-            self.connExBind[layer].apre[:,:] = 0;
-            self.connExBind[layer].apost[:,:] = 0;
+            self.inhibLayers[layer].ge = 0
+            self.inhibLayers[layer].gi = 0
+            self.connExBind[layer].Apre[:,:] = 0;
+            self.connExBind[layer].Apost[:,:] = 0;
             
         for layer in range(0, nLayers - 1):
-            self.connBottomUp[layer].apre[:,:] = 0;
-            self.connBottomUp[layer].apost[:,:] = 0;
+            self.connBottomUp[layer].Apre[:,:] = 0;
+            self.connBottomUp[layer].Apost[:,:] = 0;
 
         self.bindingLayer.v = 'Vr'  # + br.rand() * (Vt - Vr)'
-        self.bindingLayer.ve = 0 * mV
-        self.bindingLayer.vi = 0 * mV
+        self.bindingLayer.ge = 0
+        self.bindingLayer.gi = 0
         
         
         
