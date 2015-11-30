@@ -12,7 +12,7 @@ from brian2 import ms, mV, Hz
 
 #experimentName = "BO_single"
 #imageFolder = "BO_single_imgs"
-experimentName = "simpleImages3"
+experimentName = "simpleImages5"
 imageFolder = "simpleImages"
 
 #STRUCTURE OF THE NETWORK
@@ -22,7 +22,7 @@ layerDim = 20   # size of layer1 in neurons
 inhibLayerDim = 10;
 
 #simulationTime = 100;
-trainingTime = 50# * ms;
+trainingTime = 100# * ms;
 testingTime = 1000# * ms;
 
 #Param for Filtering:
@@ -92,25 +92,25 @@ conductanceConst_G2L = 2;
 eqs_G2LSyn = '''plastic: boolean (shared)'''
 eqs_G2LPre ='''ge += conductanceConst_G2L*we'''
 
-conductanceConst_E2I = 2;
+conductanceConst_E2I = 1.5;
 eqs_E2ISyn = '''w:1''';
 eqs_E2IPre = '''ge += conductanceConst_E2I*we''';
 
-conductanceConst_I2E = 2;
+conductanceConst_I2E = 1;
 eqs_I2ESyn = '''w:1'''
 eqs_I2EPre = '''gi += conductanceConst_I2E*wi''';
 
 
     
 #Synaptic Connections with STDP ; for usage, see http://brian2.readthedocs.org/en/2.0b4/examples/synapses.STDP.html
+conductanceConst_L2L = 1.5;
 const = 1;
 taupre = 20*ms  * const;
 taupost = 20*ms  * const;
 # wmax = 20 *mV #200 *mV
 #Apre = 3.0 *mV #20*mV
 #Apost = -Apre*taupre/taupost*1.05
-lRate = 100#0.001
-conductanceConst_L2L = 1;
+lRate = 1#0.001
 gmax = .05#.01
 dApre = .01
 dApost = -dApre * taupre / taupost * 1.05
