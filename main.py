@@ -134,4 +134,5 @@ for phase in phases:
         pickle.dump(FRrec, open("Results/"+experimentName+"/FR_1_trained.pkl", "wb"))
     print "*** DONE ***"
     
+plt.clf();
 ia.singleCellInfoAnalysis();

@@ -129,7 +129,7 @@ class InfoAnalysis(object):
                     plt.title("Layer " + str(layer));
             
             
-        #plt.show();
+
         plt.savefig(os.path.split(os.path.realpath(__file__))[0] +"/Results/"+experimentName+"/singleCellInfo.png");
         plt.savefig(os.path.split(os.path.realpath(__file__))[0] +"/Results/"+experimentName+"/singleCellInfo.eps");
-    
+        plt.show();  
