@@ -4,15 +4,16 @@
 
 import pylab as plt
 
-from Parameters import *
+#from Parameters import *
 
 
 class plotter(object):
 
     """a plotter for spiking visnet simulations"""
 
-    def __init__(self, vnet):
+    def __init__(self, vnet,borrowed_globals):
         super(plotter, self).__init__()
+        globals().update(borrowed_globals);
 
         self.vnet = vnet
         self.timeBegin = 0;

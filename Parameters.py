@@ -149,4 +149,5 @@ eqs_stdpPost ='''
 fanInRad = layerDim/3;
 connCond = 'sqrt((i%layerDim - j%layerDim)**2 + (i/layerDim - j/layerDim)**2) < fanInRad'
 
+randSeed = 1;
 
