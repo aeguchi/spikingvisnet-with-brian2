@@ -2,10 +2,13 @@ import numpy as np
 import pylab as plt
 import pickle
 import os;
-from Parameters import *
+#from Parameters import *
 
 
 class InfoAnalysis(object):
+    
+    def __init__(self,borrowed_globals):
+        globals().update(borrowed_globals);
 
     def singleCellInfoAnalysis(self):
         plotAllSingleCellInfo = 0;

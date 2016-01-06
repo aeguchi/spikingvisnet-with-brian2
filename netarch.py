@@ -3,7 +3,7 @@
 # description: a class to construct the network structure
 
 
-from Parameters import *
+#from Parameters import *
 import brian2 as br
 from brian2 import Hz, mV, ms  # explicitly import for readability
 import numpy as np
@@ -13,8 +13,10 @@ class visnet(object):
 
     """spiking neural network implementation of visnet"""
 
-    def __init__(self):
+    def __init__(self,borrowed_globals):
         super(visnet, self).__init__()
+        globals().update(borrowed_globals);
+        np.random.seed(randSeed)
 
         self.net = br.Network(br.collect())
 
@@ -22,6 +24,7 @@ class visnet(object):
         self.buildConnectionsBetweenLayers()
         self.buildSpikeMonitors()
         self.setSynapticPlasticity(True)
+    
 
     def buildLayers(self):
 

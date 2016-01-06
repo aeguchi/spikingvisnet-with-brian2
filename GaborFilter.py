@@ -1,4 +1,4 @@
-from Parameters import *
+#from Parameters import *
 import scipy
 import scipy.misc
 import scipy.signal
@@ -16,8 +16,9 @@ class GaborFilter(object):
 
     """Gabor filter"""
 
-    def __init__(self):
+    def __init__(self,borrowed_globals):
         #self.filtering()
+        globals().update(borrowed_globals);
         self.psi = psiList;
         self.scale = lamdaList;
         self.orient = thetaList;
