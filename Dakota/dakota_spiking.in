@@ -1,0 +1,49 @@
+#  DAKOTA INPUT FILE - dakota_spiking.in
+#  
+# analysis driver that calls VisBack for each function evaluation
+
+environment
+	graphics
+#	tabular_data
+#		tabular_data_file = 'simulation.dat'
+
+method,                                         
+#	conmin_frcg				
+	efficient_global
+	seed = 123456
+
+variables,					
+	continuous_design = 4			
+	cdv_initial_point   2.0      1.5      1.0      1.5
+	cdv_lower_bounds    0.10     0.10     0.10     0.10	
+	cdv_upper_bounds     3.00      3.00      3.00      3.00	
+	cdv_descriptor       'G2L'     'E2I'     'I2E'     'L2L'
+
+interface,					
+
+# common options
+	fork,
+	parameters_file = 'params.in'		
+	results_file    = 'results.out'		
+
+# Use this line for Linux
+	analysis_driver = 'dakota_analyser_binding.sh'	
+
+# POSSIBLY use the following to perform 2 or more simultaneous Matlab
+# evaluations.  I haven't researched whether the automation
+# server supports this asynchronously, or whether one evaluation will
+# block the next (seems to work though)
+##       asynchronous                            
+##       evaluation_concurrency = 2
+##	 file_tag                                
+# use this to keep parameters/results files around if you wish (when
+# using file_tag only)
+##	file_save                               
+
+
+responses,                                      
+	num_objective_functions = 1             
+# 	numerical_gradients			
+# 	  fd_gradient_step_size = .01	
+	no_gradients
+	no_hessians

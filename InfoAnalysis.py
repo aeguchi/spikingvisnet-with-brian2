@@ -27,6 +27,8 @@ class InfoAnalysis(object):
         
         infos = np.zeros((2,numCells*numCells));
         
+        performanceMeasure = 0.0;
+        
         for layer in range(3):
             index = 1;
             for phase in phases:
@@ -119,6 +121,15 @@ class InfoAnalysis(object):
                     
                 index+=1;
                 
+                if (layer == 2 and phase == 'FR_1_trained.pkl'):
+                    performanceMeasure = -1*np.sum(reversed_arr);
+                    f = open(os.path.split(os.path.realpath(__file__))[0] +"/Results/"+experimentName+"/performance.txt","w");
+                    f.write(str(performanceMeasure));
+                    f.close();
+                    
+                    
+                    
+                
             if plotMode==1:
                 plt.subplot(1,3,layer+1)
                 plt.plot(np.transpose(infos[0]), linestyle='--', color='k');
@@ -132,7 +143,8 @@ class InfoAnalysis(object):
                     plt.title("Layer " + str(layer));
             
             
+        
 
         plt.savefig(os.path.split(os.path.realpath(__file__))[0] +"/Results/"+experimentName+"/singleCellInfo.png");
         plt.savefig(os.path.split(os.path.realpath(__file__))[0] +"/Results/"+experimentName+"/singleCellInfo.eps");
-        plt.show();  
+        #plt.show();  
