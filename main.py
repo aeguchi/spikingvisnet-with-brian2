@@ -31,13 +31,13 @@ def loadParams(borrowed_globals):
     
 def runSimulation():
     try:
-        os.makedirs("Results");
+        os.makedirs(os.path.split(os.path.realpath(__file__))[0] + "/Results");
     except OSError as exception:
         if exception.errno != errno.EEXIST:
             raise
     
     try:
-        os.makedirs("Results/"+experimentName);
+        os.makedirs(os.path.split(os.path.realpath(__file__))[0] + "/Results/"+experimentName);
     except OSError as exception:
         if exception.errno != errno.EEXIST:
             raise
@@ -134,9 +134,9 @@ def runSimulation():
                 vnet.traceReset();
             
         if phase==0:
-            pickle.dump(FRrec, open("Results/"+experimentName+"/FR_0_blank.pkl", "wb"))
+            pickle.dump(FRrec, open(os.path.split(os.path.realpath(__file__))[0] + "/Results/"+experimentName+"/FR_0_blank.pkl", "wb"))
         elif phase==2:
-            pickle.dump(FRrec, open("Results/"+experimentName+"/FR_1_trained.pkl", "wb"))
+            pickle.dump(FRrec, open(os.path.split(os.path.realpath(__file__))[0] + "/Results/"+experimentName+"/FR_1_trained.pkl", "wb"))
         print "*** DONE ***"
         
     plt.clf();
