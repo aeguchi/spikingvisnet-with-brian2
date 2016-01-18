@@ -87,7 +87,7 @@ class plotter(object):
         plt.plot(
             self.vnet.spkdetBindingLayer.t / ms,
             self.vnet.spkdetBindingLayer.i, '.')
-        plt.ylim([0, layerGDim * layerGDim - 1])
+        plt.ylim([0, layerDim * layerDim - 1])
         plt.xlim([self.timeBegin, self.timeBegin+simulationTime])
         
         # plot FR map of bindingLayer
@@ -95,7 +95,7 @@ class plotter(object):
         tmp2 = self.vnet.spkdetBindingLayer.spike_trains()
         for row_tmp in range(layerDim):
             for col_tmp in range(layerDim):
-                index_tmp = row_tmp * layerGDim + col_tmp
+                index_tmp = row_tmp * layerDim + col_tmp
                 if (len(tmp2[index_tmp]) == 0):
                     condition = tmp2[index_tmp] > self.timeBegin
                 else:
@@ -118,7 +118,7 @@ class plotter(object):
             plt.plot(
                 self.vnet.spkdetLayers[layer].t / ms,
                 self.vnet.spkdetLayers[layer].i, '.')
-            plt.ylim([0, layerGDim * layerGDim - 1])
+            plt.ylim([0, layerDim * layerDim - 1])
             plt.xlim([self.timeBegin, self.timeBegin+simulationTime])
             
             # plot FR map of excitatory
@@ -126,7 +126,7 @@ class plotter(object):
             tmp2 = self.vnet.spkdetLayers[layer].spike_trains()
             for row_tmp in range(layerDim):
                 for col_tmp in range(layerDim):
-                    index_tmp = row_tmp * layerGDim + col_tmp
+                    index_tmp = row_tmp * layerDim + col_tmp
                     if (len(tmp2[index_tmp]) == 0):
                         condition = tmp2[index_tmp] > self.timeBegin
                     else:
@@ -145,18 +145,18 @@ class plotter(object):
             ax = plt.subplot(nLayers + 1, 4, (nLayers - layer) * 4 + 3)
 
             plt.title('Inhibitory layer ' + str(layer))
-            plt.ylim([0, layerGDim * layerGDim - 1])
+            plt.ylim([0, inhibLayerDim * inhibLayerDim - 1])
             plt.xlim([self.timeBegin, self.timeBegin+simulationTime])
             plt.plot(
                 self.vnet.spkdetInhibLayers[layer].t / ms,
                 self.vnet.spkdetInhibLayers[layer].i, '.')
 
             # plot FR map of inhibitory
-            inhib_FRMap = np.zeros((layerDim, layerDim))
+            inhib_FRMap = np.zeros((inhibLayerDim, inhibLayerDim))
             tmp2 = self.vnet.spkdetInhibLayers[layer].spike_trains()
-            for row_tmp in range(layerDim):
-                for col_tmp in range(layerDim):
-                    index_tmp = row_tmp * layerGDim + col_tmp
+            for row_tmp in range(inhibLayerDim):
+                for col_tmp in range(inhibLayerDim):
+                    index_tmp = row_tmp * inhibLayerDim + col_tmp
                     inhib_FRMap[row_tmp, col_tmp] = len(tmp2[index_tmp])
             inhib_FRMap = inhib_FRMap/(float(simulationTime)/1000);
 

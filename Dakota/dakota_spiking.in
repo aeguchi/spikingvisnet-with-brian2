@@ -13,11 +13,11 @@ method,
 	seed = 123456
 
 variables,					
-	continuous_design = 4			
-	cdv_initial_point   2.0      1.5      1.0      1.5
-	cdv_lower_bounds    0.10     0.10     0.10     0.10	
-	cdv_upper_bounds     3.00      3.00      3.00      3.00	
-	cdv_descriptor       'G2L'     'E2I'     'I2E'     'L2L'
+	continuous_design = 2			
+	cdv_initial_point   10.0      0.01
+	cdv_lower_bounds    1.00      0.01
+	cdv_upper_bounds     100.00     0.1 
+	cdv_descriptor       'taum'      'dApre'
 
 interface,					
 

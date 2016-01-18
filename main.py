@@ -21,6 +21,7 @@ import errno
 
 plotGabor = 0;
 plotActivities = 0;
+#phases = [0,1,1,1,1,1,2] #0:testing before training 1:training 2:testing after training
 phases = [0,1,1,1,1,1,2] #0:testing before training 1:training 2:testing after training
 #phases = [0,1,2]
 #phases = [1];
