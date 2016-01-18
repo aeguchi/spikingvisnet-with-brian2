@@ -121,8 +121,10 @@ class InfoAnalysis(object):
                     
                 index+=1;
                 
+                
                 if (layer == 2 and phase == 'FR_1_trained.pkl'):
-                    performanceMeasure = -1*np.sum(reversed_arr);
+                    numInfoCalc = 100;
+                    performanceMeasure = -1*np.sum(reversed_arr[0:numInfoCalc]);
                     f = open(os.path.split(os.path.realpath(__file__))[0] +"/Results/"+experimentName+"/performance.txt","w");
                     f.write(str(performanceMeasure));
                     f.close();

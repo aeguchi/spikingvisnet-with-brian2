@@ -12,8 +12,8 @@ from brian2 import ms, mV, Hz
 
 #experimentName = "BO_single"
 #imageFolder = "BO_single_imgs"
-experimentName = "simpleImages5"
-imageFolder = "simpleImages"
+experimentName = "2obj3"
+imageFolder = "simpleImages2obj"
 
 #STRUCTURE OF THE NETWORK
 nLayers = 2
@@ -22,7 +22,7 @@ layerDim = 20   # size of layer1 in neurons
 inhibLayerDim = 10;
 
 #simulationTime = 100;
-trainingTime = 100# * ms;
+trainingTime = 10# * ms;
 testingTime = 1000# * ms;
 
 #Param for Filtering:
@@ -65,20 +65,22 @@ dgi/dt = -gi/taui : 1 #incoming inhibitory voltage
 
 
 #synapse params:  from < 100 microseconds in very short axons to > 100 ms in very long non-myelinated central axons. 
-delayRandOn = False;
+delayRandOn = True;
 delayConst_G2Input = 1*ms;
 delayConst_connBottomUp = 1*ms;
 delayConst_connExIn = 1*ms;
 delayConst_connInEx = 5*ms;
 delayConst_connExBind = 5*ms;
 
-nConnections_connGtoInput = 50;
+#nConnections_connGtoInput = 50;
+nConnections_connGtoInput = 10;
+fanInRadSigma_connGtoInput = 1;
 nConnections_connBottomUp = 50;
 nConnections_connExIn = 10;
 nConnections_connInEx = 10;
-nConnections_connExBind = 5;
+nConnections_connExBind = 10;
 
-pConnections_connGtoInput = float(nConnections_connGtoInput)/(layerGDim*layerGDim);
+#pConnections_connGtoInput = float(nConnections_connGtoInput)/(layerGDim*layerGDim);
 pConnections_connBottomUp = float(nConnections_connBottomUp)/(layerDim*layerDim);
 pConnections_connExIn = float(nConnections_connExIn)/(layerDim*layerDim);
 pConnections_connInEx = float(nConnections_connInEx)/(layerDim*layerDim);
@@ -88,13 +90,17 @@ pConnections_connExBind = float(nConnections_connExBind)/(layerDim*layerDim);
 we = (0.27/10) # excitatory synaptic weight
 wi = (-4.5/30) # inhibitory synaptic weight
 
-conductanceConst_G2L = 2;
+conductanceConst_G2L = 10;
 eqs_G2LSyn = '''plastic: boolean (shared)'''
 eqs_G2LPre ='''ge += conductanceConst_G2L*we'''
 
-conductanceConst_E2I = 1.5;
+conductanceConst_E2I = 2;
 eqs_E2ISyn = '''w:1''';
 eqs_E2IPre = '''ge += conductanceConst_E2I*we''';
+
+# conductanceConst_E2E = 1;
+# eqs_E2ESyn = '''w:1'''
+# eqs_E2EPre = '''ge += conductanceConst_E2E*we''';
 
 conductanceConst_I2E = 1;
 eqs_I2ESyn = '''w:1'''
@@ -103,7 +109,7 @@ eqs_I2EPre = '''gi += conductanceConst_I2E*wi''';
 
     
 #Synaptic Connections with STDP ; for usage, see http://brian2.readthedocs.org/en/2.0b4/examples/synapses.STDP.html
-conductanceConst_L2L = 1.5;
+conductanceConst_L2L = 1;
 const = 1;
 taupre = 20*ms  * const;
 taupost = 20*ms  * const;
