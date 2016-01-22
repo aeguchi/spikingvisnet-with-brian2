@@ -83,7 +83,7 @@ nConnections_connExBind = 10;
 #pConnections_connGtoInput = float(nConnections_connGtoInput)/(layerGDim*layerGDim);
 pConnections_connBottomUp = float(nConnections_connBottomUp)/(layerDim*layerDim);
 pConnections_connExIn = float(nConnections_connExIn)/(layerDim*layerDim);
-pConnections_connInEx = float(nConnections_connInEx)/(layerDim*layerDim);
+pConnections_connInEx = float(nConnections_connInEx)/(inhibLayerDim*inhibLayerDim);
 pConnections_connExBind = float(nConnections_connExBind)/(layerDim*layerDim);
 
 #Synaptic Connections from Gabor to Layer
@@ -119,28 +119,17 @@ taupost = 20*ms  * const;
 lRate = 1#0.001
 gmax = .05#.01
 dApre = .01
-dApost = -dApre * taupre / taupost * 1.05
+ratioPreToPost = 1.05;
+dApost = -dApre * taupre / taupost * ratioPreToPost
 dApost *= gmax
 dApre *= gmax
 
 
-# eqs_stdpSyn ='''
-#              w : volt
-#              dapre/dt = -apre/taupre : volt (event-driven)
-#              dapost/dt = -apost/taupost : volt (event-driven)
-#              plastic: boolean (shared)
-#              '''
 eqs_stdpSyn = '''w : 1
                 dApre/dt = -Apre / taupre : 1 (event-driven)
                 dApost/dt = -Apost / taupost : 1 (event-driven)
                 plastic: boolean (shared)'''
                 
-# eqs_stdpPre ='''
-#              v_post += conductanceConst_L2L*w
-#              apre += Apre
-#              w = clip(w+plastic*apost*lRate, 0, wmax)
-#              '''
-
 eqs_stdpPre ='''
             ge += conductanceConst_L2L*w
             Apre += dApre
@@ -150,6 +139,12 @@ eqs_stdpPost ='''
              Apost += dApost
              w = clip(w+plastic*Apre*lRate, 0, gmax)
              '''
+
+
+
+
+
+
 
 #condition to introduce topology
 fanInRad = layerDim/3;
