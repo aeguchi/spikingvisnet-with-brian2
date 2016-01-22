@@ -12,15 +12,18 @@ print str(sys.argv);
 #set params
 outputFile = sys.argv[1];
 taum = float(sys.argv[2])*ms;
+taupre = float(sys.argv[3])*ms;
+taupost = float(sys.argv[4])*ms;
 #conductanceConst_L2L = float(sys.argv[3]);
-dApre = float(sys.argv[3]);
+#dApre = float(sys.argv[3]);
 
 lRate = 10;
 trainingTime = 200;
-gmax = 0.5;
-#taum = 63.602;
-#const
-
+dApre = .1
+nConnections_connBottomUp = 30;
+nConnections_connExBind = 20;
+conductanceConst_I2E = 5;
+gmax = 0.2;
 
 
 

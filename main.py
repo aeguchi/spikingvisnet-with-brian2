@@ -57,6 +57,8 @@ def runSimulation():
     numObj_test = int(fileList_test[0]);
     numTrans_test = int(fileList_test[1]);
     
+    #plt.ion();
+    count = 0;
     for phase in phases:
         print "*** simulation phase: " + str(phase) + " ***";
         if phase==1:
@@ -126,19 +128,23 @@ def runSimulation():
                 vplotter.plotLayers(inputImage, index_img, FRrecTmp,simulationTime)
                 
                 FRrec[index_obj,index_trans]=FRrecTmp;
-                if (plotActivities):
-                    plt.show();
-                    
+                if (plotActivities or plotGabor):
+                    plt.show(0);
+                    vplotter.saveFigs(plotActivities,plotGabor,os.path.split(os.path.realpath(__file__))[0] + "/Results/"+experimentName+"/"+str(count)+"_p"+str(phase)+"_o"+str(index_obj)+"_t"+str(index_trans));
+                    #plt.show(block=False);
+                    #plt.draw();
+                plt.clf();
+                
                 if phase==0 or phase == 2:
                     vnet.traceReset();
             if phase==1:
                 vnet.traceReset();
-            
         if phase==0:
             pickle.dump(FRrec, open(os.path.split(os.path.realpath(__file__))[0] + "/Results/"+experimentName+"/FR_0_blank.pkl", "wb"))
         elif phase==2:
             pickle.dump(FRrec, open(os.path.split(os.path.realpath(__file__))[0] + "/Results/"+experimentName+"/FR_1_trained.pkl", "wb"))
         print "*** DONE ***"
+        count+=1;
         
     plt.clf();
     ia.singleCellInfoAnalysis();
