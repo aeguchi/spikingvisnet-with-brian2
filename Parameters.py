@@ -10,6 +10,9 @@ from brian2 import ms, mV, Hz
 # nStim = 2
 # nTrans = 8
 
+plotGabor = 0;
+plotActivities = 0;
+
 #experimentName = "BO_single"
 #imageFolder = "BO_single_imgs"
 experimentName = "2obj3"
@@ -66,11 +69,11 @@ dgi/dt = -gi/taui : 1 #incoming inhibitory voltage
 
 #synapse params:  from < 100 microseconds in very short axons to > 100 ms in very long non-myelinated central axons. 
 delayRandOn = True;
-delayConst_G2Input = 1*ms;
-delayConst_connBottomUp = 1*ms;
-delayConst_connExIn = 1*ms;
-delayConst_connInEx = 5*ms;
-delayConst_connExBind = 5*ms;
+delayConst_G2Input = 10*ms;
+delayConst_connBottomUp = 10*ms;
+delayConst_connExIn = 10*ms;
+delayConst_connInEx = 10*ms;
+delayConst_connExBind = 10*ms;
 
 #nConnections_connGtoInput = 50;
 nConnections_connGtoInput = 10;
@@ -110,9 +113,9 @@ eqs_I2EPre = '''gi += conductanceConst_I2E*wi''';
     
 #Synaptic Connections with STDP ; for usage, see http://brian2.readthedocs.org/en/2.0b4/examples/synapses.STDP.html
 conductanceConst_L2L = 1;
-const = 1;
-taupre = 20*ms  * const;
-taupost = 20*ms  * const;
+tau_syn_const = 1;
+taupre = 20*ms  * tau_syn_const;
+taupost = 20*ms  * tau_syn_const;
 # wmax = 20 *mV #200 *mV
 #Apre = 3.0 *mV #20*mV
 #Apost = -Apre*taupre/taupost*1.05
@@ -140,6 +143,27 @@ eqs_stdpPost ='''
              w = clip(w+plastic*Apre*lRate, 0, gmax)
              '''
 
+
+
+
+
+conductanceConst_L2B = 2;
+gmax_bind = .5
+
+eqs_stdpSyn_bind = '''w : 1
+                dApre/dt = -Apre / taupre : 1 (event-driven)
+                dApost/dt = -Apost / taupost : 1 (event-driven)
+                plastic: boolean (shared)'''
+                
+eqs_stdpPre_bind ='''
+            ge += conductanceConst_L2B*w
+            Apre += dApre
+            w = clip(w+plastic*Apost*lRate, 0, gmax_bind)
+             '''            
+eqs_stdpPost_bind ='''
+             Apost += dApost
+             w = clip(w+plastic*Apre*lRate, 0, gmax_bind)
+             '''
 
 
 

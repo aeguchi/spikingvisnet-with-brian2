@@ -2,9 +2,9 @@ from Parameters import *
 import main
 from brian2 import ms
 
-experimentName="test4"
+experimentName="poly1"
 #imageFolder = "simpleImagesNoTrans"
-imageFolder = "simpleImages2obj"
+imageFolder = "simpleImagesNoTrans"
 plotActivities = 1;
 lRate = 1;
 fanInRadSigma_connGtoInput = 0.5

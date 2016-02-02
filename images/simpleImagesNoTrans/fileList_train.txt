@@ -1,0 +1,5 @@
+3
+1
+obj1a.png
+obj2a.png
+obj3a.png
