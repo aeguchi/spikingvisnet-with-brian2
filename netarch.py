@@ -216,9 +216,9 @@ class visnet(object):
             self.connExBind.append(br.Synapses(
                 self.layers[layer],
                 self.bindingLayer,
-                eqs_stdpSyn,
-                pre = eqs_stdpPre,
-                post = eqs_stdpPost
+                eqs_stdpSyn_bind,
+                pre = eqs_stdpPre_bind,
+                post = eqs_stdpPost_bind
             )
             )
 
@@ -226,7 +226,7 @@ class visnet(object):
                 self.connExBind[layer].connect('j==cellIndex', p=pConnections_connExBind)
             
             #self.connExBind[layer].connect(True, p=prob_connExBind)
-            self.connExBind[layer].w[:, :] = br.rand() * gmax
+            self.connExBind[layer].w[:, :] = br.rand() * gmax_bind
             self.connExBind[layer].delay[:, :] = br.rand() * delayConst_connExBind if delayRandOn else delayConst_connExBind
         self.net.add(self.connExBind)
 
@@ -310,4 +310,22 @@ class visnet(object):
         for connection in [self.connGtoInput, self.connBottomUp,self.connExIn, self.connInEx, self.connExBind]:    
             for syn in self.connBottomUp:
                 syn.plastic = synapticBool
+                
+    def getFiringRateMap(self,lDim,layer,timeBegin,simulationTime):
+        FRMap = np.zeros((lDim, lDim))
+        spikeTrains = layer.spike_trains();
+        for row_tmp in range(lDim):
+            for col_tmp in range(lDim):
+                index_tmp = row_tmp * lDim + col_tmp
+                if (len(spikeTrains[index_tmp]) == 0):
+                    condition = spikeTrains[index_tmp] > timeBegin
+                else:
+                    condition = spikeTrains[index_tmp] > timeBegin * ms
+                FRMap[row_tmp][col_tmp] = len(np.extract(condition, spikeTrains[index_tmp]));
+        FRMap = FRMap/(float(simulationTime)/1000);
+        return FRMap;
+        
+        
+        
+        
 

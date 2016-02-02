@@ -45,8 +45,8 @@ class InfoAnalysis(object):
                     FR = FR_norm;
                 
                 #settings
-                numBins =  3;##numTrans;   #can be adjusted
-                weightedAnalysis = 1;#exclude the selectivity by not responding to a particular stimulus
+                numBins =  5;##numTrans;   #can be adjusted
+                weightedAnalysis = 0;#exclude the selectivity by not responding to a particular stimulus
                 
                 #params for multiple cell info (to be implemented)
                 multi_cell_analysis = 0; #1 to run multi-cell info analysis
