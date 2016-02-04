@@ -21,6 +21,7 @@ class plotter(object):
     def plotGaborInput(self, img, index_img, res, res_norm,timeBegin,simulationTime):
 
         self.figG = plt.figure(1 , figsize=(20, 10))
+        plt.clf();
         # plot input Image
         plt.subplot(5, 3, 1)
         plt.imshow(img, cmap='gray', vmin=0, vmax=255, interpolation='none')
@@ -65,6 +66,7 @@ class plotter(object):
 
     def plotLayers(self, img, index_img, timeBegin,simulationTime):
         self.figL = plt.figure(2, figsize=(20, 10));
+        plt.clf();
         plt.title('Input')
         plt.subplot(nLayers + 1, 3, 1)
         plt.imshow(img, cmap='gray', vmin=0, vmax=255, interpolation='none')
@@ -130,13 +132,18 @@ class plotter(object):
             plt.title('Firing Rate Map')
             plt.colorbar()
 
-
+    def plotWeight(self,WeightRec):
+        self.figW = plt.figure(3, figsize=(20, 10));
+        plt.clf();
+        plt.plot(WeightRec);
     
-    def saveFigs(self,plotActivities,plotGabor,svname):
+    def saveFigs(self,svname,plotActivities=False,plotGabor=False,plotW=False):
         if plotActivities:
             self.figL.savefig(svname+"_l.png");
         if plotGabor:
             self.figG.savefig(svname+"_g.png");
+        if plotW:
+            self.figW.savefig(svname+"w.png");
         
         
         

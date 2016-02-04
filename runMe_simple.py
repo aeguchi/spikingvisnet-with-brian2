@@ -2,26 +2,49 @@ from Parameters import *
 import main
 from brian2 import ms
 
-experimentName="poly1"
+experimentName="poly1000"
 #imageFolder = "simpleImagesNoTrans"
 imageFolder = "simpleImagesNoTrans"
-plotActivities = 1;
-lRate = 1;
-fanInRadSigma_connGtoInput = 0.5
+plotGaborAtTraining = False;
+plotActivitiesAtTraining = False;
+plotWeightsAtTraining = True;
+
+#simulation settings
 trainingTime = 200;
-dApre = .1
+trainingEpochs = 1000;
+
+#layer settings
+layerGDim = 20;
+inhibLayerDim = 5;
+layerDim = 10;
+
+#neuron settings
+taum = 20.00*ms;
+
+#Synaptic settings
+lRate = 1;
+gmax = 0.5;
+taupre = 20*ms
+taupost = 20*ms;
+gmax_bind = 0.1;
+
+#connection setitngs
+nConnections_connGtoInput = 10;
+fanInRadSigma_connGtoInput = 1;
+pConnections_connBottomUp = 0.1;
+pConnections_connExIn = 0.1;
+pConnections_connInEx = 0.1;
+pConnections_connExBind = 0.1;
 
 conductanceConst_G2L = 20;
-nConnections_connBottomUp = 20;
-nConnections_connExBind = 10;
-conductanceConst_E2I = 5;
-conductanceConst_I2E = 5;
-gmax = 0.5;
-gmax_bind = 0.3;
-taupre = 100*ms;#200*ms
-taupost = 100*ms;#200*ms
+conductanceConst_E2I = 10;
+conductanceConst_I2E = 0.5;
+
+
+
+#taupre = 100*ms;#200*ms
+#taupost = 100*ms;#200*ms
 #gmax = 0.5;
-taum = 20.00*ms;
 #ratioPreToPost=5;
 #phases = [1,1,1,1,1,2]
 

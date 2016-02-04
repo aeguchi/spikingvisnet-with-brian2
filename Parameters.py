@@ -10,8 +10,10 @@ from brian2 import ms, mV, Hz
 # nStim = 2
 # nTrans = 8
 
-plotGabor = 0;
-plotActivities = 0;
+mpdePlotShow = 0; #0: continuous, 1: interrupt
+plotGaborAtTraining = False;
+plotActivitiesAtTraining = False;
+plotWeightsAtTraining = True;
 
 #experimentName = "BO_single"
 #imageFolder = "BO_single_imgs"
@@ -26,6 +28,7 @@ inhibLayerDim = 10;
 
 #simulationTime = 100;
 trainingTime = 10# * ms;
+trainingEpochs = 10;
 testingTime = 1000# * ms;
 
 #Param for Filtering:
@@ -69,11 +72,13 @@ dgi/dt = -gi/taui : 1 #incoming inhibitory voltage
 
 #synapse params:  from < 100 microseconds in very short axons to > 100 ms in very long non-myelinated central axons. 
 delayRandOn = True;
-delayConst_G2Input = 10*ms;
-delayConst_connBottomUp = 10*ms;
-delayConst_connExIn = 10*ms;
-delayConst_connInEx = 10*ms;
-delayConst_connExBind = 10*ms;
+weightNormalizationOn = True;
+typeOfWeightNormalization = 2; #1:normal, 2:unit norm.(feature rescaling)
+delayConst_G2Input = 20*ms;
+delayConst_connBottomUp = 20*ms;
+delayConst_connExIn = 20*ms;
+delayConst_connInEx = 20*ms;
+delayConst_connExBind = 20*ms;
 
 #nConnections_connGtoInput = 50;
 nConnections_connGtoInput = 10;
@@ -121,8 +126,8 @@ taupost = 20*ms  * tau_syn_const;
 #Apost = -Apre*taupre/taupost*1.05
 lRate = 1#0.001
 gmax = .05#.01
-dApre = .01
-ratioPreToPost = 1.05;
+dApre = 0.1
+ratioPreToPost = 1.2;
 dApost = -dApre * taupre / taupost * ratioPreToPost
 dApost *= gmax
 dApre *= gmax
