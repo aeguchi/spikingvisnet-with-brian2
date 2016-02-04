@@ -18,12 +18,8 @@ import os
 import sys
 import pickle
 import errno
+from brian2 import ms;
 
-
-#phases = [0,1,1,1,1,1,2] #0:testing before training 1:training 2:testing after training
-phases = [0,1,1,1,1,1,2] #0:testing before training 1:training 2:testing after training
-#phases = [0,1,2]
-#phases = [1];
 
 def loadParams(borrowed_globals):
     globals().update(borrowed_globals);
@@ -56,9 +52,21 @@ def runSimulation():
     numObj_test = int(fileList_test[0]);
     numTrans_test = int(fileList_test[1]);
     
+    
+    phases = [0]
+    for ep in range(trainingEpochs):
+        phases.append(1);
+    phases.append(2);
+    #0:testing before training 1:training 2:testing after training
+    
+
     #plt.ion();
     count = 0;
     timeBegin = 0;
+    if(weightNormalizationOn):
+        vnet.weightNormalization();
+    WeightRec = np.array([vnet.connBottomUp[0].w[:, :]]);
+    
     for phase in phases:
         print "*** simulation phase: " + str(phase) + " ***";
         if phase==1:
@@ -72,11 +80,11 @@ def runSimulation():
             
         # for img_fn in img_fns:
         FRrec = np.zeros((numObj_test,numTrans_test,nLayers+1, layerDim, layerDim));#1st layer is binding layer
-        SpikeRec = [];#this eventually becomes a list of SpikeRec[obj][trans][layer] #1st bind, 2nd 1st layer, 3rd 2nd layer..
+        #SpikeRec = [];#this eventually becomes a list of SpikeRec[obj][trans][layer] #1st bind, 2nd 1st layer, 3rd 2nd layer..
         for index_obj in range(numObj):
-            SpikeRec.append([])
+            #SpikeRec.append([])
             for index_trans in range(numTrans):
-                SpikeRec[index_obj].append([]);
+                #SpikeRec[index_obj].append([]);
                 print " ** obj: " + str(index_obj) + ", trans: " + str(index_trans) +" **";
                 index_img = index_obj * numTrans + index_trans;
                 img_fn = os.path.split(os.path.realpath(__file__))[0] + "/images/" + imageFolder + "/train/" + fileList_train[index_img + 2];
@@ -93,6 +101,9 @@ def runSimulation():
                 # filter the images and convert to normalised spikes
                 res_norm = gf.scaleToUnit(res)
                 vnet.setGaborFiringRates(res_norm)
+                
+                if(weightNormalizationOn):
+                    vnet.weightNormalization();
             
                 # run visnet simulation!
                 if phase in [0,2]:
@@ -102,43 +113,73 @@ def runSimulation():
                 vnet.net.run(simulationTime * ms)
             
                 # plot each image set
-                if plotGabor:
-                    vplotter.plotGaborInput(inputImage, index_img, res, res_norm, timeBegin,simulationTime)
-                if plotActivities:
-                    vplotter.plotLayers(inputImage, index_img, timeBegin,simulationTime)
+
                 
                 #to later save FR to the file
                 if phase==0 or phase==2:
                     FRrecTmp = np.zeros((nLayers+1, layerDim, layerDim));
                     FRrecTmp[0] = vnet.getFiringRateMap(layerDim,vnet.spkdetBindingLayer,timeBegin,simulationTime);
-                    SpikeRec[index_obj][index_trans].append(vnet.spkdetBindingLayer.spike_trains());
+                    #SpikeRec[index_obj][index_trans].append(vnet.spkdetBindingLayer.spike_trains());
                     for i in range(nLayers):
                         FRrecTmp[i+1]=vnet.getFiringRateMap(layerDim,vnet.spkdetLayers[i],timeBegin,simulationTime);                
-                        SpikeRec[index_obj][index_trans].append(vnet.spkdetLayers[i].spike_trains());
                     FRrec[index_obj,index_trans]=FRrecTmp;
-                
-                
-                if (plotActivities or plotGabor):
-                    plt.show(0);
-                    vplotter.saveFigs(plotActivities,plotGabor,os.path.split(os.path.realpath(__file__))[0] + "/Results/"+experimentName+"/"+str(count)+"_p"+str(phase)+"_o"+str(index_obj)+"_t"+str(index_trans));
-                    #plt.show(block=False);
+                    
+                    vplotter.plotGaborInput(inputImage, index_img, res, res_norm, timeBegin,simulationTime)
+                    vplotter.plotLayers(inputImage, index_img, timeBegin,simulationTime)
+                    vplotter.saveFigs(os.path.split(os.path.realpath(__file__))[0] + "/Results/"+experimentName+"/"+str(count)+"_p"+str(phase)+"_o"+str(index_obj)+"_t"+str(index_trans),plotActivities=True,plotGabor=True);
+                    vplotter.saveFigs(os.path.split(os.path.realpath(__file__))[0] + "/Results/"+experimentName+"/",plotW=False if plotWeightsAtTraining else True);
+                else:
+                    if plotGaborAtTraining:
+                        vplotter.plotGaborInput(inputImage, index_img, res, res_norm, timeBegin,simulationTime)
+                    if plotActivitiesAtTraining:
+                        vplotter.plotLayers(inputImage, index_img, timeBegin,simulationTime)    
+                    if (plotGaborAtTraining or plotActivitiesAtTraining):
+                        plt.show(mpdePlotShow);
+                        vplotter.saveFigs(os.path.split(os.path.realpath(__file__))[0] + "/Results/"+experimentName+"/"+str(count)+"_p"+str(phase)+"_o"+str(index_obj)+"_t"+str(index_trans),plotActivities=plotActivitiesAtTraining,plotGabor=plotGaborAtTraining);
+                    WeightRec = np.concatenate((WeightRec,[vnet.connBottomUp[0].w[:, :]]),axis=0);
+                    if plotWeightsAtTraining:
+                        vplotter.plotWeight(WeightRec);
+                        vplotter.saveFigs(os.path.split(os.path.realpath(__file__))[0] + "/Results/"+experimentName+"/",plotW=plotWeightsAtTraining);
+
+                    #plt.show();
+                                    #plt.show(block=False);
                     #plt.draw();
-                plt.clf();
                 
                 if phase==0 or phase == 2:
                     vnet.traceReset();
-                    
                 timeBegin += simulationTime;
             if phase==1:
                 vnet.traceReset();
         if phase==0:
             pickle.dump(FRrec, open(os.path.split(os.path.realpath(__file__))[0] + "/Results/"+experimentName+"/FR_0_blank.pkl", "wb"))
-            pickle.dump(SpikeRec, open(os.path.split(os.path.realpath(__file__))[0] + "/Results/"+experimentName+"/Spikes_0_blank.pkl", "wb"))
+            #pickle.dump(SpikeRec, open(os.path.split(os.path.realpath(__file__))[0] + "/Results/"+experimentName+"/Spikes_0_blank.pkl", "wb"))
         elif phase==2:
             pickle.dump(FRrec, open(os.path.split(os.path.realpath(__file__))[0] + "/Results/"+experimentName+"/FR_1_trained.pkl", "wb"))
-            pickle.dump(SpikeRec, open(os.path.split(os.path.realpath(__file__))[0] + "/Results/"+experimentName+"/Spikes_1_trained.pkl", "wb"))
+            #pickle.dump(SpikeRec, open(os.path.split(os.path.realpath(__file__))[0] + "/Results/"+experimentName+"/Spikes_1_trained.pkl", "wb"))
         print "*** DONE ***"
         count+=1;
+        
+    #save spike trains
+    spikes_g = [];
+    spikes_e = [];
+    spikes_i = [];
+    spikes_b = [];
+    for theta in range(0, len(thetaList)):
+        spikes_g.append(vnet.spikesG[theta].spike_trains());
+    for layer in range(nLayers):
+        spikes_e.append(vnet.spkdetLayers[layer].spike_trains());
+        spikes_i.append(vnet.spkdetInhibLayers[layer].spike_trains());
+    spikes_b.append(vnet.spkdetBindingLayer.spike_trains());
+#         spikes_e.append([vnet.spkdetLayers[layer].t/ms,vnet.spkdetLayers[layer].i]);
+#         spikes_i.append([vnet.spkdetInhibLayers[layer].t/ms,vnet.spkdetInhibLayers[layer].i]);
+#     spikes_b.append([vnet.spkdetBindingLayer.t/ms,vnet.spkdetBindingLayer.i])
+    
+    pickle.dump(spikes_e, open(os.path.split(os.path.realpath(__file__))[0] + "/Results/"+experimentName+"/Spikes_e.pkl", "wb"))
+    pickle.dump(spikes_i, open(os.path.split(os.path.realpath(__file__))[0] + "/Results/"+experimentName+"/Spikes_i.pkl", "wb"))
+    pickle.dump(spikes_b, open(os.path.split(os.path.realpath(__file__))[0] + "/Results/"+experimentName+"/Spikes_b.pkl", "wb"))
+    
+    vplotter.plotWeight(WeightRec);
+    vplotter.saveFigs(os.path.split(os.path.realpath(__file__))[0] + "/Results/"+experimentName+"/"+str(count)+"_p"+str(phase)+"_o"+str(index_obj)+"_t"+str(index_trans),plotW=plotWeights);
         
     plt.clf();
     ia.singleCellInfoAnalysis();
