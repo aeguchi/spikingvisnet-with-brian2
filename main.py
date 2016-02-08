@@ -45,6 +45,10 @@ def runSimulation():
     gf = GaborFilter.GaborFilter(globals());
     ia = InfoAnalysis.InfoAnalysis(globals())
     
+    
+    vnet.saveStates(os.path.split(os.path.realpath(__file__))[0] + "/Results/"+experimentName+"/", 0);
+
+    
     fileList_train = np.genfromtxt(os.path.split(os.path.realpath(__file__))[0] + "/images/" + imageFolder + "/fileList_train.txt", dtype='str');
     numObj_train = int(fileList_train[0]);
     numTrans_train = int(fileList_train[1]);
@@ -165,11 +169,11 @@ def runSimulation():
     spikes_i = [];
     spikes_b = [];
     for theta in range(0, len(thetaList)):
-        spikes_g.append(vnet.spikesG[theta].spike_trains());
+        spikes_g.append(np.sort(vnet.spikesG[theta].spike_trains()));
     for layer in range(nLayers):
-        spikes_e.append(vnet.spkdetLayers[layer].spike_trains());
-        spikes_i.append(vnet.spkdetInhibLayers[layer].spike_trains());
-    spikes_b.append(vnet.spkdetBindingLayer.spike_trains());
+        spikes_e.append(np.sort(vnet.spkdetLayers[layer].spike_trains()));
+        spikes_i.append(np.sort(vnet.spkdetInhibLayers[layer].spike_trains()));
+    spikes_b.append(np.sort(vnet.spkdetBindingLayer.spike_trains()));
 #         spikes_e.append([vnet.spkdetLayers[layer].t/ms,vnet.spkdetLayers[layer].i]);
 #         spikes_i.append([vnet.spkdetInhibLayers[layer].t/ms,vnet.spkdetInhibLayers[layer].i]);
 #     spikes_b.append([vnet.spkdetBindingLayer.t/ms,vnet.spkdetBindingLayer.i])
@@ -177,9 +181,11 @@ def runSimulation():
     pickle.dump(spikes_e, open(os.path.split(os.path.realpath(__file__))[0] + "/Results/"+experimentName+"/Spikes_e.pkl", "wb"))
     pickle.dump(spikes_i, open(os.path.split(os.path.realpath(__file__))[0] + "/Results/"+experimentName+"/Spikes_i.pkl", "wb"))
     pickle.dump(spikes_b, open(os.path.split(os.path.realpath(__file__))[0] + "/Results/"+experimentName+"/Spikes_b.pkl", "wb"))
+    vnet.saveStates(os.path.split(os.path.realpath(__file__))[0] + "/Results/"+experimentName+"/", count);
+
     
-    vplotter.plotWeight(WeightRec);
-    vplotter.saveFigs(os.path.split(os.path.realpath(__file__))[0] + "/Results/"+experimentName+"/"+str(count)+"_p"+str(phase)+"_o"+str(index_obj)+"_t"+str(index_trans),plotW=plotWeights);
+    #vplotter.plotWeight(WeightRec);
+    #vplotter.saveFigs(os.path.split(os.path.realpath(__file__))[0] + "/Results/"+experimentName+"/"+str(count)+"_p"+str(phase)+"_o"+str(index_obj)+"_t"+str(index_trans),plotW=plotWeights);
         
     plt.clf();
     ia.singleCellInfoAnalysis();

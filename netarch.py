@@ -29,7 +29,6 @@ class visnet(object):
     def buildLayers(self):
 
         # Gabor input layer
-
         self.layerG = []
         for theta in range(0, len(thetaList)):
             self.layerG.append(br.PoissonGroup(
@@ -40,7 +39,6 @@ class visnet(object):
         self.net.add(self.layerG)
 
         # Excitatory layers
-
         self.layers = []
         for layer in range(0, nLayers):
             self.layers.append(
@@ -59,7 +57,6 @@ class visnet(object):
         self.net.add(self.layers)
 
         # Inhibitory layers
-
         self.inhibLayers = []
         for layer in range(0, nLayers):
             self.inhibLayers.append(br.NeuronGroup(
@@ -67,7 +64,7 @@ class visnet(object):
                 eqn_membran,
                 threshold='v>Vt',
                 reset='v = Vr',
-                refractory=2 * ms
+                refractory=refractoryPeriod
             )
             )
 
@@ -83,7 +80,7 @@ class visnet(object):
             eqn_membran,
             threshold='v>Vt',
             reset='v = Vr',
-            refractory=2 * ms
+            refractory=refractoryPeriod
         )
         self.bindingLayer.v = 'Vr'  # + br.rand() * (Vt - Vr)'
         self.bindingLayer.ge = 0
@@ -94,20 +91,17 @@ class visnet(object):
         
     def buildConnectionsBetweenLayers(self):
 
-        # Connecting neurons in Gabor input layer and neurons in the first
-        # ExcitLayer
-
+        # Connecting neurons in Gabor input layer and neurons in the first ExcitLayer
         self.connGtoInput = []
         for theta in range(0, len(thetaList)):
             self.connGtoInput.append(
                 br.Synapses(self.layerG[theta],
                             self.layers[0],
-                            eqs_G2LSyn,
-                            pre=eqs_G2LPre
+                            eqs_Syn,
+                            pre=eqs_ExPre
                             )
             )
             
-        #self.connGtoInput[theta].connect(connCond, p=pConnections_connGtoInput)
         for cellIndex in range(layerDim*layerDim):
             theta = np.random.randint(len(thetaList));
             i_row = int(cellIndex/layerDim);
@@ -116,26 +110,71 @@ class visnet(object):
             j_rows = np.random.normal(i_row*layerGDim/layerDim, fanInRadSigma_connGtoInput, nConnections_connGtoInput).astype(int)%layerGDim;
             j_cols = np.random.normal(i_col*layerGDim/layerDim, fanInRadSigma_connGtoInput, nConnections_connGtoInput).astype(int)%layerGDim;
             
-            #j_row = int(i_row*layerGDim/layerDim);
-            #j_col = int(i_col*layerGDim/layerDim);
             GCellsIndex = layerGDim*j_rows + j_cols;
             self.connGtoInput[theta].connect(GCellsIndex,cellIndex);
-            #self.connGtoInput[theta].connect('i==cellIndex', p=pConnections_connGtoInput)
-            #self.connGtoInput[theta].connect(connCond2, p=pConnections_connGtoInput)
 
-        #self.connGtoInput[theta].connect(True, p=prob_GtoInput)
-
-        #self.connGtoInput[theta].delay[:, :] = br.rand() * delayConst_G2Input if delayRandOn else delayConst_G2Input
-        self.connGtoInput[theta].delay[:, :] = br.rand(len(self.connGtoInput[theta].delay[:, :])) * delayConst_G2Input if delayRandOn else delayConst_G2Input
+        for theta in range(len(thetaList)):
+            self.connGtoInput[theta].delay[:, :] = br.rand(len(self.connGtoInput[theta].delay[:, :])) * delayConst_G2Input if delayRandOn else delayConst_G2Input
+            self.connGtoInput[theta].w[:, :] = br.rand(len(self.connGtoInput[theta].w[:, :])) * conductanceConst_G2L if weightRandOn else conductanceConst_G2L;
         self.net.add(self.connGtoInput)
 
+
+
+
+        # Connecting neurons within layers (excitatory to inhibitory and vv)
+        self.connExIn = []
+        self.connInEx = []
+        # connRecIn = []
+        if ReccurentOn:
+            connRecEx = []
+
+        for layer in range(0, nLayers):
+            #Excitatory -> Inhibitory
+            self.connExIn.append(
+                br.Synapses(self.layers[layer], self.inhibLayers[layer],
+                            eqs_Syn, pre=eqs_ExPre))
+            for cellIndex in range(inhibLayerDim*inhibLayerDim):
+                self.connExIn[layer].connect('j==cellIndex', p=pConnections_connExIn)
+            self.connExIn[layer].w[:, :] = br.rand(len(self.connExIn[layer].w[:, :])) * conductanceConst_E2I if weightRandOn else conductanceConst_E2I
+            self.connExIn[layer].delay[:, :] = br.rand(len(self.connExIn[layer].delay[:, :])) * delayConst_connExIn if delayRandOn else delayConst_connExIn
+
+
+            #Inhibitory -> Excitatotry 
+            self.connInEx.append(
+                br.Synapses(self.inhibLayers[layer], self.layers[layer],
+                            eqs_Syn, pre=eqs_InPre))
+
+            for cellIndex in range(layerDim*layerDim):
+                self.connInEx[layer].connect('j==cellIndex', p=pConnections_connInEx);
+            self.connInEx[layer].w[:, :] = br.rand(len(self.connInEx[layer].w[:, :])) * conductanceConst_I2E if weightRandOn else conductanceConst_I2E
+            self.connInEx[layer].delay[:, :] = br.rand(len(self.connInEx[layer].delay[:, :])) * delayConst_connInEx if delayRandOn else delayConst_connInEx
+
+            #Excitatory -> Excitatory
+            if ReccurentOn:
+                self.connRecEx.append(
+                    br.Synapses(self.layers[layer], self.layers[layer],
+                                eqs_Syn, pre=eqs_ExPre))
+     
+                for cellIndex in range(layerDim*layerDim):
+                    self.connRecEx[layer].connect('j==cellIndex', p=pConnections_connRecEx);
+                self.connRecEx[layer].w[:, :] = br.rand(len(self.connRecEx[layer].w[:, :])) * conductanceConst_E2E if weightRandOn else conductanceConst_E2E
+                self.connRecEx[layer].delay[:, :] = br.rand(len(self.connRecEx[layer].delay[:, :])) * delayConst_connRecEx if delayRandOn else delayConst_connRecEx
+    
+        self.net.add(self.connExIn)
+        self.net.add(self.connInEx)
+        if ReccurentOn:
+            self.net.add(self.connRecEx)
+
+
+
+        
+        #STDP conn        
         # Connecting neurons between excitatory layers
-
         self.connBottomUp = []
-        #self.connTopDown = []
-
+        if topDownOn:
+            self.connTopDown = []
+            
         for layer in range(nLayers - 1):
-
             self.connBottomUp.append(br.Synapses(
                 self.layers[layer],
                 self.layers[layer + 1],
@@ -145,79 +184,34 @@ class visnet(object):
             )
             )
 
-
             for cellIndex in range(layerDim*layerDim):
                 self.connBottomUp[layer].connect('i==cellIndex', p=pConnections_connBottomUp)
-            #self.connBottomUp[layer].connect(True, p=prob_connBottomUp)
-            #self.connBottomUp[layer].w[:, :] = br.rand() * gmax
             self.connBottomUp[layer].w[:, :] = br.rand(len(self.connBottomUp[layer].w[:, :])) * gmax
-            #self.connBottomUp[layer].delay[:, :] = br.rand() * delayConst_connBottomUp if delayRandOn else delayConst_connBottomUp
             self.connBottomUp[layer].delay[:, :] = br.rand(len(self.connBottomUp[layer].delay[:, :])) * delayConst_connBottomUp if delayRandOn else delayConst_connBottomUp
-
-#             self.connTopDown.append(br.Synapses(
-#                 self.layers[layer + 1],
-#                 self.layers[layer],
-#                 eqs_stdpSyn,
-#                 eqs_stdpPre,
-#                 eqs_stdpPost
-#             )
-#             )
-# 
-#             self.connTopDown[layer].connect(True, p=0.1)
-#             self.connTopDown[layer].w[:, :] = br.rand() * Apre
-#             self.connTopDown[layer].delay[:, :] = br.rand() * 10 * ms
-
+            
+            if topDownOn:
+                self.connTopDown.append(br.Synapses(
+                    self.layers[layer + 1],
+                    self.layers[layer],
+                    eqs_stdpSyn,
+                    pre = eqs_stdpPre,
+                    post = eqs_stdpPost
+                )
+                )
+                
+                for cellIndex in range(layerDim*layerDim):
+                    self.connTopDown[layer].connect('i==cellIndex', p=pConnections_connTopDown)
+                self.connTopDown[layer].w[:, :] = br.rand(len(self.connTopDown[layer].w[:, :])) * gmax
+                self.connTopDown[layer].delay[:, :] = br.rand(len(self.connTopDown[layer].delay[:, :])) * delayConst_connTopDown if delayRandOn else delayConst_connTopDown
         self.net.add(self.connBottomUp)
-        # self.net.add(self.connTopDown)
-
-        # Connecting neurons within layers (excitatory to inhibitory and vv)
-
-        self.connExIn = []
-        self.connInEx = []
-        # connRecIn = []
-        #connRecEx = []
-
-        for layer in range(0, nLayers):
-            #Excitatory -> Inhibitory
-            self.connExIn.append(
-                br.Synapses(self.layers[layer], self.inhibLayers[layer],
-                            eqs_E2ISyn, pre=eqs_E2IPre))
-            for cellIndex in range(inhibLayerDim*inhibLayerDim):
-                self.connExIn[layer].connect('j==cellIndex', p=pConnections_connExIn)
-            #self.connExIn[layer].connect(True, p=prob_connExIn)
-            #self.connExIn[layer].delay[:, :] = br.rand() * delayConst_connExIn if delayRandOn else delayConst_connExIn
-            self.connExIn[layer].delay[:, :] = br.rand(len(self.connExIn[layer].delay[:, :])) * delayConst_connExIn if delayRandOn else delayConst_connExIn
-
-
-            #Inhibitory -> Excitatotry 
-            self.connInEx.append(
-                br.Synapses(self.inhibLayers[layer], self.layers[layer],
-                            eqs_I2ESyn, pre=eqs_I2EPre))
-
-            for cellIndex in range(layerDim*layerDim):
-                self.connInEx[layer].connect('j==cellIndex', p=pConnections_connInEx);
-            #self.connInEx[layer].connect(True, p=prob_connInEx)
-            self.connInEx[layer].delay[:, :] = br.rand(len(self.connInEx[layer].delay[:, :])) * delayConst_connInEx if delayRandOn else delayConst_connInEx
-            
-            #Excitatory -> Excitatory
-#             self.connRecEx.append(
-#                 br.Synapses(self.layers[layer], self.layers[layer],
-#                             eqs_E2ESyn, pre=eqs_E2EPre))
-# 
-#             for cellIndex in range(layerDim*layerDim):
-#                 self.connRecEx[layer].connect('j==cellIndex', p=pConnections_connRecEx);
-#             self.connRecEx[layer].delay[:, :] = br.rand() * delayConst_connRecEx if delayRandOn else delayConst_connRecEx
-            
-            
-        self.net.add(self.connExIn)
-        self.net.add(self.connInEx)
-#         self.net.add(self.connRecEx)
+        if topDownOn:
+            self.net.add(self.connTopDown)
         
         
+
+        #binding layer conn
         self.connExBind = []
-        
         for layer in range(0, nLayers):
-
             self.connExBind.append(br.Synapses(
                 self.layers[layer],
                 self.bindingLayer,
@@ -230,10 +224,7 @@ class visnet(object):
             for cellIndex in range(layerDim*layerDim):
                 self.connExBind[layer].connect('j==cellIndex', p=pConnections_connExBind)
             
-            #self.connExBind[layer].connect(True, p=prob_connExBind)
-            #self.connExBind[layer].w[:, :] = br.rand() * gmax_bind
             self.connExBind[layer].w[:, :] = br.rand(len(self.connExBind[layer].w[:, :])) * gmax_bind
-            #self.connExBind[layer].delay[:, :] = br.rand() * delayConst_connExBind if delayRandOn else delayConst_connExBind
             self.connExBind[layer].delay[:, :] = br.rand(len(self.connExBind[layer].delay[:, :])) * delayConst_connExBind if delayRandOn else delayConst_connExBind
         self.net.add(self.connExBind)
 
@@ -241,24 +232,19 @@ class visnet(object):
     def buildSpikeMonitors(self):
 
         # gabor layer
-
         self.spikesG = []
         for theta in range(0, len(thetaList)):
             self.spikesG.append(br.SpikeMonitor(self.layerG[theta]))
         self.net.add(self.spikesG)
 
-        # tmp = self.layerG[0];
-        # testSpikes = SpikeMonitor(tmp);
 
         # excitatory layers
-
         self.spkdetLayers = []
         for layer in range(0, nLayers):
             self.spkdetLayers.append(br.SpikeMonitor(self.layers[layer]))
         self.net.add(self.spkdetLayers)
 
         # inhibitory layers
-
         self.spkdetInhibLayers = []
         for layer in range(0, nLayers):
             self.spkdetInhibLayers.append(
@@ -288,6 +274,7 @@ class visnet(object):
                     # print vnet.layerG[index_filter].rates
 
     def traceReset(self):
+        #init neurons
         for layer in range(nLayers):
             self.layers[layer].v = 'Vr'  # + br.rand() * (Vt - Vr)'
             self.layers[layer].ge = 0
@@ -295,16 +282,20 @@ class visnet(object):
             self.inhibLayers[layer].v = 'Vr'  # + br.rand() * (Vt - Vr)'
             self.inhibLayers[layer].ge = 0
             self.inhibLayers[layer].gi = 0
-            self.connExBind[layer].Apre[:,:] = 0;
-            self.connExBind[layer].Apost[:,:] = 0;
-            
-        for layer in range(0, nLayers - 1):
-            self.connBottomUp[layer].Apre[:,:] = 0;
-            self.connBottomUp[layer].Apost[:,:] = 0;
-
+        
         self.bindingLayer.v = 'Vr'  # + br.rand() * (Vt - Vr)'
         self.bindingLayer.ge = 0
         self.bindingLayer.gi = 0
+        
+        #init syn
+        for layer in range(nLayers):
+            self.connExBind[layer].Apre_bind[:,:] = 0;
+            self.connExBind[layer].Apost_bind[:,:] = 0;
+            
+        for layer in range(nLayers - 1):
+            self.connBottomUp[layer].Apre[:,:] = 0;
+            self.connBottomUp[layer].Apost[:,:] = 0;
+
         print "Trace reset"
         
     def setSynapticPlasticity(self, synapticBool):
@@ -333,11 +324,43 @@ class visnet(object):
             if typeOfWeightNormalization==1:
                 w_tmp = self.connBottomUp[layer].w[:, :];
                 w_norm =  np.sqrt(np.sum(np.square(w_tmp)));
-                self.connBottomUp[layer].w[:, :] = w_tmp/w_norm*gmax;
+                self.connBottomUp[layer].w[:, :] = w_tmp/w_norm*gmax*10;
+                
+                w_tmp = self.connExBind[layer].w[:, :];
+                w_norm =  np.sqrt(np.sum(np.square(w_tmp)));
+                self.connExBind[layer].w[:, :] = w_tmp/w_norm*gmax_bind*10;
             elif typeOfWeightNormalization==2:
                 w_tmp = self.connBottomUp[layer].w[:, :];
                 self.connBottomUp[layer].w[:, :] = (w_tmp - np.min(w_tmp))/(np.max(w_tmp)-np.min(w_tmp))*gmax;
+
+                w_tmp = self.connExBind[layer].w[:, :];
+                self.connExBind[layer].w[:, :] = (w_tmp - np.min(w_tmp))/(np.max(w_tmp)-np.min(w_tmp))*gmax_bind;
             
         
+    def saveStates(self,dest,itr):
+        synStates_GtoInput = []
+        for theta in range(0, len(thetaList)):
+            synStates_GtoInput.append(self.connGtoInput[theta].get_states(['i_pre','i_post','delay','w']))
         
-
+        synStates_BottomUp = []
+        for layer in range(nLayers-1):
+            synStates_BottomUp.append(self.connBottomUp[layer].get_states(['i_pre','i_post','delay','w']));
+        
+        synStates_InEx = []
+        for layer in range(nLayers):
+            synStates_InEx.append(self.connInEx[layer].get_states(['i_pre','i_post','delay','w']));
+            
+        synStates_ExIn = []
+        for layer in range(nLayers):
+            synStates_ExIn.append(self.connExIn[layer].get_states(['i_pre','i_post','delay','w']));
+            
+        synStates_ExBind = []
+        for layer in range(nLayers):
+            synStates_ExBind.append(self.connExBind[layer].get_states(['i_pre','i_post','delay','w']));
+        
+        pickle.dump(synStates_GtoInput, open(dest + str(itr)+"_blankNet_G2L.pkl", "wb"));
+        pickle.dump(synStates_BottomUp, open(dest + str(itr)+"_blankNet_L2L.pkl", "wb"));
+        pickle.dump(synStates_InEx, open(dest + str(itr)+"_blankNet_I2E.pkl", "wb"));
+        pickle.dump(synStates_ExIn, open(dest + str(itr)+"_blankNet_E2I.pkl", "wb"));
+        pickle.dump(synStates_ExBind, open(dest + str(itr)+"_blankNet_L2B.pkl", "wb"));
+        
