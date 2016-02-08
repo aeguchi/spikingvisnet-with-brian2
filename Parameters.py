@@ -23,8 +23,10 @@ imageFolder = "simpleImages2obj"
 #STRUCTURE OF THE NETWORK
 nLayers = 2
 layerGDim = 20;
-layerDim = 20   # size of layer1 in neurons
-inhibLayerDim = 10;
+layerDim = 10   # size of layer1 in neurons
+inhibLayerDim = 5;
+topDownOn = False;
+ReccurentOn = False;
 
 #simulationTime = 100;
 trainingTime = 10# * ms;
@@ -45,7 +47,7 @@ paddingColor = 128;
 
 
 #neuron params
-taum = 10*ms
+taum = 20.00*ms;
 taue = 5*ms;
 taui = 10*ms;
 Vt = -54*mV
@@ -63,7 +65,7 @@ Ee = 0*mV;
 # '''
 
 eqn_membran = '''
-dv/dt = ((ge + gi) * (Ee-Vr) + El - v) / taum : volt (unless refractory)
+dv/dt = ((ge - gi) * (Ee-Vr) + El - v) / taum : volt (unless refractory)
 dge/dt = -ge/taue : 1 #incoming excitatory voltage
 dgi/dt = -gi/taui : 1 #incoming inhibitory voltage
 '''
@@ -80,52 +82,56 @@ delayConst_connExIn = 20*ms;
 delayConst_connInEx = 20*ms;
 delayConst_connExBind = 20*ms;
 
+delayConst_connTopDown = 20*ms;
+delayConst_connRecEx = 20*ms;
+
 #nConnections_connGtoInput = 50;
 nConnections_connGtoInput = 10;
 fanInRadSigma_connGtoInput = 1;
-nConnections_connBottomUp = 50;
-nConnections_connExIn = 10;
-nConnections_connInEx = 10;
-nConnections_connExBind = 10;
+#nConnections_connBottomUp = 50;
+#nConnections_connExIn = 10;
+#nConnections_connInEx = 10;
+#nConnections_connExBind = 10;
+nConnections_connTopDown = 0;
+nConnections_connRecEx = 0;
 
-#pConnections_connGtoInput = float(nConnections_connGtoInput)/(layerGDim*layerGDim);
-pConnections_connBottomUp = float(nConnections_connBottomUp)/(layerDim*layerDim);
-pConnections_connExIn = float(nConnections_connExIn)/(layerDim*layerDim);
-pConnections_connInEx = float(nConnections_connInEx)/(inhibLayerDim*inhibLayerDim);
-pConnections_connExBind = float(nConnections_connExBind)/(layerDim*layerDim);
+
+pConnections_connBottomUp = 0.1;
+pConnections_connExIn = 0.1;
+pConnections_connInEx = 0.1;
+pConnections_connExBind = 0.1;
+# pConnections_connBottomUp = float(nConnections_connBottomUp)/(layerDim*layerDim);
+# pConnections_connExIn = float(nConnections_connExIn)/(layerDim*layerDim);
+# pConnections_connInEx = float(nConnections_connInEx)/(inhibLayerDim*inhibLayerDim);
+# pConnections_connExBind = float(nConnections_connExBind)/(layerDim*layerDim);
+pConnections_connTopDown = float(nConnections_connTopDown)/(layerDim*layerDim);
+pConnections_connInEx = float(nConnections_connRecEx)/(layerDim*layerDim);
+
 
 #Synaptic Connections from Gabor to Layer
-we = (0.27/10) # excitatory synaptic weight
-wi = (-4.5/30) # inhibitory synaptic weight
+eqs_Syn = '''w:1'''
+eqs_InPre = '''gi += w''';
+eqs_ExPre ='''ge += w'''
 
-conductanceConst_G2L = 10;
-eqs_G2LSyn = '''plastic: boolean (shared)'''
-eqs_G2LPre ='''ge += conductanceConst_G2L*we'''
-
-conductanceConst_E2I = 2;
-eqs_E2ISyn = '''w:1''';
-eqs_E2IPre = '''ge += conductanceConst_E2I*we''';
-
-# conductanceConst_E2E = 1;
-# eqs_E2ESyn = '''w:1'''
-# eqs_E2EPre = '''ge += conductanceConst_E2E*we''';
-
-conductanceConst_I2E = 1;
-eqs_I2ESyn = '''w:1'''
-eqs_I2EPre = '''gi += conductanceConst_I2E*wi''';
+#we = (0.27/10) # excitatory synaptic weight
+#wi = (4.5/30) # inhibitory synaptic weight
+conductanceConst_G2L = 0.4;#20*we;
+conductanceConst_E2I = 0.2;#10*we;
+conductanceConst_E2E = 0;#*we;
+conductanceConst_I2E = -0.075;#0.5*wi;
+weightRandOn = False; #for G2L, E2I, E2E, I2E
 
 
     
 #Synaptic Connections with STDP ; for usage, see http://brian2.readthedocs.org/en/2.0b4/examples/synapses.STDP.html
-conductanceConst_L2L = 1;
 tau_syn_const = 1;
 taupre = 20*ms  * tau_syn_const;
 taupost = 20*ms  * tau_syn_const;
 # wmax = 20 *mV #200 *mV
 #Apre = 3.0 *mV #20*mV
 #Apost = -Apre*taupre/taupost*1.05
-lRate = 1#0.001
-gmax = .05#.01
+lRate = 0.1#0.001
+gmax = 0.5#.01
 dApre = 0.1
 ratioPreToPost = 1.2;
 dApost = -dApre * taupre / taupost * ratioPreToPost
@@ -139,7 +145,7 @@ eqs_stdpSyn = '''w : 1
                 plastic: boolean (shared)'''
                 
 eqs_stdpPre ='''
-            ge += conductanceConst_L2L*w
+            ge += w
             Apre += dApre
             w = clip(w+plastic*Apost*lRate, 0, gmax)
              '''            
@@ -152,22 +158,26 @@ eqs_stdpPost ='''
 
 
 
-conductanceConst_L2B = 2;
-gmax_bind = .5
+gmax_bind = .1
+dApre_bind = 0.1
+ratioPreToPost_bind = 1.2;
+dApost_bind = -dApre_bind * taupre / taupost * ratioPreToPost_bind
+dApost_bind *= gmax_bind
+dApre_bind *= gmax_bind
 
 eqs_stdpSyn_bind = '''w : 1
-                dApre/dt = -Apre / taupre : 1 (event-driven)
-                dApost/dt = -Apost / taupost : 1 (event-driven)
+                dApre_bind/dt = -Apre_bind / taupre : 1 (event-driven)
+                dApost_bind/dt = -Apost_bind / taupost : 1 (event-driven)
                 plastic: boolean (shared)'''
                 
 eqs_stdpPre_bind ='''
-            ge += conductanceConst_L2B*w
-            Apre += dApre
-            w = clip(w+plastic*Apost*lRate, 0, gmax_bind)
+            ge += w
+            Apre_bind += dApre_bind
+            w = clip(w+plastic*Apost_bind*lRate, 0, gmax_bind)
              '''            
 eqs_stdpPost_bind ='''
-             Apost += dApost
-             w = clip(w+plastic*Apre*lRate, 0, gmax_bind)
+             Apost_bind += dApost_bind
+             w = clip(w+plastic*Apre_bind*lRate, 0, gmax_bind)
              '''
 
 

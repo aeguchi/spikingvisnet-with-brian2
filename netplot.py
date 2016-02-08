@@ -135,7 +135,10 @@ class plotter(object):
     def plotWeight(self,WeightRec):
         self.figW = plt.figure(3, figsize=(20, 10));
         plt.clf();
+        plt.subplot(1,2,1)
         plt.plot(WeightRec);
+        plt.subplot(1,2,2)
+        plt.hist(self.vnet.connBottomUp[0].w[:, :])
     
     def saveFigs(self,svname,plotActivities=False,plotGabor=False,plotW=False):
         if plotActivities:
