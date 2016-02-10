@@ -138,7 +138,7 @@ def runSimulation():
                     if plotActivitiesAtTraining:
                         vplotter.plotLayers(inputImage, index_img, timeBegin,simulationTime)    
                     if (plotGaborAtTraining or plotActivitiesAtTraining):
-                        plt.show(mpdePlotShow);
+                        #plt.show(modePlotShow);
                         vplotter.saveFigs(os.path.split(os.path.realpath(__file__))[0] + "/Results/"+experimentName+"/"+str(count)+"_p"+str(phase)+"_o"+str(index_obj)+"_t"+str(index_trans),plotActivities=plotActivitiesAtTraining,plotGabor=plotGaborAtTraining);
                     WeightRec = np.concatenate((WeightRec,[vnet.connBottomUp[0].w[:, :]]),axis=0);
                     if plotWeightsAtTraining:

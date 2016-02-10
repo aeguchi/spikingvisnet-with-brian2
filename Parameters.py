@@ -10,10 +10,13 @@ from brian2 import ms, mV, Hz
 # nStim = 2
 # nTrans = 8
 
-mpdePlotShow = 0; #0: continuous, 1: interrupt
+modePlotShow = 0; #0: continuous, 1: interrupt
 plotGaborAtTraining = False;
 plotActivitiesAtTraining = False;
 plotWeightsAtTraining = True;
+plotPopulationRateOn = True;
+
+ratioTakenToCalcFR = 0.5;
 
 #experimentName = "BO_single"
 #imageFolder = "BO_single_imgs"
@@ -118,7 +121,7 @@ eqs_ExPre ='''ge += w'''
 conductanceConst_G2L = 0.4;#20*we;
 conductanceConst_E2I = 0.2;#10*we;
 conductanceConst_E2E = 0;#*we;
-conductanceConst_I2E = -0.075;#0.5*wi;
+conductanceConst_I2E = 0.075;#0.5*wi;
 weightRandOn = False; #for G2L, E2I, E2E, I2E
 
 
