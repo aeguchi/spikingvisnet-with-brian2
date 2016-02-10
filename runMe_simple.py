@@ -2,7 +2,7 @@ from Parameters import *
 import main
 from brian2 import ms
 
-experimentName="test_norm1_300"
+experimentName="test_norm1_itr300_gmax0.25"
 #imageFolder = "simpleImagesNoTrans"
 imageFolder = "simpleImagesNoTrans"
 plotGaborAtTraining = False;
@@ -12,8 +12,11 @@ plotWeightsAtTraining = True;
 #simulation settings
 trainingTime = 200;
 trainingEpochs = 300;
+testingTime = 5000;
 
 typeOfWeightNormalization = 1;
+gmax = 0.25;
+gmax_bind = 0.25
 #layer settings
 #layerGDim = 20;
 #inhibLayerDim = 5;

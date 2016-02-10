@@ -3,7 +3,7 @@
 # description: a class to plot results
 
 import pylab as plt
-
+import brian2 as br
 #from Parameters import *
 
 
@@ -20,7 +20,7 @@ class plotter(object):
 
     def plotGaborInput(self, img, index_img, res, res_norm,timeBegin,simulationTime):
 
-        self.figG = plt.figure(1 , figsize=(20, 10))
+        self.figG = plt.figure(1 , figsize=(40, 20),dpi=500);
         plt.clf();
         # plot input Image
         plt.subplot(5, 3, 1)
@@ -65,15 +65,15 @@ class plotter(object):
                     plt.colorbar()
 
     def plotLayers(self, img, index_img, timeBegin,simulationTime):
-        self.figL = plt.figure(2, figsize=(20, 10));
+        self.figL = plt.figure(2 , figsize=(40, 20),dpi=500);
         plt.clf();
         plt.title('Input')
-        plt.subplot(nLayers + 1, 3, 1)
+        plt.subplot(nLayers*2 + 1, 3, 1)
         plt.imshow(img, cmap='gray', vmin=0, vmax=255, interpolation='none')
         
         # plot binding layer
         # plot spike raster of binding layer
-        plt.subplot(nLayers + 1, 3, 2)
+        plt.subplot(nLayers*2 + 1, 3, 2)
         plt.title('Binding layer')
         plt.plot(
             self.vnet.spkdetBindingLayer.t / ms,
@@ -83,7 +83,7 @@ class plotter(object):
         
         # plot FR map of bindingLayer
         bind_FRMap = self.vnet.getFiringRateMap(layerDim,self.vnet.spkdetBindingLayer,timeBegin,simulationTime)
-        plt.subplot(nLayers + 1, 3, 3)
+        plt.subplot(nLayers*2 + 1, 3, 3)
         plt.imshow(
             bind_FRMap, cmap='jet', interpolation='none', vmin=0, vmax=bind_FRMap.max())
         plt.colorbar()
@@ -93,7 +93,7 @@ class plotter(object):
 
         for layer in range(0, nLayers):
             # plot spike raster of excitatory
-            ax = plt.subplot(nLayers + 1, 4, (nLayers - layer) * 4 + 1)
+            ax = plt.subplot(nLayers*2 + 1, 4, (nLayers*2 - layer*2-1) * 4 + 1)
             plt.title('Excitatory layer ' + str(layer))
             plt.plot(
                 self.vnet.spkdetLayers[layer].t / ms,
@@ -101,18 +101,30 @@ class plotter(object):
             plt.ylim([0, layerDim * layerDim - 1])
             plt.xlim([timeBegin, timeBegin+simulationTime])
             
-            # plot FR map of excitatory
-            ex_FRMap = self.vnet.getFiringRateMap(layerDim,self.vnet.spkdetLayers[layer],timeBegin,simulationTime)
+            if plotPopulationRateOn:
+                plt.subplot(nLayers*2 + 1, 4, (nLayers*2 - layer*2) * 4 + 1)
+                window = 20*ms
+                popMon = self.vnet.popMonLayers[layer];
+                window_length = int(window/br.defaultclock.dt)
+                cumsum = np.cumsum(np.insert(popMon.rate, 0, 0))
+                binned_rate = (cumsum[window_length:] - cumsum[:-window_length]) / window_length
+                plt.bar(popMon.t[window_length-1:]/ms, binned_rate);
+                plt.xlim([timeBegin, timeBegin+simulationTime])
             
-            plt.subplot(nLayers + 1, 4, (nLayers - layer) * 4 + 2)
+                       
+            # plot FR map of excitatory
+            ex_FRMap = self.vnet.getFiringRateMap(layerDim,self.vnet.spkdetLayers[layer],timeBegin,simulationTime)            
+            plt.subplot(nLayers*2 + 1, 4, (nLayers*2 - layer*2-1) * 4 + 2)
             plt.imshow(
                 ex_FRMap, cmap='jet', interpolation='none', vmin=0, vmax=ex_FRMap.max())
             plt.colorbar()
             #FRrecTmp[layer + 1] = ex_FRMap;
             
             
+            
+            
             # plot spike raster of inhibitory
-            ax = plt.subplot(nLayers + 1, 4, (nLayers - layer) * 4 + 3)
+            ax = plt.subplot(nLayers*2 + 1, 4, (nLayers*2 - layer*2-1) * 4 + 3)
 
             plt.title('Inhibitory layer ' + str(layer))
             plt.ylim([0, inhibLayerDim * inhibLayerDim - 1])
@@ -125,7 +137,7 @@ class plotter(object):
             
             inhib_FRMap = self.vnet.getFiringRateMap(inhibLayerDim,self.vnet.spkdetInhibLayers[layer],timeBegin,simulationTime)
 
-            plt.subplot(nLayers + 1, 4, (nLayers - layer) * 4 + 4)
+            plt.subplot(nLayers*2 + 1, 4, (nLayers*2 - layer*2-1) * 4 + 4)
             plt.imshow(
                 inhib_FRMap, cmap='jet', interpolation='none', vmin=0,
                 vmax=inhib_FRMap.max())
@@ -133,10 +145,11 @@ class plotter(object):
             plt.colorbar()
 
     def plotWeight(self,WeightRec):
-        self.figW = plt.figure(3, figsize=(20, 10));
+        self.figW = plt.figure(3 , figsize=(40, 20),dpi=500);
         plt.clf();
         plt.subplot(1,2,1)
         plt.plot(WeightRec);
+        plt.ylim([gmax*-0.01,gmax*1.01])
         plt.subplot(1,2,2)
         plt.hist(self.vnet.connBottomUp[0].w[:, :])
     

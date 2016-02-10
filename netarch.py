@@ -240,9 +240,12 @@ class visnet(object):
 
         # excitatory layers
         self.spkdetLayers = []
+        self.popMonLayers =[]
         for layer in range(0, nLayers):
             self.spkdetLayers.append(br.SpikeMonitor(self.layers[layer]))
+            self.popMonLayers.append(br.PopulationRateMonitor(self.layers[layer]))
         self.net.add(self.spkdetLayers)
+        self.net.add(self.popMonLayers)
 
         # inhibitory layers
         self.spkdetInhibLayers = []
@@ -312,9 +315,9 @@ class visnet(object):
             for col_tmp in range(lDim):
                 index_tmp = row_tmp * lDim + col_tmp
                 if (len(spikeTrains[index_tmp]) == 0):
-                    condition = spikeTrains[index_tmp] > timeBegin
+                    condition = spikeTrains[index_tmp] > timeBegin + simulationTime*ratioTakenToCalcFR
                 else:
-                    condition = spikeTrains[index_tmp] > timeBegin * ms
+                    condition = spikeTrains[index_tmp] > (timeBegin +simulationTime * ratioTakenToCalcFR) * ms
                 FRMap[row_tmp][col_tmp] = len(np.extract(condition, spikeTrains[index_tmp]));
         FRMap = FRMap/(float(simulationTime)/1000);
         return FRMap;

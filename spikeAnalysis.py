@@ -5,7 +5,7 @@ import pickle
 import os;
 import errno
 
-experimentName = 'test_norm1';
+experimentName = 'test_norm1_500';
 SpikeData = ['Spikes_e.pkl', 'Spikes_i.pkl', 'Spikes_b.pkl', 'Spikes_g.pkl'];
 spikes_e = pickle.load(open(os.path.split(os.path.realpath(__file__))[0] + "/Results/" + experimentName + "/" + SpikeData[0], "rb"));
 netState_L2L = pickle.load(open(os.path.split(os.path.realpath(__file__))[0] + "/Results/" + experimentName + "/0_blankNet_L2L.pkl", "rb"));
@@ -20,8 +20,8 @@ delayList = netState_L2L[0]['delay'];
 
 # analysing cell index==0 for test development
 nCells = 100;
-t_min = 1000;
-t_max = 2000;
+t_min = 4000;#319000;
+t_max = 5000;
 i_post = 1;
 max_delay = 20;
 gmax = 0.5
