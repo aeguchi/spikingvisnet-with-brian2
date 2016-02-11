@@ -14,7 +14,7 @@ modePlotShow = 0; #0: continuous, 1: interrupt
 plotGaborAtTraining = False;
 plotActivitiesAtTraining = False;
 plotWeightsAtTraining = True;
-plotPopulationRateOn = True;
+plotPopulationRateOn = False;
 
 ratioTakenToCalcFR = 0.5;
 
@@ -51,15 +51,16 @@ paddingColor = 128;
 
 #neuron params
 taum = 20.00*ms;
-taue = 5*ms;
-taui = 10*ms;
-Vt = -54*mV
-Vr = -60*mV
-El = -60*mV#-49*mV
+taue = 2*ms;
+taui = 5*ms;
+Vt = -53*mV #firing threshold potential
+Vr = -74*mV #resting potential
+El = -60*mV #-49*mV
 refractoryPeriod = 2*ms;
 Rmax = 30 * Hz  # max FR
-Ee = 0*mV;
 
+Ee = 0*mV; #excitatory reversal potential
+Vi = -70*mV; #inhibitory reversal potential
 
 # eqn_membran = '''
 # dv/dt  = (ve+vi-(v-El))/taum : volt (unless refractory)
@@ -67,10 +68,17 @@ Ee = 0*mV;
 # dvi/dt = -vi/taui : volt (unless refractory) #incoming inhibitory voltage
 # '''
 
+#eqn_membran = '''
+#dv/dt = ((ge - gi) * (Ee-Vr) + El - v) / taum : volt (unless refractory)
+#dge/dt = -ge/taue : 1 #incoming excitatory voltage
+#dgi/dt = -gi/taui : 1 #incoming inhibitory voltage
+#'''
+
 eqn_membran = '''
-dv/dt = ((ge - gi) * (Ee-Vr) + El - v) / taum : volt (unless refractory)
+dv/dt =  ((Vr -v) + (ge - gi) * (Ee-Vr) + Iext) / taum : volt (unless refractory)
 dge/dt = -ge/taue : 1 #incoming excitatory voltage
 dgi/dt = -gi/taui : 1 #incoming inhibitory voltage
+Iext : volt
 '''
 
 

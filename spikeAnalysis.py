@@ -5,10 +5,10 @@ import pickle
 import os;
 import errno
 
-experimentName = 'test_norm1_500';
+experimentName = 'test_V1_itr300';
 SpikeData = ['Spikes_e.pkl', 'Spikes_i.pkl', 'Spikes_b.pkl', 'Spikes_g.pkl'];
 spikes_e = pickle.load(open(os.path.split(os.path.realpath(__file__))[0] + "/Results/" + experimentName + "/" + SpikeData[0], "rb"));
-netState_L2L = pickle.load(open(os.path.split(os.path.realpath(__file__))[0] + "/Results/" + experimentName + "/0_blankNet_L2L.pkl", "rb"));
+netState_L2L = pickle.load(open(os.path.split(os.path.realpath(__file__))[0] + "/Results/" + experimentName + "/502_blankNet_L2L.pkl", "rb"));
 
 preSynConn = netState_L2L[0]['i_pre'];
 postSynConn = netState_L2L[0]['i_post'];
@@ -20,11 +20,10 @@ delayList = netState_L2L[0]['delay'];
 
 # analysing cell index==0 for test development
 nCells = 100;
-t_min = 4000;#319000;
-t_max = 5000;
-i_post = 1;
+t_min = 306000;#319000;
+t_max = 308000;
 max_delay = 20;
-gmax = 0.5
+gmax = 0.25
 
 try:
     os.makedirs(os.path.split(os.path.realpath(__file__))[0] + "/Results/" + experimentName + "/hist"+str(t_min)+"-"+str(t_max));
@@ -32,7 +31,7 @@ except OSError as exception:
     if exception.errno != errno.EEXIST:
         raise
 
-fig_hist = plt.figure(0 , figsize=(40, 40),dpi=500);
+fig_hist = plt.figure(1 , figsize=(40, 40),dpi=500);
 for i_post in range(100):
     print i_post
     plt.clf();
@@ -78,7 +77,7 @@ for i_post in range(100):
 
             tmp = np.extract(prevSpikeTime[i_pre]!=0,prevSpikeTime[i_pre]);
             if len(tmp)>1:
-                plt.hist(tmp,range = (0,20),color=c);
+                plt.hist(tmp,bins=5,range = (0,20),color=c);
                 
             if len(preList)>0:
                 plt.hold(True);

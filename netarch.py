@@ -45,7 +45,9 @@ class visnet(object):
                 br.NeuronGroup(layerDim * layerDim,  # N neurons
                                eqn_membran,  # differential equations
                                threshold='v>Vt',  # spike condition
-                               reset='v = Vr',  # code to execute on reset
+                               reset='''v = Vr
+                                ge = 0
+                                gi = 0''',  # code to execute on reset
                                refractory=refractoryPeriod  # length of refractory period
                                )
             )
@@ -240,12 +242,15 @@ class visnet(object):
 
         # excitatory layers
         self.spkdetLayers = []
-        self.popMonLayers =[]
+        if plotPopulationRateOn:
+            self.popMonLayers =[]
         for layer in range(0, nLayers):
             self.spkdetLayers.append(br.SpikeMonitor(self.layers[layer]))
-            self.popMonLayers.append(br.PopulationRateMonitor(self.layers[layer]))
+            if plotPopulationRateOn:
+                self.popMonLayers.append(br.PopulationRateMonitor(self.layers[layer]))
         self.net.add(self.spkdetLayers)
-        self.net.add(self.popMonLayers)
+        if plotPopulationRateOn:
+            self.net.add(self.popMonLayers)
 
         # inhibitory layers
         self.spkdetInhibLayers = []
