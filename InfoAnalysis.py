@@ -11,6 +11,7 @@ class InfoAnalysis(object):
         globals().update(borrowed_globals);
 
     def singleCellInfoAnalysis(self):
+        plt.figure(4 , figsize=(15, 5),dpi=100);
         plotAllSingleCellInfo = 0;
         
         #ExperimentName = "BO_single";
@@ -46,7 +47,7 @@ class InfoAnalysis(object):
                 
                 #settings
                 numBins =  5;##numTrans;   #can be adjusted
-                weightedAnalysis = 0;#exclude the selectivity by not responding to a particular stimulus
+                weightedAnalysis = 1;#exclude the selectivity by not responding to a particular stimulus
                 
                 #params for multiple cell info (to be implemented)
                 multi_cell_analysis = 0; #1 to run multi-cell info analysis
