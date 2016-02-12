@@ -4,7 +4,7 @@ from brian2 import ms
 import InfoAnalysis
 import pylab as plt
 
-experimentName="test_V1_norm2"
+experimentName="test_V1_norm1_itr500"
 #imageFolder = "simpleImagesNoTrans"
 imageFolder = "simpleImagesNoTrans"
 plotGaborAtTraining = False;
@@ -13,16 +13,21 @@ plotWeightsAtTraining = True;
 plotPopulationRateOn = False;
 
 #simulation settings
-trainingTime = 200;
+trainingTime = 200.0;
 trainingEpochs = 500;
-testingTime = 5000;
+testingTime = 5000.0;
 
-typeOfWeightNormalization = 2;
+typeOfWeightNormalization = 1;
+type1NormConst = 15.0;
+
+nConnections_connGtoInput = 20;
+fanInRadSigma_connGtoInput = 2;
+
 gmax = 2.0;
-gmax_bind = 2.0
-conductanceConst_E2I = 2.0#0.4;
-conductanceConst_I2E = 0.25;
-conductanceConst_G2L = 2.0
+gmax_bind = 1.0
+conductanceConst_E2I = 3.0#0.4;
+conductanceConst_I2E = 12.0;
+conductanceConst_G2L = 3.0
 #layer settings
 #layerGDim = 20;
 #inhibLayerDim = 5;

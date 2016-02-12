@@ -1,6 +1,6 @@
 # use glob syntax.
 syntax: glob
-
+Results/*
 images/temp/*
 *.pyc
 *inputGen.pl~

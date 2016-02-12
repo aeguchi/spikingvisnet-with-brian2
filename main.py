@@ -46,7 +46,6 @@ def runSimulation():
     ia = InfoAnalysis.InfoAnalysis(globals())
     
     
-    vnet.saveStates(os.path.split(os.path.realpath(__file__))[0] + "/Results/"+experimentName+"/", 0);
 
     
     fileList_train = np.genfromtxt(os.path.split(os.path.realpath(__file__))[0] + "/images/" + imageFolder + "/fileList_train.txt", dtype='str');
@@ -70,7 +69,9 @@ def runSimulation():
     if(weightNormalizationOn):
         vnet.weightNormalization();
     WeightRec = np.array([vnet.connBottomUp[0].w[:, :]]);
-    
+
+    vnet.saveStates(os.path.split(os.path.realpath(__file__))[0] + "/Results/"+experimentName+"/", count);
+
     for phase in phases:
         print "*** simulation phase: " + str(phase) + " ***";
         if phase==1:
@@ -132,6 +133,8 @@ def runSimulation():
                     vplotter.plotLayers(inputImage, index_img, timeBegin,simulationTime)
                     vplotter.saveFigs(os.path.split(os.path.realpath(__file__))[0] + "/Results/"+experimentName+"/"+str(count)+"_p"+str(phase)+"_o"+str(index_obj)+"_t"+str(index_trans),plotActivities=True,plotGabor=True);
                     vplotter.saveFigs(os.path.split(os.path.realpath(__file__))[0] + "/Results/"+experimentName+"/",plotW=False if plotWeightsAtTraining else True);
+                    vnet.saveSpikes(os.path.split(os.path.realpath(__file__))[0] + "/Results/"+experimentName+"/", count);
+                    
                 else:
                     if plotGaborAtTraining:
                         vplotter.plotGaborInput(inputImage, index_img, res, res_norm, timeBegin,simulationTime)
@@ -165,36 +168,6 @@ def runSimulation():
         
     #save spike trains
     print "saving spike trains"
-    spikes_g = [];
-    spikes_e = [];
-    spikes_i = [];
-    for theta in range(0, len(thetaList)):
-        tmp_g = vnet.spikesG[theta].spike_trains();
-        for i in range(layerGDim*layerGDim):
-            if len(tmp_g[i])>0:
-                tmp_g[i] = np.sort(tmp_g[i]/ms);
-        spikes_g.append(tmp_g);
-        
-    for layer in range(nLayers):
-        tmp_e = vnet.spkdetLayers[layer].spike_trains();
-        tmp_i = vnet.spkdetInhibLayers[layer].spike_trains();
-        for i in range(layerDim*layerDim):
-            if len(tmp_e[i]>0):
-                tmp_e[i] = np.sort(tmp_e[i]/ms);
-        for i in range(inhibLayerDim*inhibLayerDim):
-            if len(tmp_i[i]>0):
-                tmp_i[i] = np.sort(tmp_i[i]/ms);
-        spikes_e.append(tmp_e);
-        spikes_i.append(tmp_i);
-
-    spikes_b = vnet.spkdetBindingLayer.spike_trains();
-    for i in range(layerDim*layerDim):
-        if len(spikes_b[i]>0):
-            spikes_b[i] = np.sort(spikes_b[i]/ms);
-    
-    pickle.dump(spikes_e, open(os.path.split(os.path.realpath(__file__))[0] + "/Results/"+experimentName+"/Spikes_e.pkl", "wb"))
-    pickle.dump(spikes_i, open(os.path.split(os.path.realpath(__file__))[0] + "/Results/"+experimentName+"/Spikes_i.pkl", "wb"))
-    pickle.dump(spikes_b, open(os.path.split(os.path.realpath(__file__))[0] + "/Results/"+experimentName+"/Spikes_b.pkl", "wb"))
     vnet.saveStates(os.path.split(os.path.realpath(__file__))[0] + "/Results/"+experimentName+"/", count);
 
     
