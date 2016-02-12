@@ -43,16 +43,16 @@ class visnet(object):
         for layer in range(0, nLayers):
             self.layers.append(
                 br.NeuronGroup(layerDim * layerDim,  # N neurons
-                               eqn_membran,  # differential equations
-                               threshold='v>Vt',  # spike condition
-                               reset='''v = Vr
+                               eqn_membranEx,  # differential equations
+                               threshold='v>Vth_ex',  # spike condition
+                               reset='''v = V0_ex
                                 ge = 0
                                 gi = 0''',  # code to execute on reset
                                refractory=refractoryPeriod  # length of refractory period
                                )
             )
 
-            self.layers[layer].v = 'Vr'  # + br.rand() * (Vt - Vr)'
+            self.layers[layer].v = 'V0_ex'  # + br.rand() * (Vt - Vr)'
             self.layers[layer].ge = 0
             self.layers[layer].gi = 0
 
@@ -63,14 +63,15 @@ class visnet(object):
         for layer in range(0, nLayers):
             self.inhibLayers.append(br.NeuronGroup(
                 inhibLayerDim * inhibLayerDim,
-                eqn_membran,
-                threshold='v>Vt',
-                reset='v = Vr',
+                eqn_membranIn,  # differential equations
+                threshold='v>Vth_in',  # spike condition
+                reset='''v = V0_in
+                        ge = 0
+                        gi = 0''',
                 refractory=refractoryPeriod
             )
             )
-
-            self.inhibLayers[layer].v = 'Vr'  # + br.rand() * (Vt - Vr)'
+            self.inhibLayers[layer].v = 'V0_in'  # + br.rand() * (Vt - Vr)'
             self.inhibLayers[layer].ge = 0
             self.inhibLayers[layer].gi = 0
         self.net.add(self.inhibLayers)
@@ -79,12 +80,14 @@ class visnet(object):
         #binding layer
         self.bindingLayer = br.NeuronGroup(
             layerDim * layerDim,
-            eqn_membran,
-            threshold='v>Vt',
-            reset='v = Vr',
+            eqn_membranEx,  # differential equations
+            threshold='v>Vth_ex',  # spike condition
+            reset='''v = V0_ex
+                    ge = 0
+                    gi = 0''',
             refractory=refractoryPeriod
         )
-        self.bindingLayer.v = 'Vr'  # + br.rand() * (Vt - Vr)'
+        self.bindingLayer.v = 'V0_ex'  # + br.rand() * (Vt - Vr)'
         self.bindingLayer.ge = 0
         self.bindingLayer.gi = 0      
         self.net.add(self.bindingLayer) 
@@ -284,14 +287,14 @@ class visnet(object):
     def traceReset(self):
         #init neurons
         for layer in range(nLayers):
-            self.layers[layer].v = 'Vr'  # + br.rand() * (Vt - Vr)'
+            self.layers[layer].v = 'V0_ex'  # + br.rand() * (Vt - Vr)'
             self.layers[layer].ge = 0
             self.layers[layer].gi = 0
-            self.inhibLayers[layer].v = 'Vr'  # + br.rand() * (Vt - Vr)'
+            self.inhibLayers[layer].v = 'V0_in'  # + br.rand() * (Vt - Vr)'
             self.inhibLayers[layer].ge = 0
             self.inhibLayers[layer].gi = 0
         
-        self.bindingLayer.v = 'Vr'  # + br.rand() * (Vt - Vr)'
+        self.bindingLayer.v = 'V0_ex'  # + br.rand() * (Vt - Vr)'
         self.bindingLayer.ge = 0
         self.bindingLayer.gi = 0
         
@@ -324,7 +327,7 @@ class visnet(object):
                 else:
                     condition = spikeTrains[index_tmp] > (timeBegin +simulationTime * ratioTakenToCalcFR) * ms
                 FRMap[row_tmp][col_tmp] = len(np.extract(condition, spikeTrains[index_tmp]));
-        FRMap = FRMap/(float(simulationTime)/1000);
+        FRMap = FRMap/(float(simulationTime*ratioTakenToCalcFR)/1000);
         return FRMap;
 
     def weightNormalization(self):
@@ -332,11 +335,11 @@ class visnet(object):
             if typeOfWeightNormalization==1:
                 w_tmp = self.connBottomUp[layer].w[:, :];
                 w_norm =  np.sqrt(np.sum(np.square(w_tmp)));
-                self.connBottomUp[layer].w[:, :] = w_tmp/w_norm*gmax*10;
+                self.connBottomUp[layer].w[:, :] = w_tmp/w_norm*gmax*type1NormConst;
                 
                 w_tmp = self.connExBind[layer].w[:, :];
                 w_norm =  np.sqrt(np.sum(np.square(w_tmp)));
-                self.connExBind[layer].w[:, :] = w_tmp/w_norm*gmax_bind*10;
+                self.connExBind[layer].w[:, :] = w_tmp/w_norm*gmax_bind*type1NormConst;
             elif typeOfWeightNormalization==2:
                 w_tmp = self.connBottomUp[layer].w[:, :];
                 self.connBottomUp[layer].w[:, :] = (w_tmp - np.min(w_tmp))/(np.max(w_tmp)-np.min(w_tmp))*gmax;
@@ -366,9 +369,43 @@ class visnet(object):
         for layer in range(nLayers):
             synStates_ExBind.append(self.connExBind[layer].get_states(['i_pre','i_post','delay','w']));
         
-        pickle.dump(synStates_GtoInput, open(dest + str(itr)+"_blankNet_G2L.pkl", "wb"));
-        pickle.dump(synStates_BottomUp, open(dest + str(itr)+"_blankNet_L2L.pkl", "wb"));
-        pickle.dump(synStates_InEx, open(dest + str(itr)+"_blankNet_I2E.pkl", "wb"));
-        pickle.dump(synStates_ExIn, open(dest + str(itr)+"_blankNet_E2I.pkl", "wb"));
-        pickle.dump(synStates_ExBind, open(dest + str(itr)+"_blankNet_L2B.pkl", "wb"));
+        pickle.dump(synStates_GtoInput, open(dest + str(itr)+"_netStates_G2L.pkl", "wb"));
+        pickle.dump(synStates_BottomUp, open(dest + str(itr)+"_netStates_L2L.pkl", "wb"));
+        pickle.dump(synStates_InEx, open(dest + str(itr)+"_netStates_I2E.pkl", "wb"));
+        pickle.dump(synStates_ExIn, open(dest + str(itr)+"_netStates_E2I.pkl", "wb"));
+        pickle.dump(synStates_ExBind, open(dest + str(itr)+"_netStates_L2B.pkl", "wb"));
         
+    
+    def saveSpikes(self,dest,itr):
+        spikes_g = [];
+        spikes_e = [];
+        spikes_i = [];
+        for theta in range(0, len(thetaList)):
+            tmp_g = self.spikesG[theta].spike_trains();
+            for i in range(layerGDim*layerGDim):
+                if len(tmp_g[i])>0:
+                    tmp_g[i] = np.sort(tmp_g[i]/ms);
+            spikes_g.append(tmp_g);
+            
+        for layer in range(nLayers):
+            tmp_e = self.spkdetLayers[layer].spike_trains();
+            tmp_i = self.spkdetInhibLayers[layer].spike_trains();
+            for i in range(layerDim*layerDim):
+                if len(tmp_e[i]>0):
+                    tmp_e[i] = np.sort(tmp_e[i]/ms);
+            for i in range(inhibLayerDim*inhibLayerDim):
+                if len(tmp_i[i]>0):
+                    tmp_i[i] = np.sort(tmp_i[i]/ms);
+            spikes_e.append(tmp_e);
+            spikes_i.append(tmp_i);
+    
+        spikes_b = self.spkdetBindingLayer.spike_trains();
+        for i in range(layerDim*layerDim):
+            if len(spikes_b[i]>0):
+                spikes_b[i] = np.sort(spikes_b[i]/ms);
+        
+        pickle.dump(spikes_e, open(dest + str(itr)+"_spikes_e.pkl", "wb"))
+        pickle.dump(spikes_i, open(dest + str(itr)+"_spikes_i.pkl", "wb"))
+        pickle.dump(spikes_b, open(dest + str(itr)+"_spikes_b.pkl", "wb"))
+    
+            

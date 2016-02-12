@@ -5,10 +5,10 @@ import pickle
 import os;
 import errno
 
-experimentName = 'test_V1_itr300';
-SpikeData = ['Spikes_e.pkl', 'Spikes_i.pkl', 'Spikes_b.pkl', 'Spikes_g.pkl'];
+experimentName = 'test_V1_norm1_G2L3_I2E_in';
+SpikeData = ['0_spikes_e.pkl', '0_spikes_i.pkl', '0_pikes_b.pkl', '0_pikes_g.pkl'];
 spikes_e = pickle.load(open(os.path.split(os.path.realpath(__file__))[0] + "/Results/" + experimentName + "/" + SpikeData[0], "rb"));
-netState_L2L = pickle.load(open(os.path.split(os.path.realpath(__file__))[0] + "/Results/" + experimentName + "/502_blankNet_L2L.pkl", "rb"));
+netState_L2L = pickle.load(open(os.path.split(os.path.realpath(__file__))[0] + "/Results/" + experimentName + "/0_netStates_L2L.pkl", "rb"));
 
 preSynConn = netState_L2L[0]['i_pre'];
 postSynConn = netState_L2L[0]['i_post'];
@@ -20,10 +20,10 @@ delayList = netState_L2L[0]['delay'];
 
 # analysing cell index==0 for test development
 nCells = 100;
-t_min = 306000;#319000;
-t_max = 308000;
+t_min = 0;#319000;
+t_max = 5000;
 max_delay = 20;
-gmax = 0.25
+gmax = 2.0
 
 try:
     os.makedirs(os.path.split(os.path.realpath(__file__))[0] + "/Results/" + experimentName + "/hist"+str(t_min)+"-"+str(t_max));
@@ -77,14 +77,14 @@ for i_post in range(100):
 
             tmp = np.extract(prevSpikeTime[i_pre]!=0,prevSpikeTime[i_pre]);
             if len(tmp)>1:
-                plt.hist(tmp,bins=5,range = (0,20),color=c);
+                plt.hist(tmp,bins=10,range = (0,max_delay),color=c);
                 
             if len(preList)>0:
                 plt.hold(True);
                 plt.plot(delay[0],len(spikeTime_post_ext)/2,'*');
                 
             plt.ylim(len(spikeTime_post_ext)*-0.1,len(spikeTime_post_ext)*1.1)
-            plt.xlim(-1,21);
+            plt.xlim(-0.01*max_delay,max_delay*1.01);
             
             
         fig_hist.savefig(os.path.split(os.path.realpath(__file__))[0] + "/Results/"+experimentName+"/hist"+str(t_min)+"-"+str(t_max)+"/hist_"+str(t_min)+"-"+str(t_max)+"_"+str(i_post)+".png");

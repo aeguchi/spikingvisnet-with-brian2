@@ -19,8 +19,12 @@ class InfoAnalysis(object):
         plotMode = 1; #0:normal 1:max
         
         phases = ['FR_0_blank.pkl', 'FR_1_trained.pkl'];
+        #phases = ['FR_0_blank.pkl'];
         linestyles = ['-', '--'];#, '-.', ':']
-        
+
+        #settings
+        numBins =  3;##numTrans;   #can be adjusted
+        weightedAnalysis = 1;#exclude the selectivity by not responding to a particular stimulus        
         
         
         FR=pickle.load(open(os.path.split(os.path.realpath(__file__))[0] +"/Results/"+experimentName+"/"+ phases[0], "rb"));
@@ -45,9 +49,7 @@ class InfoAnalysis(object):
                     FR_norm = (FR-FR[:,:,layer,:,:].min())/(FR[:,:,layer,:,:].max()-FR[:,:,layer,:,:].min());
                     FR = FR_norm;
                 
-                #settings
-                numBins =  5;##numTrans;   #can be adjusted
-                weightedAnalysis = 1;#exclude the selectivity by not responding to a particular stimulus
+
                 
                 #params for multiple cell info (to be implemented)
                 multi_cell_analysis = 0; #1 to run multi-cell info analysis
@@ -141,13 +143,13 @@ class InfoAnalysis(object):
                 plt.ylim([-0.05, np.log2(numObj)+0.05]);
                 plt.xlim([0, numCells*numCells])
                 if layer==0:
-                    plt.title("Binding layer");
+                    plt.title("Binding layer (nBins:" + str(numBins) +")");
                 else:
                     plt.title("Layer " + str(layer));
             
             
         
 
-        plt.savefig(os.path.split(os.path.realpath(__file__))[0] +"/Results/"+experimentName+"/singleCellInfo.png");
-        plt.savefig(os.path.split(os.path.realpath(__file__))[0] +"/Results/"+experimentName+"/singleCellInfo.eps");
+        plt.savefig(os.path.split(os.path.realpath(__file__))[0] +"/Results/"+experimentName+"/singleCellInfo_bin"+str(numBins)+".png");
+        plt.savefig(os.path.split(os.path.realpath(__file__))[0] +"/Results/"+experimentName+"/singleCellInfo_bin"+str(numBins)+".eps");
         #plt.show();  

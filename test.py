@@ -4,10 +4,8 @@ import pylab as plt
 import numpy as np
 
 plt.figure(0,figsize=(30, 10),dpi=100)
-taum = 20.00*ms;
-taue = 2*ms;
-taui = 5*ms;
-conductanceConst_I2E = 0.005
+
+conductanceConst_I2E = 2.0
 
 
 
@@ -17,8 +15,8 @@ conductanceConst_I2E = 0.005
 
 
 
-numInputCells = 1;
-numConn = 3;
+numInputCells = 10;
+numConn = 1;
 #input
 layerG=br.PoissonGroup(numInputCells, Rmax)  # rates
 # Excitatory layers
@@ -27,17 +25,33 @@ layerG=br.PoissonGroup(numInputCells, Rmax)  # rates
 
 # Excitatory layers
 layerEx=br.NeuronGroup(1,  # N neurons
-                       eqn_membran,  # differential equations
-                       threshold='v>Vt',  # spike condition
-                       reset='''v = Vr
+                       eqn_membranEx,  # differential equations
+                       threshold='v>Vth_ex',  # spike condition
+                       reset='''v = V0_ex
                                 ge = 0
                                 gi = 0''',  # code to execute on reset
                        refractory=refractoryPeriod  # length of refractory period
                        );
 
-layerEx.v = 'Vr'  # + br.rand() * (Vt - Vr)'
+layerEx.v = 'V0_ex'  # + br.rand() * (Vt - Vr)'
 layerEx.ge = 0
 layerEx.gi = 0
+#layerEx.Iext = 25*mV;
+
+
+# Excitatory layers
+layerIn=br.NeuronGroup(1,  # N neurons
+                       eqn_membranIn,  # differential equations
+                       threshold='v>Vth_in',  # spike condition
+                       reset='''v = V0_in
+                                ge = 0
+                                gi = 0''',  # code to execute on reset
+                       refractory=refractoryPeriod  # length of refractory period
+                       );
+
+layerIn.v = 'V0_in'  # + br.rand() * (Vt - Vr)'
+layerIn.ge = 0
+layerIn.gi = 0
 #layerEx.Iext = 25*mV;
 
 #conn1=br.Synapses(layerG, layerEx,eqs_Syn, pre=eqs_ExPre);
@@ -55,10 +69,13 @@ conn1.plastic = True;
 conn1.w[:,:]=gmax/2;
 conn1.delay[:,:]=range(numConn)*ms;
 
-#conn2=br.Synapses(layerG,layerEx,eqs_Syn,pre=eqs_InPre);
-#conn2.connect(True);
-#conn2.delay[:,:]=100*ms;
-#conn2.w[:,:]=conductanceConst_I2E;
+
+
+
+conn2=br.Synapses(layerG,layerIn,eqs_Syn,pre=eqs_InPre);
+conn2.connect(True);
+conn2.delay[:,:]=10*ms;
+conn2.w[:,:]=conductanceConst_I2E;
 
 
 spkMonLayerG = br.SpikeMonitor(layerG);
@@ -83,13 +100,14 @@ for i in range(nEp):
     plt.subplot(3,nEp,nEp*1+i+1);
     plt.plot(sttMonLayerEx.t/ms,sttMonLayerEx.v[0]);
     plt.xlim([simTime*i,simTime*(i+1)])
-    plt.ylim([Vr*1.01,Vt*0.99])
+    plt.ylim([V0_ex*1.01,Vth_ex*0.99])
     
     plt.subplot(3,nEp,nEp*2+i+1);
     plt.hold(True);
-    plt.plot(spkMonLayerG.t / ms,spkMonLayerG.i,'.');
-    plt.xlim([simTime*i,simTime*(i+1)])
-    plt.ylim([-1,numInputCells])
+    for j in range(numConn):
+        plt.plot(spkMonLayerG.t/ms+j,spkMonLayerG.i,'.');
+        plt.xlim([simTime*i,simTime*(i+1)])
+        plt.ylim([-1,numInputCells*numConn*1.1])
     #plt.hold(True);
     plt.plot(spkMonLayerEx.t / ms,spkMonLayerEx.i+0.5,'*',c='r');
     
