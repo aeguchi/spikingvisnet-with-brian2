@@ -45,7 +45,7 @@ def runSimulation():
     gf = GaborFilter.GaborFilter(globals());
     ia = InfoAnalysis.InfoAnalysis(globals())
     
-    
+    #pickle.dump(vnet.net.objects, open(os.path.split(os.path.realpath(__file__))[0] + "/Results/"+experimentName+"/vnet.pkl", "wb"))
 
     
     fileList_train = np.genfromtxt(os.path.split(os.path.realpath(__file__))[0] + "/images/" + imageFolder + "/fileList_train.txt", dtype='str');
@@ -168,7 +168,7 @@ def runSimulation():
         
     #save spike trains
     print "saving spike trains"
-    vnet.saveStates(os.path.split(os.path.realpath(__file__))[0] + "/Results/"+experimentName+"/", count);
+    vnet.saveStates(os.path.split(os.path.realpath(__file__))[0] + "/Results/"+experimentName+"/", count-1);
 
     
     #vplotter.plotWeight(WeightRec);
