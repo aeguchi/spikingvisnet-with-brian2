@@ -28,11 +28,6 @@ t_max = 325000;
 max_delay = 20;
 gmax = 2.0
 
-try:
-    os.makedirs(os.path.split(os.path.realpath(__file__))[0] + "/Results/" + experimentName + "/hist"+str(t_min)+"-"+str(t_max));
-except OSError as exception:
-    if exception.errno != errno.EEXIST:
-        raise
 
 #fig_hist = plt.figure(1 , figsize=(40, 40),dpi=500);
 #fig_poly = plt.figure(2 , figsize=(40, 40),dpi=100);
@@ -40,13 +35,15 @@ except OSError as exception:
 for i_post in range(100):
     print i_post
     #plt.clf();
-
+    #prevSpikeTime = np.ones([len(preList), len(spikes_e[1][i_post])])*(max_delay+1);  # pre cell index, number of spikes
     prevSpikeTime = np.ones([nCells, len(spikes_e[1][i_post])])*(max_delay+1);  # pre cell index, number of spikes
     spikeTime_post = spikes_e[1][i_post]; #spiking time of cell i_post in post synaptic layer (layer 1)
     cond_post1 = spikeTime_post < t_max;
     cond_post2 = t_min < spikeTime_post;
     cond_post = cond_post1 & cond_post2;
     spikeTime_post_ext=np.extract(cond_post, spikeTime_post)    #extract spike timings between specified timing
+    
+          
 
     if(len(spikeTime_post_ext)>0):  #if post synaptic cell ever spikes
         count = 0;
@@ -70,6 +67,14 @@ for i_post in range(100):
 
         #then, try to trace
         if polyHist:
+            
+            try:
+                os.makedirs(os.path.split(os.path.realpath(__file__))[0] + "/Results/" + experimentName + "/hist"+str(t_min)+"-"+str(t_max));
+            except OSError as exception:
+                if exception.errno != errno.EEXIST:
+                    raise
+
+            
             fig_hist = plt.figure(1 , figsize=(40, 40),dpi=500);
             plt.clf();
             for i_pre in range(100):
@@ -107,34 +112,57 @@ for i_post in range(100):
         #for each input spikes find the correlation
         #polyTable = np.zeros([nCells,nCells,max_delay]);#post,pre,diff
         if polyAnalysisOn:
-            polyTable = np.zeros([nCells,nCells,nCells]);#post,pre,diff
-            for i in range(count):#for each post synaptic spike
-                for cell_in in range(nCells):            
-                    tmp = prevSpikeTime[:,i];  #store delay of each presynaptic spike (before the ith post synaptic spike)
-                    if tmp[cell_in]<max_delay+1:
+            try:
+                os.makedirs(os.path.split(os.path.realpath(__file__))[0] + "/Results/" + experimentName + "/poly"+str(t_min)+"-"+str(t_max));
+            except OSError as exception:
+                if exception.errno != errno.EEXIST:
+                    raise
+            
+            fig_poly = plt.figure(2 , figsize=(30, 30),dpi=300);
+            plt.clf();
+            plt.title("Post Synaptic Cell index: "+str(i_post));
+            
+            cond_ipost = postSynConn == i_post
+            preList = np.extract(cond_ipost,preSynConn);  
+            polyTable = np.zeros([nCells,nCells,max_delay]);#post,pre,diff
+            spikeCount = np.zeros(nCells);
+            
+            subplot_i=0;
+            for cell_focus in preList:
+                subplot_i+=1;
+                for i_SpikeTrain in range(count):#for each post synaptic spike
+                    tmp = prevSpikeTime[:,i_SpikeTrain];  #store delay of each presynaptic spike (before the ith post synaptic spike)
+                    if tmp[cell_focus]<max_delay+1: #
+                        spikeCount[cell_focus]+=1;    
                         sorted = np.sort(tmp)       #sorted the delay of each input cell (before the ith post synaptic spike)
                         sorted_i = np.argsort(tmp)  #sorted index
                         cond_sorted1 = sorted<max_delay+1; #eliminated all the stored delay bigger than max_delay
-                        cond_sorted2 = tmp[cell_in]<sorted
+                        cond_sorted2 = tmp[cell_focus]<sorted
                         cond_sorted = cond_sorted1&cond_sorted2;
                         ext_sorted = np.extract(cond_sorted,sorted);
                         ext_sorted_i = np.extract(cond_sorted,sorted_i);
-                        t_backs=ext_sorted-tmp[cell_in];
+                        t_backs=ext_sorted-tmp[cell_focus];
                         #print str(cell_in) + " " + str(t_backs);
                         for order_in in range(len(ext_sorted)):
                             t_back = int(t_backs[order_in]/1);
-                            polyTable[cell_in][ext_sorted_i[order_in]][t_back] += 1;        
+                            polyTable[cell_focus][ext_sorted_i[order_in]][t_back] += 1;      
             
-            for i in range(nCells):
-                fig_poly = plt.figure(2 , figsize=(40, 40),dpi=100);
+                subplotDim = np.ceil(np.sqrt(len(preList)));
+                plt.subplot(int(subplotDim),int(subplotDim),subplot_i);
                 #print polyTable[i]
-                plt.clf()
-                plt.imshow(polyTable[i],interpolation='none');
+                #plt.clf()
+                #plt.imshow(polyTable[i],interpolation='none');
+                #plt.imshow(polyTable[cell_focus][preList],interpolation='none',vmin=0,vmax=spikeCount[cell_focus]);
+                plt.imshow(polyTable[cell_focus][preList],interpolation='none');
                 plt.colorbar()
-                plt.title("(PostSynCell: " + str(i_post) + ") Distribution of the delay of spikes after spikes of PreSynCell " + str(i))
+                plt.title("i:" + str(cell_focus) + " max:" + str(spikeCount[cell_focus]));
+                #plt.title("(PostSynCell: " + str(i_post) + ") Distribution of the delay of spikes after spikes of PreSynCell " + str(i))
                 plt.xlabel("delay [ms]");
-                plt.ylabel("index of neuron in layer 0");
-                plt.show(fig_poly)    
+                #plt.ylabel("index of neuron in layer 0");
+                plt.yticks(range(len(preList)), preList)
+            #plt.show(fig_poly)
+            fig_poly.savefig(os.path.split(os.path.realpath(__file__))[0] + "/Results/"+experimentName+"/poly"+str(t_min)+"-"+str(t_max)+"/poly_"+str(t_min)+"-"+str(t_max)+"_"+str(i_post)+".png");
+
     
     
     #print "stop";
