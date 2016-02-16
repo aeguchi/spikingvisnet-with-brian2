@@ -5,12 +5,12 @@ import pickle
 import os;
 import errno
 
-experimentName = 'test_V1_norm1_itr500';
-#SpikeData = ['0_spikes_e.pkl', '0_spikes_i.pkl', '0_pikes_b.pkl', '0_pikes_g.pkl'];
-SpikeData = ['501_spikes_e.pkl', '501_spikes_i.pkl', '501_pikes_b.pkl', '501_pikes_g.pkl'];
+experimentName = 'test_V1_norm1_itr5000';
+SpikeData = ['0_spikes_e.pkl', '0_spikes_i.pkl', '0_pikes_b.pkl', '0_pikes_g.pkl'];
+#SpikeData = ['501_spikes_e.pkl', '501_spikes_i.pkl', '501_pikes_b.pkl', '501_pikes_g.pkl'];
 spikes_e = pickle.load(open(os.path.split(os.path.realpath(__file__))[0] + "/Results/" + experimentName + "/" + SpikeData[0], "rb"));
-#netState_L2L = pickle.load(open(os.path.split(os.path.realpath(__file__))[0] + "/Results/" + experimentName + "/0_netStates_L2L.pkl", "rb"));
-netState_L2L = pickle.load(open(os.path.split(os.path.realpath(__file__))[0] + "/Results/" + experimentName + "/502_netStates_L2L.pkl", "rb"));
+netState_L2L = pickle.load(open(os.path.split(os.path.realpath(__file__))[0] + "/Results/" + experimentName + "/0_netStates_L2L.pkl", "rb"));
+#netState_L2L = pickle.load(open(os.path.split(os.path.realpath(__file__))[0] + "/Results/" + experimentName + "/502_netStates_L2L.pkl", "rb"));
 
 preSynConn = netState_L2L[0]['i_pre'];
 postSynConn = netState_L2L[0]['i_post'];
@@ -24,9 +24,28 @@ nBins = 10;
 # analysing cell index==0 for test development
 nCells = 100;
 t_min = 0#315000;#319000;
-t_max = 5000#320000;
+t_max = 10000#320000;
 max_delay = 20;
 gmax = 2.5
+polyChainDetectTh = 10;
+
+
+def traceDelay(poly_indexs,poly_delays,index,delay):
+    #print str(index) + " " + str(delay);
+    polyTableConnected = polyTable[index][preList];
+    preMax = polyTableConnected.max();
+    #print "max: " + str(preMax);
+    if preMax<polyChainDetectTh:
+        return;
+    preArgMax = np.where(polyTableConnected==preMax);
+    
+    for in_max in range(len(preArgMax[0])):
+        poly_indexs.append(preList[preArgMax[0][in_max]]);
+        poly_delays.append(delay+preArgMax[1][in_max]);
+        #print str(preArgMax[0][in_max]) + ", " +str(delay+preArgMax[1][in_max]);
+        if delay!=0 and delay+preArgMax[1][in_max]<max_delay:
+           traceDelay(poly_indexs,poly_delays,preList[preArgMax[0][in_max]],delay+preArgMax[1][in_max]);
+
 
 
 #fig_hist = plt.figure(1 , figsize=(40, 40),dpi=500);
@@ -43,8 +62,6 @@ for i_post in range(100):
     cond_post = cond_post1 & cond_post2;
     spikeTime_post_ext=np.extract(cond_post, spikeTime_post)    #extract spike timings between specified timing
     
-          
-
     if(len(spikeTime_post_ext)>0):  #if post synaptic cell ever spikes
         count = 0;
         for t_post in spikeTime_post_ext: #for each spikes of the post synaptic cell (i_post)
@@ -126,13 +143,9 @@ for i_post in range(100):
             preList = np.extract(cond_ipost,preSynConn);  
             polyTable = np.zeros([nCells,nCells,max_delay]);#post,pre,diff
             spikeCount = np.zeros(nCells);
-            
-            subplotDim = np.ceil(np.sqrt(len(preList)+1));
-            
-            #plt.subplot(int(subplotDim)+1,int(subplotDim),1);
-            plt.subplot(int(subplotDim)+1,2,1);
-            
             polyTableTmp = np.zeros([nCells,max_delay]);
+            subplotDim = np.ceil(np.sqrt(len(preList)+1));
+                        
             sCount = 0;
             for i_SpikeTrain in range(count):#for each post synaptic spike
                 tmp = prevSpikeTime[:,i_SpikeTrain];  #store delay of each presynaptic spike (before the ith post synaptic spike)
@@ -147,8 +160,10 @@ for i_post in range(100):
                     t_back = int(ext_sorted[order_in]/1);
                     polyTableTmp[ext_sorted_i[order_in]][t_back] += 1;
             
-            
+
+            #plt.subplot(int(subplotDim)+1,int(subplotDim),1);
             polyTableTmpConnected = polyTableTmp[preList];
+            plt.subplot(int(subplotDim)+1,2,1);
             plt.imshow(polyTableTmpConnected,interpolation='none');                
             plt.colorbar()
             plt.title("postSynapticCell:" + str(i_post) + " count:" + str(count));
@@ -157,17 +172,6 @@ for i_post in range(100):
             #plt.ylabel("index of neuron in layer 0");
             plt.yticks(range(len(preList)), preList)
             plt.gca().invert_xaxis()
-            
-            postArgMax = polyTableTmpConnected.argmax();
-            postArgMax_index = preList[int(postArgMax/max_delay)];
-            postArgMax_delay = postArgMax%max_delay;
-#             print "postArgMax cell: " + str(postArgMax_index) + " delay:" + str(postArgMax_delay);
-            
-            poly_indexs = []
-            poly_delays = []
-            poly_indexs.append(postArgMax_index);
-            poly_delays.append(postArgMax_delay);
-            
             
             
             subplot_i=0;
@@ -203,30 +207,29 @@ for i_post in range(100):
                 #plt.ylabel("index of neuron in layer 0");
                 plt.yticks(range(len(preList)), preList)
             
-            tracingOn = True;
-            while(tracingOn):
-                
-                polyTableConnected = polyTable[poly_indexs[-1]][preList];
-                preArgMax = polyTableConnected.argmax();
-                preArgMax_index = preList[int(preArgMax/max_delay)];
-                preArgMax_delay = preArgMax%max_delay;
-#                 print "postArgMax cell: " + str(preArgMax_index) + " delay:" + str(preArgMax_delay);
-                poly_indexs.append(preArgMax_index);
-                poly_delays.append(preArgMax_delay+poly_delays[-1]);
-                if poly_delays[-1]>2*max_delay or poly_delays[-1]==poly_delays[-2]:
-                    tracingOn = False;
-                    
-            plt.subplot(int(subplotDim)+1,2,2);
-#             print poly_indexs
-#             print poly_delays
-            plt.plot(poly_delays,poly_indexs,'*');
-            plt.xlim([max_delay*2*-0.01,max_delay*2*1.01]);
-            plt.ylim([-1,nCells]);
-            plt.gca().invert_yaxis()
-            plt.gca().invert_xaxis()
-            #plt.show()
+            
+            #tracing poly
+            poly_indexs = []
+            poly_delays = []
+            
+            postMax = polyTableTmpConnected.max();
+            postArgMax = np.where(polyTableTmpConnected==postMax);
+            
+            
+            if postMax>=polyChainDetectTh:
+                for max_in in range(len(postArgMax[0])):
+                    poly_indexs.append(preList[postArgMax[0][max_in]]);
+                    poly_delays.append(postArgMax[1][max_in]);
+                    traceDelay(poly_indexs,poly_delays,preList[postArgMax[0][max_in]],postArgMax[1][max_in])
+                    plt.subplot(int(subplotDim)+1,2,2);
+                    plt.plot(poly_delays,poly_indexs,'*');
+                    plt.xlim([max_delay*-0.01,max_delay*1.01]);
+                    plt.ylim([-1,nCells]);
+                    plt.gca().invert_yaxis()
+                    plt.gca().invert_xaxis()
+                    #plt.show()
              
-            fig_poly.savefig(os.path.split(os.path.realpath(__file__))[0] + "/Results/"+experimentName+"/poly"+str(t_min)+"-"+str(t_max)+"/poly_"+str(t_min)+"-"+str(t_max)+"_"+str(i_post)+".png");
+            fig_poly.savefig(os.path.split(os.path.realpath(__file__))[0] + "/Results/"+experimentName+"/poly"+str(t_min)+"-"+str(t_max)+"/poly_"+str(t_min)+"-"+str(t_max)+"_"+str(i_post)+"_polyLen"+str(len(poly_indexs))+".png");
 
             
     
@@ -235,7 +238,6 @@ for i_post in range(100):
     
     #plt.show()
     
-
 
 # #spikes[layer][cellIndex]
 # layer = 1;
