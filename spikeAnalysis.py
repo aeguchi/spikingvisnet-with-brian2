@@ -41,9 +41,9 @@ def traceDelay(poly_indexs,poly_delays,index,delay):
     
     for in_max in range(len(preArgMax[0])):
         poly_indexs.append(preList[preArgMax[0][in_max]]);
-        poly_delays.append(delay+preArgMax[1][in_max]);
+        poly_delays.append(delay+int(preArgMax[1][in_max]));
         #print str(preArgMax[0][in_max]) + ", " +str(delay+preArgMax[1][in_max]);
-        if delay!=0 and delay+preArgMax[1][in_max]<max_delay:
+        if preArgMax[1][in_max]!=0 and delay+preArgMax[1][in_max]<max_delay:
            traceDelay(poly_indexs,poly_delays,preList[preArgMax[0][in_max]],delay+preArgMax[1][in_max]);
 
 
@@ -219,8 +219,8 @@ for i_post in range(100):
             if postMax>=polyChainDetectTh:
                 for max_in in range(len(postArgMax[0])):
                     poly_indexs.append(preList[postArgMax[0][max_in]]);
-                    poly_delays.append(postArgMax[1][max_in]);
-                    traceDelay(poly_indexs,poly_delays,preList[postArgMax[0][max_in]],postArgMax[1][max_in])
+                    poly_delays.append(int(postArgMax[1][max_in]));
+                    traceDelay(poly_indexs,poly_delays,preList[postArgMax[0][max_in]],int(postArgMax[1][max_in]))
                     plt.subplot(int(subplotDim)+1,2,2);
                     plt.plot(poly_delays,poly_indexs,'*');
                     plt.xlim([max_delay*-0.01,max_delay*1.01]);
