@@ -5,12 +5,12 @@ import pickle
 import os;
 import errno
 
-experimentName = 'test_V1_norm1_itr500';
+experimentName = 'test_V1_norm1_itr5000';
 #SpikeData = ['0_spikes_e.pkl', '0_spikes_i.pkl', '0_pikes_b.pkl', '0_pikes_g.pkl'];
-SpikeData = ['501_spikes_e.pkl', '501_spikes_i.pkl', '501_pikes_b.pkl', '501_pikes_g.pkl'];
+SpikeData = ['5001_spikes_e.pkl', '5001_spikes_i.pkl', '5001_pikes_b.pkl', '5001_pikes_g.pkl'];
 spikes_e = pickle.load(open(os.path.split(os.path.realpath(__file__))[0] + "/Results/" + experimentName + "/" + SpikeData[0], "rb"));
 #netState_L2L = pickle.load(open(os.path.split(os.path.realpath(__file__))[0] + "/Results/" + experimentName + "/0_netStates_L2L.pkl", "rb"));
-netState_L2L = pickle.load(open(os.path.split(os.path.realpath(__file__))[0] + "/Results/" + experimentName + "/502_netStates_L2L.pkl", "rb"));
+netState_L2L = pickle.load(open(os.path.split(os.path.realpath(__file__))[0] + "/Results/" + experimentName + "/5001_netStates_L2L.pkl", "rb"));
 
 preSynConn = netState_L2L[0]['i_pre'];
 postSynConn = netState_L2L[0]['i_post'];
@@ -20,14 +20,14 @@ delayList = netState_L2L[0]['delay'];
 polyAnalysisOn = True
 polyHist = False
 
-nBins = 10;
+#nBins = 10;
 # analysing cell index==0 for test development
 nCells = 100;
-t_min = 315000#15000;#319000;
-t_max = 320000#320000;
+t_min = 3030000#15000;#319000;
+t_max = 3040000#320000;
 max_delay = 20;
-gmax = 2.5
-polyChainDetectTh = 5;
+gmax = 3#2.5
+polyChainDetectTh = 10;
 
 
 def traceDelay(poly_indexs,poly_delays,index,delay):
@@ -40,12 +40,15 @@ def traceDelay(poly_indexs,poly_delays,index,delay):
     preArgMax = np.where(polyTableConnected==preMax);
     
     for in_max in range(len(preArgMax[0])):
-        cond1 = poly_indexs==preList[preArgMax[0][in_max]];#check if the pair of the values already exists
-        cond2 = poly_delays==(delay+int(preArgMax[1][in_max]));
+        cond1 = np.array(poly_indexs)==preList[preArgMax[0][in_max]];#check if the pair of the values already exists
+        cond2 = np.array(poly_delays)==delay+int(preArgMax[1][in_max]);
         cond = cond1 & cond2;
         #print str(preArgMax[0][in_max]) + ", " +str(delay+preArgMax[1][in_max]);
         #if preArgMax[1][in_max]!=0 and delay+preArgMax[1][in_max]<max_delay:
         if not (True in cond) and delay+preArgMax[1][in_max]<max_delay:
+            if preList[preArgMax[0][in_max]]==58 and delay+int(preArgMax[1][in_max])==19:
+                print "test"
+            print str(preList[preArgMax[0][in_max]]) + " " + str(delay+int(preArgMax[1][in_max]));
             poly_indexs.append(preList[preArgMax[0][in_max]]);
             poly_delays.append(delay+int(preArgMax[1][in_max]));
             traceDelay(poly_indexs,poly_delays,preList[preArgMax[0][in_max]],delay+int(preArgMax[1][in_max]));
@@ -139,7 +142,7 @@ for i_post in range(100):
                 if exception.errno != errno.EEXIST:
                     raise
             
-            fig_poly = plt.figure(2 , figsize=(30, 30),dpi=300);
+            fig_poly = plt.figure(2 , figsize=(20, 20),dpi=100);
             plt.clf();
             plt.title("Post Synaptic Cell index: "+str(i_post));
             

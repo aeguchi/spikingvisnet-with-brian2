@@ -130,26 +130,33 @@ delayConst_connTopDown = 20.0*ms;
 delayConst_connRecEx = 20.0*ms;
 
 #nConnections_connGtoInput = 50;
-nConnections_connGtoInput = 20;
+nConnections_connGtoInput = 10;
 fanInRadSigma_connGtoInput = 1.0;
-#nConnections_connBottomUp = 50;
-#nConnections_connExIn = 10;
-#nConnections_connInEx = 10;
-#nConnections_connExBind = 10;
+nConnections_connBottomUp = 50;
+fanInRadSigma_connBottomUp = 2.0;
+nConnections_connE2I = 10;
+fanInRadSigma_connE2I = 2.0;
+nConnections_connI2E = 10;
+fanInRadSigma_connI2E = 2.0;
+nConnections_connExBind = 10;
+fanInRadSigma_connExBind = 2.0;
 nConnections_connTopDown = 0;
-nConnections_connRecEx = 0;
+fanInRadSigma_connTopDown = 2.0;
+nConnections_connRecEx = 5;
+fanInRadSigma_connRecEx = 2.0;
 
 
-pConnections_connBottomUp = 0.1;
-pConnections_connExIn = 0.1;
-pConnections_connInEx = 0.1;
+#pConnections_connBottomUp = 0.1;
+#pConnections_connExIn = 0.1;
+#inhibRad = layerDim/3;
+#pConnections_connInEx = 0.1;
 pConnections_connExBind = 0.1;
 # pConnections_connBottomUp = float(nConnections_connBottomUp)/(layerDim*layerDim);
 # pConnections_connExIn = float(nConnections_connExIn)/(layerDim*layerDim);
 # pConnections_connInEx = float(nConnections_connInEx)/(inhibLayerDim*inhibLayerDim);
 # pConnections_connExBind = float(nConnections_connExBind)/(layerDim*layerDim);
 pConnections_connTopDown = float(nConnections_connTopDown)/(layerDim*layerDim);
-pConnections_connRecEx = float(nConnections_connRecEx)/(layerDim*layerDim);
+#pConnections_connRecEx = float(nConnections_connRecEx)/(layerDim*layerDim);
 
 
 #Synaptic Connections from Gabor to Layer
@@ -161,7 +168,7 @@ eqs_ExPre ='''ge += w'''
 #wi = (4.5/30) # inhibitory synaptic weight
 conductanceConst_G2L = 0.4;#20*we;
 conductanceConst_E2I = 0.2;#10*we;
-conductanceConst_E2E = 0.0;#*we;
+conductanceConst_E2E = 0.1;#*we; (rec)
 conductanceConst_I2E = 0.075;#0.5*wi;
 weightRandOn = False; #for G2L, E2I, E2E, I2E
 
@@ -231,7 +238,8 @@ eqs_stdpPost_bind ='''
 
 #condition to introduce topology
 fanInRad = layerDim/3;
-connCond = 'sqrt((i%layerDim - j%layerDim)**2 + (i/layerDim - j/layerDim)**2) < fanInRad'
-
+connCond = 'sqrt(0-99(i%layerDim - j%layerDim)**2 + (i/layerDim - j/layerDim)**2) < fanInRad'
+#somehow sqrt did not seem to work, instead use one below: (but this is not wrap-around)
+connCond = '(((i%layerDim) - (j%layerDim))%layerDim)**2 + (((i/layerDim) - (j/layerDim))%layerDim)**2 < inhibRad**2'
 randSeed = 1;
 

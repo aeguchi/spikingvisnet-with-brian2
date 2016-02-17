@@ -19,9 +19,11 @@ class visnet(object):
         np.random.seed(randSeed)
 
         self.net = br.Network(br.collect())
-
+        print " - initializing layers.."
         self.buildLayers()
+        print " - initializing synapses..";
         self.buildConnectionsBetweenLayers()
+        print " - initializing spike monitors.."
         self.buildSpikeMonitors()
         self.setSynapticPlasticity(True)
     
@@ -39,6 +41,7 @@ class visnet(object):
         self.net.add(self.layerG)
 
         # Excitatory layers
+        print "  ..excitatory layers.."
         self.layers = []
         for layer in range(0, nLayers):
             self.layers.append(
@@ -51,7 +54,6 @@ class visnet(object):
                                refractory=refractoryPeriod  # length of refractory period
                                )
             )
-
             self.layers[layer].v = 'V0_ex'  # + br.rand() * (Vt - Vr)'
             self.layers[layer].ge = 0
             self.layers[layer].gi = 0
@@ -59,6 +61,7 @@ class visnet(object):
         self.net.add(self.layers)
 
         # Inhibitory layers
+        print "  ..inhibitory layers.."
         self.inhibLayers = []
         for layer in range(0, nLayers):
             self.inhibLayers.append(br.NeuronGroup(
@@ -78,6 +81,7 @@ class visnet(object):
         
         
         #binding layer
+        print "  ..binding layers.."
         self.bindingLayer = br.NeuronGroup(
             layerDim * layerDim,
             eqn_membranEx,  # differential equations
@@ -97,6 +101,7 @@ class visnet(object):
     def buildConnectionsBetweenLayers(self):
 
         # Connecting neurons in Gabor input layer and neurons in the first ExcitLayer
+        print "  ..G2Input Syns.."
         self.connGtoInput = []
         for theta in range(0, len(thetaList)):
             self.connGtoInput.append(
@@ -107,16 +112,16 @@ class visnet(object):
                             )
             )
             
-        for cellIndex in range(layerDim*layerDim):
+        for i_post_index in range(layerDim*layerDim):
             theta = np.random.randint(len(thetaList));
-            i_row = int(cellIndex/layerDim);
-            i_col = cellIndex%layerDim;
+            i_post_row = int(i_post_index/layerDim);
+            i_post_col = i_post_index%layerDim;
 
-            j_rows = np.random.normal(i_row*layerGDim/layerDim, fanInRadSigma_connGtoInput, nConnections_connGtoInput).astype(int)%layerGDim;
-            j_cols = np.random.normal(i_col*layerGDim/layerDim, fanInRadSigma_connGtoInput, nConnections_connGtoInput).astype(int)%layerGDim;
+            i_pre_rows = np.random.normal(i_post_row*layerGDim/layerDim, fanInRadSigma_connGtoInput, nConnections_connGtoInput).astype(int)%layerGDim;
+            i_pre_cols = np.random.normal(i_post_col*layerGDim/layerDim, fanInRadSigma_connGtoInput, nConnections_connGtoInput).astype(int)%layerGDim;
             
-            GCellsIndex = layerGDim*j_rows + j_cols;
-            self.connGtoInput[theta].connect(GCellsIndex,cellIndex);
+            i_pre_indexes = layerGDim*i_pre_rows + i_pre_cols;
+            self.connGtoInput[theta].connect(i_pre_indexes,i_post_index);
 
         for theta in range(len(thetaList)):
             self.connGtoInput[theta].delay[:, :] = br.rand(len(self.connGtoInput[theta].delay[:, :])) * delayConst_G2Input if delayRandOn else delayConst_G2Input
@@ -127,19 +132,30 @@ class visnet(object):
 
 
         # Connecting neurons within layers (excitatory to inhibitory and vv)
+        print "  ..ExIn InEx RecEx Syns.."
         self.connExIn = []
         self.connInEx = []
         # connRecIn = []
         if ReccurentOn:
-            connRecEx = []
+            self.connRecEx = []
 
         for layer in range(0, nLayers):
             #Excitatory -> Inhibitory
             self.connExIn.append(
                 br.Synapses(self.layers[layer], self.inhibLayers[layer],
                             eqs_Syn, pre=eqs_ExPre))
-            for cellIndex in range(inhibLayerDim*inhibLayerDim):
-                self.connExIn[layer].connect('j==cellIndex', p=pConnections_connExIn)
+#             for cellIndex in range(inhibLayerDim*inhibLayerDim):
+#                 self.connExIn[layer].connect('j==cellIndex', p=pConnections_connExIn)
+            for i_post_index in range(inhibLayerDim*inhibLayerDim):
+                i_post_row = int(i_post_index/inhibLayerDim);
+                i_post_col = i_post_index%inhibLayerDim;
+     
+                i_pre_rows = np.random.normal(i_post_row*layerDim/inhibLayerDim, fanInRadSigma_connE2I, nConnections_connE2I).astype(int)%layerDim;
+                i_pre_cols = np.random.normal(i_post_col*layerDim/inhibLayerDim, fanInRadSigma_connE2I, nConnections_connE2I).astype(int)%layerDim;
+                 
+                i_pre_indexes = layerDim*i_pre_rows + i_pre_cols;
+                self.connExIn[layer].connect(i_pre_indexes,i_post_index);
+            
             self.connExIn[layer].w[:, :] = br.rand(len(self.connExIn[layer].w[:, :])) * conductanceConst_E2I if weightRandOn else conductanceConst_E2I
             self.connExIn[layer].delay[:, :] = br.rand(len(self.connExIn[layer].delay[:, :])) * delayConst_connExIn if delayRandOn else delayConst_connExIn
 
@@ -149,8 +165,16 @@ class visnet(object):
                 br.Synapses(self.inhibLayers[layer], self.layers[layer],
                             eqs_Syn, pre=eqs_InPre))
 
-            for cellIndex in range(layerDim*layerDim):
-                self.connInEx[layer].connect('j==cellIndex', p=pConnections_connInEx);
+            for i_post_index in range(layerDim*layerDim):
+                i_post_row = int(i_post_index/layerDim);
+                i_post_col = i_post_index%layerDim;
+    
+                i_pre_rows = np.random.normal(i_post_row*inhibLayerDim/layerDim, fanInRadSigma_connI2E, nConnections_connI2E).astype(int)%inhibLayerDim;
+                i_pre_cols = np.random.normal(i_post_col*inhibLayerDim/layerDim, fanInRadSigma_connI2E, nConnections_connI2E).astype(int)%inhibLayerDim;
+                
+                i_pre_indexes = inhibLayerDim*i_pre_rows + i_pre_cols;
+                self.connInEx[layer].connect(i_pre_indexes,i_post_index);
+            
             self.connInEx[layer].w[:, :] = br.rand(len(self.connInEx[layer].w[:, :])) * conductanceConst_I2E if weightRandOn else conductanceConst_I2E
             self.connInEx[layer].delay[:, :] = br.rand(len(self.connInEx[layer].delay[:, :])) * delayConst_connInEx if delayRandOn else delayConst_connInEx
 
@@ -161,7 +185,14 @@ class visnet(object):
                                 eqs_Syn, pre=eqs_ExPre))
      
                 for cellIndex in range(layerDim*layerDim):
-                    self.connRecEx[layer].connect('j==cellIndex', p=pConnections_connRecEx);
+                    i_row = int(cellIndex/layerDim);
+                    i_col = cellIndex%layerDim;
+                    j_rows = np.random.normal(i_row, fanInRadSigma_connRecEx, nConnections_connRecEx).astype(int)%layerDim;
+                    j_cols = np.random.normal(i_col, fanInRadSigma_connRecEx, nConnections_connRecEx).astype(int)%layerDim;
+                    PreCellsIndex = layerDim*j_rows + j_cols;
+                    self.connRecEx[layer].connect(PreCellsIndex,cellIndex);
+#                 for cellIndex in range(layerDim*layerDim):
+#                     self.connRecEx[layer].connect('j==cellIndex', p=pConnections_connRecEx);
                 self.connRecEx[layer].w[:, :] = br.rand(len(self.connRecEx[layer].w[:, :])) * conductanceConst_E2E if weightRandOn else conductanceConst_E2E
                 self.connRecEx[layer].delay[:, :] = br.rand(len(self.connRecEx[layer].delay[:, :])) * delayConst_connRecEx if delayRandOn else delayConst_connRecEx
     
@@ -175,6 +206,8 @@ class visnet(object):
         
         #STDP conn        
         # Connecting neurons between excitatory layers
+        
+        print "  ..BottomUp and TopDown Syns.."
         self.connBottomUp = []
         if topDownOn:
             self.connTopDown = []
@@ -189,8 +222,17 @@ class visnet(object):
             )
             )
 
+#             for cellIndex in range(layerDim*layerDim):
+#                 self.connBottomUp[layer].connect('i==cellIndex', p=pConnections_connBottomUp)
+
             for cellIndex in range(layerDim*layerDim):
-                self.connBottomUp[layer].connect('i==cellIndex', p=pConnections_connBottomUp)
+                i_row = int(cellIndex/layerDim);
+                i_col = cellIndex%layerDim;
+                j_rows = np.random.normal(i_row, fanInRadSigma_connBottomUp, nConnections_connBottomUp).astype(int)%layerDim;
+                j_cols = np.random.normal(i_col, fanInRadSigma_connBottomUp, nConnections_connBottomUp).astype(int)%layerDim;
+                PreCellsIndex = layerDim*j_rows + j_cols;
+                self.connBottomUp[layer].connect(PreCellsIndex,cellIndex);
+            
             self.connBottomUp[layer].w[:, :] = br.rand(len(self.connBottomUp[layer].w[:, :])) * gmax
             self.connBottomUp[layer].delay[:, :] = br.rand(len(self.connBottomUp[layer].delay[:, :])) * delayConst_connBottomUp if delayRandOn else delayConst_connBottomUp
             
@@ -204,8 +246,16 @@ class visnet(object):
                 )
                 )
                 
+#                 for cellIndex in range(layerDim*layerDim):
+#                     self.connTopDown[layer].connect('i==cellIndex', p=pConnections_connTopDown)   
                 for cellIndex in range(layerDim*layerDim):
-                    self.connTopDown[layer].connect('i==cellIndex', p=pConnections_connTopDown)
+                    i_row = int(cellIndex/layerDim);
+                    i_col = cellIndex%layerDim;
+                    j_rows = np.random.normal(i_row, fanInRadSigma_connTopDown, nConnections_connTopDown).astype(int)%layerDim;
+                    j_cols = np.random.normal(i_col, fanInRadSigma_connTopDown, nConnections_connTopDown).astype(int)%layerDim;
+                    PreCellsIndex = layerDim*j_rows + j_cols;
+                    self.connTopDown[layer].connect(PreCellsIndex,cellIndex);    
+                
                 self.connTopDown[layer].w[:, :] = br.rand(len(self.connTopDown[layer].w[:, :])) * gmax
                 self.connTopDown[layer].delay[:, :] = br.rand(len(self.connTopDown[layer].delay[:, :])) * delayConst_connTopDown if delayRandOn else delayConst_connTopDown
         self.net.add(self.connBottomUp)
@@ -215,6 +265,7 @@ class visnet(object):
         
 
         #binding layer conn
+        print "  ..ExBind Syns.."
         self.connExBind = []
         for layer in range(0, nLayers):
             self.connExBind.append(br.Synapses(
@@ -226,8 +277,18 @@ class visnet(object):
             )
             )
 
-            for cellIndex in range(layerDim*layerDim):
-                self.connExBind[layer].connect('j==cellIndex', p=pConnections_connExBind)
+#             for cellIndex in range(layerDim*layerDim):
+#                 self.connExBind[layer].connect('j==cellIndex', p=pConnections_connExBind)
+
+            for i_post_index in range(layerDim*layerDim):
+                i_post_row = int(i_post_index/layerDim);
+                i_post_col = i_post_index%layerDim;
+     
+                i_pre_rows = np.random.normal(i_post_row, fanInRadSigma_connExBind, nConnections_connExBind).astype(int)%layerDim;
+                i_pre_cols = np.random.normal(i_post_col, fanInRadSigma_connExBind, nConnections_connExBind).astype(int)%layerDim;
+                 
+                i_pre_indexes = layerDim*i_pre_rows + i_pre_cols;
+                self.connExBind[layer].connect(i_pre_indexes,i_post_index);
             
             self.connExBind[layer].w[:, :] = br.rand(len(self.connExBind[layer].w[:, :])) * gmax_bind
             self.connExBind[layer].delay[:, :] = br.rand(len(self.connExBind[layer].delay[:, :])) * delayConst_connExBind if delayRandOn else delayConst_connExBind
@@ -307,7 +368,7 @@ class visnet(object):
             self.connBottomUp[layer].Apre[:,:] = 0;
             self.connBottomUp[layer].Apost[:,:] = 0;
 
-        print "Trace reset"
+        print "  ..Trace reset.."
         
     def setSynapticPlasticity(self, synapticBool):
 
@@ -369,11 +430,19 @@ class visnet(object):
         for layer in range(nLayers):
             synStates_ExBind.append(self.connExBind[layer].get_states(['i_pre','i_post','delay','w']));
         
+        if ReccurentOn:
+            synStates_ExEx = []
+            for layer in range(nLayers):
+                synStates_ExEx.append(self.connRecEx[layer].get_states(['i_pre','i_post','delay','w']));
+        
+        
         pickle.dump(synStates_GtoInput, open(dest + str(itr)+"_netStates_G2L.pkl", "wb"));
         pickle.dump(synStates_BottomUp, open(dest + str(itr)+"_netStates_L2L.pkl", "wb"));
         pickle.dump(synStates_InEx, open(dest + str(itr)+"_netStates_I2E.pkl", "wb"));
         pickle.dump(synStates_ExIn, open(dest + str(itr)+"_netStates_E2I.pkl", "wb"));
         pickle.dump(synStates_ExBind, open(dest + str(itr)+"_netStates_L2B.pkl", "wb"));
+        if ReccurentOn:
+            pickle.dump(synStates_ExEx, open(dest + str(itr)+"_netStates_E2E.pkl", "wb"));
         
     
     def saveSpikes(self,dest,itr):
