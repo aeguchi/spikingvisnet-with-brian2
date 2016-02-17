@@ -90,7 +90,7 @@ def runSimulation():
             #SpikeRec.append([])
             for index_trans in range(numTrans):
                 #SpikeRec[index_obj].append([]);
-                print " ** obj: " + str(index_obj) + ", trans: " + str(index_trans) +" **";
+                print " - obj: " + str(index_obj) + ", trans: " + str(index_trans) +" **";
                 index_img = index_obj * numTrans + index_trans;
                 img_fn = os.path.split(os.path.realpath(__file__))[0] + "/images/" + imageFolder + "/train/" + fileList_train[index_img + 2];
             
