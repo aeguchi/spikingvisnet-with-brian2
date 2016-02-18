@@ -4,10 +4,11 @@ from brian2 import ms
 import InfoAnalysis
 import pylab as plt
 
-experimentName="topp_itr1000"
+experimentName="BO_1"
 #inhibLayerDim = 10;
 #imageFolder = "simpleImagesNoTrans"
-imageFolder = "simpleImagesNoTrans"
+#imageFolder = "simpleImagesNoTrans"
+imageFolder = "BO"
 plotGaborAtTraining = False;
 plotActivitiesAtTraining = False;
 plotWeightsAtTraining = False;
@@ -16,7 +17,7 @@ ReccurentOn = True;
 
 #simulation settings
 trainingTime = 200.0;
-trainingEpochs = 1000;
+trainingEpochs = 10;
 testingTime = 10000.0;
 
 typeOfWeightNormalization = 1;
@@ -59,7 +60,6 @@ gmax_bind = 1.0
 
 main.loadParams(globals());
 main.runSimulation();
-
 
 # ia = InfoAnalysis.InfoAnalysis(globals())
 # ia.singleCellInfoAnalysis();

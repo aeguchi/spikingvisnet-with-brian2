@@ -132,7 +132,9 @@ def runSimulation():
                     vplotter.plotGaborInput(inputImage, index_img, res, res_norm, timeBegin,simulationTime)
                     vplotter.plotLayers(inputImage, index_img, timeBegin,simulationTime)
                     vplotter.saveFigs(os.path.split(os.path.realpath(__file__))[0] + "/Results/"+experimentName+"/"+str(count)+"_p"+str(phase)+"_o"+str(index_obj)+"_t"+str(index_trans),plotActivities=True,plotGabor=True);
-                    vplotter.saveFigs(os.path.split(os.path.realpath(__file__))[0] + "/Results/"+experimentName+"/",plotW=False if plotWeightsAtTraining else True);
+                    if not plotWeightsAtTraining:
+                        vplotter.plotWeight(WeightRec);
+                        vplotter.saveFigs(os.path.split(os.path.realpath(__file__))[0] + "/Results/"+experimentName+"/",plotW=True);
                     vnet.saveSpikes(os.path.split(os.path.realpath(__file__))[0] + "/Results/"+experimentName+"/", count);
                     
                 else:
