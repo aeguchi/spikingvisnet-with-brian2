@@ -46,6 +46,8 @@ class GaborFilter(object):
         #I = scipy.misc.imread(file, flatten=True)
         #fsize = len(I) * len(I);
         imgDim = len(I);
+        if use00asPaddingColor:
+            paddingColor = I[0,0]
         originalImageD = np.array(([imgDim, imgDim]));
         paddedImageD = 2 * originalImageD;
         ss = len(self.scale);
@@ -104,7 +106,6 @@ class GaborFilter(object):
                  # Copy out part of padded image convolution that corresponds to
                  # the original image
                     fi = tmp[(paddedImageD[0] - originalImageD[0]) / 2:(paddedImageD[0] - originalImageD[0]) / 2 + originalImageD[0], (paddedImageD[1] - originalImageD[1]) / 2:(paddedImageD[1] - originalImageD[1]) / 2 + originalImageD[1]]
-
 
                     #resize
                     #fi = self.resizeImg(fi);
