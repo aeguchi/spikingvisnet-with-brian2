@@ -24,13 +24,13 @@ typeOfWeightNormalization = 1;
 type1NormConst = 15.0;
 
 nConnections_connGtoInput = 20;
-fanInRadSigma_connGtoInput = 2;
+fanInRadSigma_connGtoInput = 1.0;
 
 conductanceConst_G2L = 2.5
 conductanceConst_E2I = 1.0#0.4;
 conductanceConst_I2E = 1.0;
 conductanceConst_E2E = 1.0
-gmax = 2.0;
+gmax = 2.5;
 gmax_bind = 1.0
 #layer settings
 #layerGDim = 20;

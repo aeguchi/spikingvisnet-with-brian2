@@ -4,13 +4,14 @@ import pylab as plt;
 import pickle
 import os;
 import errno
+import InfoAnalysis
 
-experimentName = 'test_V1_norm1_itr5000';
+experimentName = 'topp_itr100';
 #SpikeData = ['0_spikes_e.pkl', '0_spikes_i.pkl', '0_pikes_b.pkl', '0_pikes_g.pkl'];
-SpikeData = ['5001_spikes_e.pkl', '5001_spikes_i.pkl', '5001_pikes_b.pkl', '5001_pikes_g.pkl'];
+SpikeData = ['101_spikes_e.pkl', '101_spikes_i.pkl', '101_pikes_b.pkl', '101_pikes_g.pkl'];
 spikes_e = pickle.load(open(os.path.split(os.path.realpath(__file__))[0] + "/Results/" + experimentName + "/" + SpikeData[0], "rb"));
 #netState_L2L = pickle.load(open(os.path.split(os.path.realpath(__file__))[0] + "/Results/" + experimentName + "/0_netStates_L2L.pkl", "rb"));
-netState_L2L = pickle.load(open(os.path.split(os.path.realpath(__file__))[0] + "/Results/" + experimentName + "/5001_netStates_L2L.pkl", "rb"));
+netState_L2L = pickle.load(open(os.path.split(os.path.realpath(__file__))[0] + "/Results/" + experimentName + "/101_netStates_L2L.pkl", "rb"));
 
 preSynConn = netState_L2L[0]['i_pre'];
 postSynConn = netState_L2L[0]['i_post'];
@@ -23,10 +24,10 @@ polyHist = False
 #nBins = 10;
 # analysing cell index==0 for test development
 nCells = 100;
-t_min = 3030000#15000;#319000;
-t_max = 3040000#320000;
+t_min = 90000#15000;#319000;
+t_max = 100000#320000;
 max_delay = 20;
-gmax = 3#2.5
+gmax = 2#2.5
 polyChainDetectTh = 10;
 
 
@@ -52,6 +53,16 @@ def traceDelay(poly_indexs,poly_delays,index,delay):
             poly_indexs.append(preList[preArgMax[0][in_max]]);
             poly_delays.append(delay+int(preArgMax[1][in_max]));
             traceDelay(poly_indexs,poly_delays,preList[preArgMax[0][in_max]],delay+int(preArgMax[1][in_max]));
+
+
+
+
+#infoAnalysis?
+ia = InfoAnalysis.InfoAnalysis(globals())
+#ia.singleCellInfoAnalysis(phases = ['FR_0_blank.pkl']);
+ia.singleCellInfoAnalysis();
+plt.show();
+
 
 
 
