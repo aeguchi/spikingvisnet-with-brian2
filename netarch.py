@@ -184,13 +184,13 @@ class visnet(object):
                     br.Synapses(self.layers[layer], self.layers[layer],
                                 eqs_Syn, pre=eqs_ExPre))
      
-                for cellIndex in range(layerDim*layerDim):
-                    i_row = int(cellIndex/layerDim);
-                    i_col = cellIndex%layerDim;
-                    j_rows = np.random.normal(i_row, fanInRadSigma_connRecEx, nConnections_connRecEx).astype(int)%layerDim;
-                    j_cols = np.random.normal(i_col, fanInRadSigma_connRecEx, nConnections_connRecEx).astype(int)%layerDim;
-                    PreCellsIndex = layerDim*j_rows + j_cols;
-                    self.connRecEx[layer].connect(PreCellsIndex,cellIndex);
+                for i_post_index in range(layerDim*layerDim):
+                    i_row = int(i_post_index/layerDim);
+                    i_col = i_post_index%layerDim;
+                    i_pre_rows = np.random.normal(i_row, fanInRadSigma_connRecEx, nConnections_connRecEx).astype(int)%layerDim;
+                    i_pre_cols = np.random.normal(i_col, fanInRadSigma_connRecEx, nConnections_connRecEx).astype(int)%layerDim;
+                    i_pre_indexes = layerDim*i_pre_rows + i_pre_cols;
+                    self.connRecEx[layer].connect(i_pre_indexes,i_post_index);
 #                 for cellIndex in range(layerDim*layerDim):
 #                     self.connRecEx[layer].connect('j==cellIndex', p=pConnections_connRecEx);
                 self.connRecEx[layer].w[:, :] = br.rand(len(self.connRecEx[layer].w[:, :])) * conductanceConst_E2E if weightRandOn else conductanceConst_E2E
@@ -248,13 +248,13 @@ class visnet(object):
                 
 #                 for cellIndex in range(layerDim*layerDim):
 #                     self.connTopDown[layer].connect('i==cellIndex', p=pConnections_connTopDown)   
-                for cellIndex in range(layerDim*layerDim):
-                    i_row = int(cellIndex/layerDim);
-                    i_col = cellIndex%layerDim;
-                    j_rows = np.random.normal(i_row, fanInRadSigma_connTopDown, nConnections_connTopDown).astype(int)%layerDim;
-                    j_cols = np.random.normal(i_col, fanInRadSigma_connTopDown, nConnections_connTopDown).astype(int)%layerDim;
-                    PreCellsIndex = layerDim*j_rows + j_cols;
-                    self.connTopDown[layer].connect(PreCellsIndex,cellIndex);    
+                for i_post_index in range(layerDim*layerDim):
+                    i_row = int(i_post_index/layerDim);
+                    i_col = i_post_index%layerDim;
+                    i_pre_rows = np.random.normal(i_row, fanInRadSigma_connTopDown, nConnections_connTopDown).astype(int)%layerDim;
+                    i_pre_cols = np.random.normal(i_col, fanInRadSigma_connTopDown, nConnections_connTopDown).astype(int)%layerDim;
+                    i_pre_indexes = layerDim*i_pre_rows + i_pre_cols;
+                    self.connTopDown[layer].connect(i_pre_indexes,i_post_index);    
                 
                 self.connTopDown[layer].w[:, :] = br.rand(len(self.connTopDown[layer].w[:, :])) * gmax
                 self.connTopDown[layer].delay[:, :] = br.rand(len(self.connTopDown[layer].delay[:, :])) * delayConst_connTopDown if delayRandOn else delayConst_connTopDown

@@ -10,7 +10,7 @@ class InfoAnalysis(object):
     def __init__(self,borrowed_globals):
         globals().update(borrowed_globals);
 
-    def singleCellInfoAnalysis(self):
+    def singleCellInfoAnalysis(self,phases = ['FR_0_blank.pkl', 'FR_1_trained.pkl']):
         plt.figure(4 , figsize=(15, 5),dpi=100);
         plotAllSingleCellInfo = 0;
         
@@ -18,7 +18,7 @@ class InfoAnalysis(object):
         #layer = 2; #0: bindingLayer, 1: 1st layer ..
         plotMode = 1; #0:normal 1:max
         
-        phases = ['FR_0_blank.pkl', 'FR_1_trained.pkl'];
+        #phases = ['FR_0_blank.pkl', 'FR_1_trained.pkl'];
         #phases = ['FR_0_blank.pkl'];
         linestyles = ['-', '--'];#, '-.', ':']
 
