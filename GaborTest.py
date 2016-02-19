@@ -1,9 +1,6 @@
 
 from Parameters import *
 
-import imageImport as imimp
-import cv2
-
 import netarch
 import netplot
 import GaborFilter
@@ -22,7 +19,7 @@ plotGabor = 1;
 #plotLayer = 0;  # 0:each images, 1: at end
 plotActivities = 0;
 phases = [0,1,2] #testing only [0], testing and training [0,2]
-
+psiList = [0,np.pi]
 
 try:
     os.makedirs("Results");
@@ -38,12 +35,12 @@ except OSError as exception:
 
 print "*** constructing the network ***"
 
-#vnet = netarch.visnet()
-#vplotter = netplot.plotter(vnet)
+# vnet = netarch.visnet(globals())
+# vplotter = netplot.plotter(vnet,globals())
 gf = GaborFilter.GaborFilter(globals());
 
-experimentName="BO_1"
-imageFolder = "BO"
+experimentName="gabor_test"
+imageFolder = "BO_single"
 
 fileList_train = np.genfromtxt(os.path.split(os.path.realpath(__file__))[0] + "/images/" + imageFolder + "/fileList_train.txt", dtype='str');
 numObj_train = int(fileList_train[0]);
@@ -52,6 +49,8 @@ fileList_test = np.genfromtxt(os.path.split(os.path.realpath(__file__))[0] + "/i
 numObj_test = int(fileList_test[0]);
 numTrans_test = int(fileList_test[1]);
 
+timeBegin = 0;
+    
 for phase in [0,1,2]:
     print "*** simulation phase: " + str(phase);
     if phase==1:
@@ -91,11 +90,11 @@ for phase in [0,1,2]:
             # run visnet simulation!
         
             print "** running a simulation **"
-            #vnet.net.run(simulationTime * ms)
+            vnet.net.run(simulationTime * ms)
         
             # plot each image set
             if plotGabor:
-                vplotter.plotGaborInput(I, index_img, res, res_norm)
+                vplotter.plotGaborInput(inputImage, index_img, res, res_norm,timeBegin,simulationTime)
             FRrecTmp = np.zeros((nLayers+1, layerDim, layerDim));
             vplotter.plotLayers(I, index_img, FRrecTmp)
             FRrec[index_obj,index_trans]=FRrecTmp;

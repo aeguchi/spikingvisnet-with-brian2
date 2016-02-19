@@ -151,12 +151,12 @@ fanInRadSigma_connRecEx = 2.0;
 #pConnections_connExIn = 0.1;
 #inhibRad = layerDim/3;
 #pConnections_connInEx = 0.1;
-pConnections_connExBind = 0.1;
+#pConnections_connExBind = 0.1;
 # pConnections_connBottomUp = float(nConnections_connBottomUp)/(layerDim*layerDim);
 # pConnections_connExIn = float(nConnections_connExIn)/(layerDim*layerDim);
 # pConnections_connInEx = float(nConnections_connInEx)/(inhibLayerDim*inhibLayerDim);
 # pConnections_connExBind = float(nConnections_connExBind)/(layerDim*layerDim);
-pConnections_connTopDown = float(nConnections_connTopDown)/(layerDim*layerDim);
+#pConnections_connTopDown = float(nConnections_connTopDown)/(layerDim*layerDim);
 #pConnections_connRecEx = float(nConnections_connRecEx)/(layerDim*layerDim);
 
 
@@ -206,10 +206,6 @@ eqs_stdpPost ='''
              w = clip(w+plastic*Apre*lRate, 0, gmax)
              '''
 
-
-
-
-
 gmax_bind = 0.1
 dApre_bind = 0.1
 ratioPreToPost_bind = 1.2;
@@ -232,15 +228,10 @@ eqs_stdpPost_bind ='''
              w = clip(w+plastic*Apre_bind*lRate, 0, gmax_bind)
              '''
 
-
-
-
-
-
 #condition to introduce topology
-fanInRad = layerDim/3;
-connCond = 'sqrt(0-99(i%layerDim - j%layerDim)**2 + (i/layerDim - j/layerDim)**2) < fanInRad'
-#somehow sqrt did not seem to work, instead use one below: (but this is not wrap-around)
-connCond = '(((i%layerDim) - (j%layerDim))%layerDim)**2 + (((i/layerDim) - (j/layerDim))%layerDim)**2 < inhibRad**2'
+# fanInRad = layerDim/3;
+# connCond = 'sqrt(0-99(i%layerDim - j%layerDim)**2 + (i/layerDim - j/layerDim)**2) < fanInRad'
+# #somehow sqrt did not seem to work, instead use one below: (but this is not wrap-around)
+# connCond = '(((i%layerDim) - (j%layerDim))%layerDim)**2 + (((i/layerDim) - (j/layerDim))%layerDim)**2 < inhibRad**2'
 randSeed = 1;
 

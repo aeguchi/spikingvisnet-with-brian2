@@ -4,11 +4,9 @@ from brian2 import ms
 import InfoAnalysis
 import pylab as plt
 
-experimentName="BO_1"
-#inhibLayerDim = 10;
-#imageFolder = "simpleImagesNoTrans"
-#imageFolder = "simpleImagesNoTrans"
-imageFolder = "BO"
+experimentName="BO_single1_1000"
+imageFolder = "BO_single"
+
 plotGaborAtTraining = False;
 plotActivitiesAtTraining = False;
 plotWeightsAtTraining = False;
@@ -17,7 +15,7 @@ ReccurentOn = True;
 
 #simulation settings
 trainingTime = 200.0;
-trainingEpochs = 10;
+trainingEpochs = 1000;
 testingTime = 10000.0;
 
 typeOfWeightNormalization = 1;
@@ -25,6 +23,8 @@ type1NormConst = 15.0;
 
 nConnections_connGtoInput = 20;
 fanInRadSigma_connGtoInput = 1.0;
+fanInRadSigma_connBottomUp = 3.0;
+
 
 conductanceConst_G2L = 2.5
 conductanceConst_E2I = 1.0#0.4;
