@@ -103,6 +103,8 @@ def runSimulation():
 
                 resizedImage = gf.resizeImg(inputImage);
                 res = gf.filtering(resizedImage);
+                
+                
                 # filter the images and convert to normalised spikes
                 res_norm = gf.scaleToUnit(res)
                 vnet.setGaborFiringRates(res_norm)

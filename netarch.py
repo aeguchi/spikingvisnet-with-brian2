@@ -30,15 +30,22 @@ class visnet(object):
 
     def buildLayers(self):
 
-        # Gabor input layer
+        # Gabor input layer layerG [theta(orientation),psi(phase),lambda(wavelength)]
         self.layerG = []
-        for theta in range(0, len(thetaList)):
-            self.layerG.append(br.PoissonGroup(
-                layerGDim * layerGDim,  # N neurons
-                np.random.rand(layerGDim * layerGDim) * Hz)  # rates
-            )
+        ps = len(psiList);
+        ss = len(lamdaList);
+        ors = len(thetaList);
+        for p in range(ps):
+            self.layerG.append([]);
+            for s in range(ss):
+                self.layerG[p].append([])
+                for o in range(ors):
+                    self.layerG[p][s].append(br.PoissonGroup(
+                        layerGDim * layerGDim,  # N neurons
+                        np.random.rand(layerGDim * layerGDim) * Hz)  # rates
+                    )
 
-        self.net.add(self.layerG)
+        self.net.add(self.layerG);
 
         # Excitatory layers
         print "  ..excitatory layers.."
@@ -101,19 +108,31 @@ class visnet(object):
     def buildConnectionsBetweenLayers(self):
 
         # Connecting neurons in Gabor input layer and neurons in the first ExcitLayer
+        # Gabor input layer layerG [theta(orientation),psi(phase),lambda(wavelength)]
         print "  ..G2Input Syns.."
         self.connGtoInput = []
-        for theta in range(0, len(thetaList)):
-            self.connGtoInput.append(
-                br.Synapses(self.layerG[theta],
-                            self.layers[0],
-                            eqs_Syn,
-                            pre=eqs_ExPre
-                            )
-            )
+        
+        ps = len(psiList);
+        ss = len(lamdaList);
+        ors = len(thetaList);
+        for p in range(ps):
+            self.connGtoInput.append([]);
+            for s in range(ss):
+                self.connGtoInput[p].append([])
+                for o in range(ors):
+                    self.connGtoInput[p][s].append(
+                        br.Synapses(self.layerG[p][s][o],
+                                    self.layers[0],
+                                    eqs_Syn,
+                                    pre=eqs_ExPre
+                                    )
+                    )
             
         for i_post_index in range(layerDim*layerDim):
-            theta = np.random.randint(len(thetaList));
+            o = np.random.randint(ors);
+            p = np.random.randint(ps);
+            s = np.random.randint(ss);
+            
             i_post_row = int(i_post_index/layerDim);
             i_post_col = i_post_index%layerDim;
 
@@ -121,11 +140,13 @@ class visnet(object):
             i_pre_cols = np.random.normal(i_post_col*layerGDim/layerDim, fanInRadSigma_connGtoInput, nConnections_connGtoInput).astype(int)%layerGDim;
             
             i_pre_indexes = layerGDim*i_pre_rows + i_pre_cols;
-            self.connGtoInput[theta].connect(i_pre_indexes,i_post_index);
+            self.connGtoInput[p][s][o].connect(i_pre_indexes,i_post_index);
 
-        for theta in range(len(thetaList)):
-            self.connGtoInput[theta].delay[:, :] = br.rand(len(self.connGtoInput[theta].delay[:, :])) * delayConst_G2Input if delayRandOn else delayConst_G2Input
-            self.connGtoInput[theta].w[:, :] = br.rand(len(self.connGtoInput[theta].w[:, :])) * conductanceConst_G2L if weightRandOn else conductanceConst_G2L;
+        for p in range(ps):
+            for s in range(ss):
+                for o in range(ors):
+                    self.connGtoInput[p][s][o].delay[:, :] = br.rand(len(self.connGtoInput[p][s][o].delay[:, :])) * delayConst_G2Input if delayRandOn else delayConst_G2Input
+                    self.connGtoInput[p][s][o].w[:, :] = br.rand(len(self.connGtoInput[p][s][o].w[:, :])) * conductanceConst_G2L if weightRandOn else conductanceConst_G2L;
         self.net.add(self.connGtoInput)
 
 
@@ -299,8 +320,16 @@ class visnet(object):
 
         # gabor layer
         self.spikesG = []
-        for theta in range(0, len(thetaList)):
-            self.spikesG.append(br.SpikeMonitor(self.layerG[theta]))
+        
+        ps = len(psiList);
+        ss = len(lamdaList);
+        ors = len(thetaList);
+        for p in range(ps):
+            self.spikesG.append([]);
+            for s in range(ss):
+                self.spikesG[p].append([])
+                for o in range(ors):
+                    self.spikesG[p][s].append(br.SpikeMonitor(self.layerG[p][s][o]))
         self.net.add(self.spikesG)
 
 
@@ -341,7 +370,9 @@ class visnet(object):
                     r = np.reshape(np.array(res_norm[p][s][o]),layerGDim * layerGDim);
                     #r = np.reshape(np.mean(tmp, axis=3),(layerGDim * layerGDim))
                     # print r
-                    self.layerG[index_filter].rates = r * Rmax
+                    #self.layerG[index_filter].rates = r * Rmax
+                    self.layerG[p][s][o].rates = r * Rmax
+                    
                     # To be fixed
                     # print vnet.layerG[index_filter].rates
 
@@ -373,7 +404,7 @@ class visnet(object):
     def setSynapticPlasticity(self, synapticBool):
 
 #        for connection in [self.connGtoInput, self.connBottomUp,self.connTopDown, self.connExIn, self.connInEx]:
-        for connection in [self.connGtoInput, self.connBottomUp,self.connExIn, self.connInEx, self.connExBind]:    
+        for connection in [self.connBottomUp,self.connExBind]:    
             for syn in self.connBottomUp:
                 syn.plastic = synapticBool
                 
@@ -411,8 +442,15 @@ class visnet(object):
         
     def saveStates(self,dest,itr):
         synStates_GtoInput = []
-        for theta in range(0, len(thetaList)):
-            synStates_GtoInput.append(self.connGtoInput[theta].get_states(['i_pre','i_post','delay','w']))
+        ps = len(psiList);
+        ss = len(lamdaList);
+        ors = len(thetaList);
+        for p in range(ps):
+            synStates_GtoInput.append([]);
+            for s in range(ss):
+                synStates_GtoInput[p].append([])
+                for o in range(ors):
+                    synStates_GtoInput[p][s].append(self.connGtoInput[p][s][o].get_states(['i_pre','i_post','delay','w']))
         
         synStates_BottomUp = []
         for layer in range(nLayers-1):
@@ -449,12 +487,23 @@ class visnet(object):
         spikes_g = [];
         spikes_e = [];
         spikes_i = [];
-        for theta in range(0, len(thetaList)):
-            tmp_g = self.spikesG[theta].spike_trains();
-            for i in range(layerGDim*layerGDim):
-                if len(tmp_g[i])>0:
-                    tmp_g[i] = np.sort(tmp_g[i]/ms);
-            spikes_g.append(tmp_g);
+        
+        
+        
+        ps = len(psiList);
+        ss = len(lamdaList);
+        ors = len(thetaList);
+        for p in range(ps):
+            spikes_g.append([]);
+            for s in range(ss):
+                spikes_g[p].append([])
+                for o in range(ors):
+                    tmp_g = self.spikesG[p][s][o].spike_trains();
+                    for i in range(layerGDim*layerGDim):
+                        if len(tmp_g[i])>0:
+                            tmp_g[i] = np.sort(tmp_g[i]/ms);
+                    spikes_g[p][s].append(tmp_g);       
+
             
         for layer in range(nLayers):
             tmp_e = self.spkdetLayers[layer].spike_trains();

@@ -22,22 +22,23 @@ class plotter(object):
 
         self.figG = plt.figure(1 , figsize=(40, 20),dpi=500);
         plt.clf();
-        # plot input Image
-        plt.subplot(5, 3, 1)
-        plt.imshow(img, cmap='gray', vmin=0, vmax=255, interpolation='none')
-        plt.title('Input')
-
-
+        
         
         ps = len(psiList);
         ss = len(lamdaList);
         ors = len(thetaList);
+        
+        # plot input Image
+        plt.subplot(1+ps*ss*ors, 3, 1)
+        plt.imshow(img, cmap='gray', vmin=0, vmax=255, interpolation='none')
+        plt.title('Input')
+    
 
         for p in range(ps):
             for s in range(ss):
                 for o in range(ors):
                     index_filter = p * (ss * ors) + s * ors + o;
-                    ax = plt.subplot(5, 3, (index_filter + 1) * 3 + 1)
+                    ax = plt.subplot(1+ps*ss*ors, 3, (index_filter + 1) * 3 + 1)
                     plt.imshow(res[p][s][o], cmap='jet', interpolation='none')
                     # ax.get_xaxis().set_visible(False)
                     # ax.get_yaxis().set_visible(False)
@@ -45,20 +46,20 @@ class plotter(object):
         
         
                     # plot spike raster
-                    ax = plt.subplot(5, 3, (index_filter + 1) * 3 + 2)
+                    ax = plt.subplot(1+ps*ss*ors, 3, (index_filter + 1) * 3 + 2)
                     if(index_filter == 0):
                         plt.title('Raster Plot')
-                    tmp = self.vnet.spikesG[index_filter]
+                    tmp = self.vnet.spikesG[p][s][o]
                     # plot(self.vnet.spikesG[index_filter].t/ms, self.vnet.spikesG[index_filter].i, '.')
                     # plot(testSpikes.t/ms, testSpikes.i, '.')
                     plt.plot(tmp.t / ms, tmp.i, '.')
                     plt.ylim([0, layerGDim * layerGDim - 1])
                     plt.xlim([timeBegin, timeBegin+simulationTime])
         
-                    res_FRMap = self.vnet.getFiringRateMap(layerGDim,self.vnet.spikesG[index_filter],timeBegin,simulationTime)
+                    res_FRMap = self.vnet.getFiringRateMap(layerGDim,self.vnet.spikesG[p][s][o],timeBegin,simulationTime)
                     
                     # plot FR map
-                    plt.subplot(5, 3, (index_filter + 1) * 3 + 3)
+                    plt.subplot(1+ps*ss*ors, 3, (index_filter + 1) * 3 + 3)
                     if(index_filter == 0):
                         plt.title('Firing Rate Map')
                     plt.imshow(res_FRMap, cmap='jet', interpolation='none', vmin=0, vmax=Rmax)

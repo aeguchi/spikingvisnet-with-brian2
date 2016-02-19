@@ -6,7 +6,17 @@ import os;
 import errno
 import InfoAnalysis
 
-experimentName = 'topp_itr100';
+experimentName = 'BO_single1_1000';
+
+#infoAnalysis?
+ia = InfoAnalysis.InfoAnalysis(globals())
+ia.singleCellInfoAnalysis(phases = ['FR_0_blank.pkl']);
+#ia.singleCellInfoAnalysis();
+plt.show();
+
+
+
+
 #SpikeData = ['0_spikes_e.pkl', '0_spikes_i.pkl', '0_pikes_b.pkl', '0_pikes_g.pkl'];
 SpikeData = ['101_spikes_e.pkl', '101_spikes_i.pkl', '101_pikes_b.pkl', '101_pikes_g.pkl'];
 spikes_e = pickle.load(open(os.path.split(os.path.realpath(__file__))[0] + "/Results/" + experimentName + "/" + SpikeData[0], "rb"));
@@ -57,11 +67,7 @@ def traceDelay(poly_indexs,poly_delays,index,delay):
 
 
 
-#infoAnalysis?
-ia = InfoAnalysis.InfoAnalysis(globals())
-#ia.singleCellInfoAnalysis(phases = ['FR_0_blank.pkl']);
-ia.singleCellInfoAnalysis();
-plt.show();
+
 
 
 
