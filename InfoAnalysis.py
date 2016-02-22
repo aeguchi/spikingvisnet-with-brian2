@@ -10,7 +10,7 @@ class InfoAnalysis(object):
     def __init__(self,borrowed_globals):
         globals().update(borrowed_globals);
 
-    def singleCellInfoAnalysis(self,phases = ['FR_0_blank.pkl', 'FR_1_trained.pkl']):
+    def singleCellInfoAnalysis(self,phases = ['FR_0_blank.pkl', 'FR_1_trained.pkl'],numBins=3,weightedAnalysis = 1):
         plt.figure(4 , figsize=(15, 5),dpi=100);
         plotAllSingleCellInfo = 0;
         
@@ -23,8 +23,8 @@ class InfoAnalysis(object):
         linestyles = ['-', '--'];#, '-.', ':']
 
         #settings
-        numBins =  3;##numTrans;   #can be adjusted
-        weightedAnalysis = 1;#exclude the selectivity by not responding to a particular stimulus        
+        #numBins =  3;##numTrans;   #can be adjusted
+        #weightedAnalysis = 1;#exclude the selectivity by not responding to a particular stimulus        
         
         
         FR=pickle.load(open(os.path.split(os.path.realpath(__file__))[0] +"/Results/"+experimentName+"/"+ phases[0], "rb"));
