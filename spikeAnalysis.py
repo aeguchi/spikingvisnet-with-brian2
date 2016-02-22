@@ -6,22 +6,22 @@ import os;
 import errno
 import InfoAnalysis
 
-experimentName = 'BO_single1_1000';
+experimentName = 'BO_single1_gabMod2';
 
 #infoAnalysis?
-ia = InfoAnalysis.InfoAnalysis(globals())
-ia.singleCellInfoAnalysis(phases = ['FR_0_blank.pkl']);
-#ia.singleCellInfoAnalysis();
-plt.show();
+#ia = InfoAnalysis.InfoAnalysis(globals())
+#ia.singleCellInfoAnalysis(phases = ['FR_0_blank.pkl']);
+#ia.singleCellInfoAnalysis(numBins=3,weightedAnalysis=1);
+#plt.show();
 
 
 
 
 #SpikeData = ['0_spikes_e.pkl', '0_spikes_i.pkl', '0_pikes_b.pkl', '0_pikes_g.pkl'];
-SpikeData = ['101_spikes_e.pkl', '101_spikes_i.pkl', '101_pikes_b.pkl', '101_pikes_g.pkl'];
+SpikeData = ['1001_spikes_e.pkl', '1001_spikes_i.pkl', '1001_pikes_b.pkl', '1001_pikes_g.pkl'];
 spikes_e = pickle.load(open(os.path.split(os.path.realpath(__file__))[0] + "/Results/" + experimentName + "/" + SpikeData[0], "rb"));
 #netState_L2L = pickle.load(open(os.path.split(os.path.realpath(__file__))[0] + "/Results/" + experimentName + "/0_netStates_L2L.pkl", "rb"));
-netState_L2L = pickle.load(open(os.path.split(os.path.realpath(__file__))[0] + "/Results/" + experimentName + "/101_netStates_L2L.pkl", "rb"));
+netState_L2L = pickle.load(open(os.path.split(os.path.realpath(__file__))[0] + "/Results/" + experimentName + "/1001_netStates_L2L.pkl", "rb"));
 
 preSynConn = netState_L2L[0]['i_pre'];
 postSynConn = netState_L2L[0]['i_post'];
@@ -34,12 +34,12 @@ polyHist = False
 #nBins = 10;
 # analysing cell index==0 for test development
 nCells = 100;
-t_min = 90000#15000;#319000;
-t_max = 100000#320000;
+t_min = 20000#840000#15000;#319000;
+t_max = 40000#860000#320000;
 max_delay = 20;
-gmax = 2#2.5
+gmax = 2.5
 polyChainDetectTh = 10;
-
+nTopCellsChosenForPI = 10;
 
 def traceDelay(poly_indexs,poly_delays,index,delay):
     #print str(index) + " " + str(delay);
@@ -75,6 +75,19 @@ def traceDelay(poly_indexs,poly_delays,index,delay):
 #fig_hist = plt.figure(1 , figsize=(40, 40),dpi=500);
 #fig_poly = plt.figure(2 , figsize=(40, 40),dpi=100);
 
+#calculate FR in layer 0:
+meanFR = 0;
+PI = np.zeros(nCells);
+for i_pre in range(100):
+    spikeTime_pre = spikes_e[0][i_pre]; #spiking time of cell i_post in post synaptic layer (layer 1)
+    cond_post1 = spikeTime_pre < t_max;
+    cond_post2 = t_min < spikeTime_pre;
+    cond_post = cond_post1 & cond_post2;
+    spikeTime_pre_ext=np.extract(cond_post, spikeTime_pre)    #extract spike timings between specified timing
+    meanFR += len(spikeTime_pre_ext)*1.0/nCells/(t_max-t_min)*1000;
+print meanFR;
+
+
 for i_post in range(100):
     print i_post
     #plt.clf();
@@ -84,7 +97,7 @@ for i_post in range(100):
     cond_post1 = spikeTime_post < t_max;
     cond_post2 = t_min < spikeTime_post;
     cond_post = cond_post1 & cond_post2;
-    spikeTime_post_ext=np.extract(cond_post, spikeTime_post)    #extract spike timings between specified timing
+    spikeTime_post_ext=np.extract(cond_post, spikeTime_post)    #extract spike timings between specified timing    
     
     if(len(spikeTime_post_ext)>0):  #if post synaptic cell ever spikes
         count = 0;
@@ -158,6 +171,8 @@ for i_post in range(100):
             except OSError as exception:
                 if exception.errno != errno.EEXIST:
                     raise
+                
+                
             
             fig_poly = plt.figure(2 , figsize=(20, 20),dpi=100);
             plt.clf();
@@ -183,6 +198,12 @@ for i_post in range(100):
                 for order_in in range(len(ext_sorted)):
                     t_back = int(ext_sorted[order_in]/1);
                     polyTableTmp[ext_sorted_i[order_in]][t_back] += 1;
+            
+            
+            #calculating PI
+            sortedPolyTable = np.sort(polyTableTmp.reshape(max_delay*nCells));
+            if meanFR>0:
+                PI[i_post]=np.mean(sortedPolyTable[-1-nTopCellsChosenForPI:-1])/meanFR;
             
 
             #plt.subplot(int(subplotDim)+1,int(subplotDim),1);
@@ -253,7 +274,7 @@ for i_post in range(100):
                     plt.gca().invert_xaxis()
                     #plt.show()
              
-            fig_poly.savefig(os.path.split(os.path.realpath(__file__))[0] + "/Results/"+experimentName+"/poly"+str(t_min)+"-"+str(t_max)+"/poly_"+str(t_min)+"-"+str(t_max)+"_"+str(i_post)+"_polyLen"+str(len(poly_indexs))+".png");
+            fig_poly.savefig(os.path.split(os.path.realpath(__file__))[0] + "/Results/"+experimentName+"/poly"+str(t_min)+"-"+str(t_max)+"/poly_"+str(t_min)+"-"+str(t_max)+"_"+str(i_post)+"_polyLen"+str(len(poly_indexs))+"_PI{:.2f}".format(PI[i_post])+".png");
 
             
     
@@ -261,7 +282,12 @@ for i_post in range(100):
     #plt.plot(prevSpikeTime[:][1::]);
     
     #plt.show()
-    
+
+if polyAnalysisOn:
+    print np.mean(PI);
+    f = open(os.path.split(os.path.realpath(__file__))[0] + "/Results/"+experimentName+"/PI_"+str(t_min)+"-"+str(t_max)+".txt","w");    
+    f.write(str(np.mean(PI)));
+    f.close();
 
 # #spikes[layer][cellIndex]
 # layer = 1;

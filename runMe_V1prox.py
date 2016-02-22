@@ -4,7 +4,7 @@ from brian2 import ms
 import InfoAnalysis
 import pylab as plt
 
-experimentName="BO_single1_1000"
+experimentName="BO_test"
 imageFolder = "BO_single"
 
 plotGaborAtTraining = False;
@@ -18,12 +18,13 @@ trainingTime = 200.0;
 trainingEpochs = 1000;
 testingTime = 10000.0;
 
+psiList = [-np.pi/2,np.pi/2]
 typeOfWeightNormalization = 1;
 type1NormConst = 15.0;
 
-nConnections_connGtoInput = 20;
+nConnections_connGtoInput = 25#20;
 fanInRadSigma_connGtoInput = 1.0;
-fanInRadSigma_connBottomUp = 3.0;
+fanInRadSigma_connBottomUp = 4.0;
 
 
 conductanceConst_G2L = 2.5

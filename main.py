@@ -9,6 +9,7 @@ import netplot
 import GaborFilter
 import InfoAnalysis
 
+from shutil import copyfile
 import numpy as np
 import pylab as plt
 import scipy
@@ -37,6 +38,16 @@ def runSimulation():
     except OSError as exception:
         if exception.errno != errno.EEXIST:
             raise
+        
+    try:
+        os.makedirs(os.path.split(os.path.realpath(__file__))[0] + "/Results/"+experimentName+"/scriptBackup");
+    except OSError as exception:
+        if exception.errno != errno.EEXIST:
+            raise
+
+
+    copyfile(__file__,os.path.split(os.path.realpath(__file__))[0] + "/Results/"+experimentName+"/scriptBackup/" +os.path.basename(__file__));
+    copyfile(os.path.split(os.path.realpath(__file__))[0] + "/Parameters.py",os.path.split(os.path.realpath(__file__))[0] + "/Results/"+experimentName+"/scriptBackup/Parameters.py");
     
     print "*** constructing the network ***"
     
