@@ -32,9 +32,9 @@ topDownOn = False;
 ReccurentOn = False;
 
 #simulationTime = 100;
-trainingTime = 10.0# * ms;
-trainingEpochs = 10;
-testingTime = 1000.0# * ms;
+trainingTime = 200.0# * ms;
+trainingEpochs = 1000;
+testingTime = 10000.0# * ms;
 
 #Param for Filtering:
 #ksize = 31#31  # 31 the size of the Gabor kernel. If ksize = (a, b), we then have a Gabor kernel of size a x b pixels. As with many other convolution kernels, ksize is preferably odd and the kernel is a square (just for the sake of uniformity).
@@ -43,7 +43,7 @@ thetaList = [0, np.pi/4, np.pi/2, np.pi*3/4]  #0 #orientation: the orientation o
 lamdaList = [2.0]; #wavelength: the wavelength of the sinusoidal factor in the above equation.
 gamma = 0.5 #aspect ratio:  the spatial aspect ratio.
 #psiList = [0, np.pi, -np.pi/2, np.pi/2]#phase shift:  phase offset
-psiList = [0]#phase shift:  phase offset
+psiList = [-np.pi/2,np.pi/2]#[0]#phase shift:  phase offset
 sigma = 0.5 # the standard deviation of the Gaussian function used in the Gabor filter.
 paddingColor = 128;
 use00asPaddingColor = True;
@@ -119,8 +119,8 @@ Iext : volt #external current input
 #synapse params:  from < 100 microseconds in very short axons to > 100 ms in very long non-myelinated central axons. 
 delayRandOn = True;
 weightNormalizationOn = True;
-typeOfWeightNormalization = 2; #1:normal, 2:unit norm.(feature rescaling)
-type1NormConst = 10.0;
+typeOfWeightNormalization = 1; #1:normal, 2:unit norm.(feature rescaling)
+type1NormConst = 15.0;
 delayConst_G2Input = 20.0*ms;
 delayConst_connBottomUp = 20.0*ms;
 delayConst_connExIn = 20.0*ms;
@@ -130,11 +130,12 @@ delayConst_connExBind = 20.0*ms;
 delayConst_connTopDown = 20.0*ms;
 delayConst_connRecEx = 20.0*ms;
 
+
 #nConnections_connGtoInput = 50;
-nConnections_connGtoInput = 10;
+nConnections_connGtoInput = 25;
 fanInRadSigma_connGtoInput = 1.0;
 nConnections_connBottomUp = 10;
-fanInRadSigma_connBottomUp = 2.0;
+fanInRadSigma_connBottomUp = 4.0;
 nConnections_connE2I = 10;
 fanInRadSigma_connE2I = 2.0;
 nConnections_connI2E = 5;
@@ -167,14 +168,13 @@ eqs_ExPre ='''ge += w'''
 
 #we = (0.27/10) # excitatory synaptic weight
 #wi = (4.5/30) # inhibitory synaptic weight
-conductanceConst_G2L = 0.4;#20*we;
-conductanceConst_E2I = 0.2;#10*we;
-conductanceConst_E2E = 0.1;#*we; (rec)
-conductanceConst_I2E = 0.075;#0.5*wi;
+conductanceConst_G2L = 2.5#0.4;#20*we;
+conductanceConst_E2I = 1.0#0.2;#10*we;
+conductanceConst_E2E = 1.0#0.1;#*we; (rec)
+conductanceConst_I2E = 1.0#0.075;#0.5*wi;
 weightRandOn = False; #for G2L, E2I, E2E, I2E
 
-
-    
+   
 #Synaptic Connections with STDP ; for usage, see http://brian2.readthedocs.org/en/2.0b4/examples/synapses.STDP.html
 tau_syn_const = 1.0;
 taupre = 20.0*ms  * tau_syn_const;
@@ -182,8 +182,8 @@ taupost = 20.0*ms  * tau_syn_const;
 # wmax = 20 *mV #200 *mV
 #Apre = 3.0 *mV #20*mV
 #Apost = -Apre*taupre/taupost*1.05
-lRate = 0.1#0.001
-gmax = 0.5#.01
+lRate = 1.0#0.001
+gmax = 2.5#0.5#.01
 dApre = 0.1
 ratioPreToPost = 1.2;
 dApost = -dApre * taupre / taupost * ratioPreToPost
@@ -206,7 +206,7 @@ eqs_stdpPost ='''
              w = clip(w+plastic*Apre*lRate, 0, gmax)
              '''
 
-gmax_bind = 0.1
+gmax_bind = 1.0#0.1
 dApre_bind = 0.1
 ratioPreToPost_bind = 1.2;
 dApost_bind = -dApre_bind * taupre / taupost * ratioPreToPost_bind
