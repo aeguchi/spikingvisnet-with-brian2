@@ -84,7 +84,7 @@ def runSimulation():
     vnet.saveStates(os.path.split(os.path.realpath(__file__))[0] + "/Results/"+experimentName+"/", count);
 
     for phase in phases:
-        print "*** simulation phase: " + str(phase) + " ***";
+        print "*** simulation phase: " + str(phase) + " Epoch " + str(count) +"/" +str((trainingEpochs+2)) +"***";
         if phase==1:
             vnet.setSynapticPlasticity(True)
             numObj = numObj_test;

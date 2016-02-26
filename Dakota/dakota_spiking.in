@@ -14,10 +14,10 @@ method,
 
 variables,					
 	continuous_design = 2			
-	cdv_initial_point   100.0      100.0
-	cdv_lower_bounds    50.00      50.00
-	cdv_upper_bounds    300.0      300.0 
-	cdv_descriptor      'taupre'      'taupost'
+	cdv_initial_point   1.0      1.0
+	cdv_lower_bounds    0.10      0.10
+	cdv_upper_bounds    10.0      10.0 
+	cdv_descriptor      'tau_syn_const'      'conductanceConst_I2E'
 
 interface,					
 

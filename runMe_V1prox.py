@@ -3,9 +3,10 @@ import main
 from brian2 import ms
 import InfoAnalysis
 import pylab as plt
+import spikeAnalysis
 
-experimentName="BO_test"
-imageFolder = "BO_single"
+experimentName="BO_single1_gabMod2"
+imageFolder = "BO_two"
 
 plotGaborAtTraining = False;
 plotActivitiesAtTraining = False;
@@ -18,21 +19,21 @@ trainingTime = 200.0;
 trainingEpochs = 1000;
 testingTime = 10000.0;
 
-psiList = [-np.pi/2,np.pi/2]
-typeOfWeightNormalization = 1;
-type1NormConst = 15.0;
+#psiList = [-np.pi/2,np.pi/2]
+# typeOfWeightNormalization = 1;
+# type1NormConst = 15.0;
 
-nConnections_connGtoInput = 25#20;
-fanInRadSigma_connGtoInput = 1.0;
-fanInRadSigma_connBottomUp = 4.0;
+# nConnections_connGtoInput = 25#20;
+# fanInRadSigma_connGtoInput = 1.0;
+# fanInRadSigma_connBottomUp = 4.0;
 
 
-conductanceConst_G2L = 2.5
-conductanceConst_E2I = 1.0#0.4;
-conductanceConst_I2E = 1.0;
-conductanceConst_E2E = 1.0
-gmax = 2.5;
-gmax_bind = 1.0
+# conductanceConst_G2L = 2.5
+# conductanceConst_E2I = 1.0#0.4;
+# conductanceConst_I2E = 1.0;
+# conductanceConst_E2E = 1.0
+# gmax = 2.5;
+# gmax_bind = 1.0
 #layer settings
 #layerGDim = 20;
 #inhibLayerDim = 5;
@@ -61,6 +62,9 @@ gmax_bind = 1.0
 
 main.loadParams(globals());
 main.runSimulation();
+
+# spikeAnalysis.loadParams(globals());
+# spikeAnalysis.runSpikeAnalysis(2,2,PIcalcOn=True,polyAnalysisOn = False,polyHist = False)
 
 # ia = InfoAnalysis.InfoAnalysis(globals())
 # ia.singleCellInfoAnalysis();
