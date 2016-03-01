@@ -81,23 +81,25 @@ class plotter(object):
             plt.subplot(nLayers*2 + 1, 3, 2)
         else:
             plt.subplot(nLayers + 1, 3, 2);
-        plt.title('Binding layer')
-        plt.plot(
-            self.vnet.spkdetBindingLayer.t / ms,
-            self.vnet.spkdetBindingLayer.i, '.')
-        plt.ylim([0, layerDim * layerDim - 1])
-        plt.xlim([timeBegin, timeBegin+simulationTime])
-        
-        # plot FR map of bindingLayer
-        bind_FRMap = self.vnet.getFiringRateMap(layerDim,self.vnet.spkdetBindingLayer,timeBegin,simulationTime)
-        if plotPopulationRateOn:
-            plt.subplot(nLayers*2 + 1, 3, 3)
-        else:
-            plt.subplot(nLayers + 1, 3, 3)
-        plt.imshow(
-            bind_FRMap, cmap='jet', interpolation='none', vmin=0, vmax=bind_FRMap.max())
-        plt.colorbar()
-        #FRrecTmp[0] = bind_FRMap;
+            
+        if bindingLayerOn:
+            plt.title('Binding layer')
+            plt.plot(
+                self.vnet.spkdetBindingLayer.t / ms,
+                self.vnet.spkdetBindingLayer.i, '.')
+            plt.ylim([0, layerDim * layerDim - 1])
+            plt.xlim([timeBegin, timeBegin+simulationTime])
+            
+            # plot FR map of bindingLayer
+            bind_FRMap = self.vnet.getFiringRateMap(layerDim,self.vnet.spkdetBindingLayer,timeBegin,simulationTime)
+            if plotPopulationRateOn:
+                plt.subplot(nLayers*2 + 1, 3, 3)
+            else:
+                plt.subplot(nLayers + 1, 3, 3)
+            plt.imshow(
+                bind_FRMap, cmap='jet', interpolation='none', vmin=0, vmax=bind_FRMap.max())
+            plt.colorbar()
+            #FRrecTmp[0] = bind_FRMap;
         
         
 

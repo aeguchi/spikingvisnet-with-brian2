@@ -59,10 +59,14 @@ def runSpikeAnalysis(nStims,nTrans,PIcalcOn=True,polyAnalysisOn = False,polyHist
     spikes_e = pickle.load(open(os.path.split(os.path.realpath(__file__))[0] + "/Results/" + experimentName + "/" + SpikeData[0], "rb"));
     netState_L2L = pickle.load(open(os.path.split(os.path.realpath(__file__))[0] + "/Results/" + experimentName + "/"+ str(trainingEpochs+1) + "_netStates_L2L.pkl", "rb"));
     
-    preSynConn = netState_L2L[0]['i_pre'];
-    postSynConn = netState_L2L[0]['i_post'];
-    weightList = netState_L2L[0]['w'];
-    delayList = netState_L2L[0]['delay'];
+    
+    analysisLayer = 3;#(3)
+    
+    
+    preSynConn = netState_L2L[analysisLayer-1]['i_pre'];
+    postSynConn = netState_L2L[analysisLayer-1]['i_post'];
+    weightList = netState_L2L[analysisLayer-1]['w'];
+    delayList = netState_L2L[analysisLayer-1]['delay'];
     
     phases = []
     PI = np.zeros((2,nStims,nCells));#phase(blank, trained), number of stimuli, number of cells
@@ -90,7 +94,7 @@ def runSpikeAnalysis(nStims,nTrans,PIcalcOn=True,polyAnalysisOn = False,polyHist
         meanFR_pre = 0;
         meanFR_post = 0;
         for i in range(100):
-            spikeTime_pre = spikes_e[0][i]; #spiking time of cell i_post in post synaptic layer (layer 1)
+            spikeTime_pre = spikes_e[analysisLayer-1][i]; #spiking time of cell i_post in post synaptic layer (layer 1)
             cond_post1 = spikeTime_pre < t_max;
             cond_post2 = t_min < spikeTime_pre;
             cond_post = cond_post1 & cond_post2;
@@ -98,7 +102,7 @@ def runSpikeAnalysis(nStims,nTrans,PIcalcOn=True,polyAnalysisOn = False,polyHist
             meanFR_pre += len(spikeTime_pre_ext)*1.0/nCells/(t_max-t_min)*1000;
             
             
-            spikeTime_post = spikes_e[1][i]; #spiking time of cell i_post in post synaptic layer (layer 1)
+            spikeTime_post = spikes_e[analysisLayer][i]; #spiking time of cell i_post in post synaptic layer (layer 1)
             cond_post1 = spikeTime_post < t_max;
             cond_post2 = t_min < spikeTime_post;
             cond_post = cond_post1 & cond_post2;
@@ -112,8 +116,8 @@ def runSpikeAnalysis(nStims,nTrans,PIcalcOn=True,polyAnalysisOn = False,polyHist
             print i_post
             #plt.clf();
             #prevSpikeTime = np.ones([len(preList), len(spikes_e[1][i_post])])*(maxDelay+1);  # pre cell index, number of spikes
-            prevSpikeTime = np.ones([nCells, len(spikes_e[1][i_post])])*(maxDelay+1);  # pre cell index, number of spikes
-            spikeTime_post = spikes_e[1][i_post]; #spiking time of cell i_post in post synaptic layer (layer 1)
+            prevSpikeTime = np.ones([nCells, len(spikes_e[analysisLayer][i_post])])*(maxDelay+1);  # pre cell index, number of spikes
+            spikeTime_post = spikes_e[analysisLayer][i_post]; #spiking time of cell i_post in post synaptic layer (layer 1)
             cond_post1 = spikeTime_post < t_max;
             cond_post2 = t_min < spikeTime_post;
             cond_post = cond_post1 & cond_post2;
@@ -123,9 +127,9 @@ def runSpikeAnalysis(nStims,nTrans,PIcalcOn=True,polyAnalysisOn = False,polyHist
                 count = 0;
                 for t_post in spikeTime_post_ext: #for each spikes of the post synaptic cell (i_post)
                     for i_pre in range(100):        #for each presynaptic cell
-                        if len(spikes_e[0][i_pre]) > 0: #if the presynaptic cell in layer 0 ever spikes
+                        if len(spikes_e[analysisLayer-1][i_pre]) > 0: #if the presynaptic cell in layer 0 ever spikes
                             # print i_pre
-                            spikeTime_pre = spikes_e[0][i_pre]; #store the spike timings of the presynaptic cell in layer 0
+                            spikeTime_pre = spikes_e[analysisLayer-1][i_pre]; #store the spike timings of the presynaptic cell in layer 0
                             spikeTime_pre = spikeTime_pre[::-1];    #and reverse order
                             cond_pre1 = t_post-maxDelay < spikeTime_pre;
                             cond_pre2 = spikeTime_pre < t_post;

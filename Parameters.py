@@ -13,8 +13,10 @@ from brian2 import ms, mV, Hz
 modePlotShow = 0; #0: continuous, 1: interrupt
 plotGaborAtTraining = False;
 plotActivitiesAtTraining = False;
-plotWeightsAtTraining = True;
+plotWeightsAtTraining = False;
 plotPopulationRateOn = False;
+
+inputType = 1; #1:poisson, 2:direct current injection
 
 ratioTakenToCalcFR = 0.5;
 
@@ -30,6 +32,7 @@ layerDim = 10   # size of layer1 in neurons
 inhibLayerDim = 5;
 topDownOn = False;
 ReccurentOn = False;
+bindingLayerOn = False;
 
 #simulationTime = 100;
 trainingTime = 200.0# * ms;
@@ -47,7 +50,7 @@ psiList = [-np.pi/2,np.pi/2]#[0]#phase shift:  phase offset
 sigma = 0.5 # the standard deviation of the Gaussian function used in the Gabor filter.
 paddingColor = 128;
 use00asPaddingColor = True;
-Rmax = 30.0 * Hz  # max FR
+Rmax = 50.0 * Hz  # max FR
 
 
 # #neuron params
@@ -126,13 +129,12 @@ delayConst_connBottomUp = 20.0*ms;
 delayConst_connExIn = 20.0*ms;
 delayConst_connInEx = 20.0*ms;
 delayConst_connExBind = 20.0*ms;
-
 delayConst_connTopDown = 20.0*ms;
 delayConst_connRecEx = 20.0*ms;
 
 
 #nConnections_connGtoInput = 50;
-nConnections_connGtoInput = 25;
+nConnections_connGtoInput = 5;
 fanInRadSigma_connGtoInput = 1.0;
 nConnections_connBottomUp = 10;
 fanInRadSigma_connBottomUp = 4.0;
@@ -140,12 +142,12 @@ nConnections_connE2I = 10;
 fanInRadSigma_connE2I = 2.0;
 nConnections_connI2E = 5;
 fanInRadSigma_connI2E = 2.0;
-nConnections_connExBind = 10;
-fanInRadSigma_connExBind = 2.0;
-nConnections_connTopDown = 0;
+nConnections_connTopDown = 5;
 fanInRadSigma_connTopDown = 2.0;
 nConnections_connRecEx = 5;
 fanInRadSigma_connRecEx = 2.0;
+nConnections_connExBind = 10;
+fanInRadSigma_connExBind = 2.0;
 
 
 #pConnections_connBottomUp = 0.1;
@@ -183,7 +185,7 @@ taupost = 20.0*ms  * tau_syn_const;
 #Apre = 3.0 *mV #20*mV
 #Apost = -Apre*taupre/taupost*1.05
 lRate = 1.0#0.001
-gmax = 2.5#0.5#.01
+gmax = 1.5#0.5#.01
 dApre = 0.1
 ratioPreToPost = 1.2;
 dApost = -dApre * taupre / taupost * ratioPreToPost

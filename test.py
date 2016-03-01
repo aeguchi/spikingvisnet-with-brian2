@@ -14,14 +14,26 @@ conductanceConst_I2E = 2.0
 
 
 
-
-numInputCells = 10;
+Rmax = 50.0 *Hz
+numInputCells = 1;
 numConn = 1;
 #input
-layerG=br.PoissonGroup(numInputCells, Rmax)  # rates
+#layerG=br.PoissonGroup(numInputCells, Rmax)  # rates
 # Excitatory layers
 #layerG=br.SpikeGeneratorGroup(numInputCells, 't % (1.0 / (br.rand(50)*Hz)) == 0*ms');
+layerG=br.NeuronGroup(numInputCells,  # N neurons
+                       eqn_membranEx,  # differential equations
+                       threshold='v>Vth_ex',  # spike condition
+                       reset='''v = V0_ex
+                                ge = 0
+                                gi = 0''',  # code to execute on reset
+                       refractory=refractoryPeriod  # length of refractory period
+                       );
+print (Vth_ex-V0_ex)/(1/Rmax)*(taum_ex)+(Vth_ex - V0_ex)*2/3;
+maxExI = (Vth_ex-V0_ex)/(1/Rmax)*(taum_ex)+(Vth_ex - V0_ex)*2/3;
 
+layerG.Iext[:] = maxExI#*br.rand(numInputCells)*mV;
+layerG.v[:] = V0_ex  + br.rand(numInputCells) * (Vth_ex - V0_ex)
 
 # Excitatory layers
 layerEx=br.NeuronGroup(1,  # N neurons
@@ -33,7 +45,7 @@ layerEx=br.NeuronGroup(1,  # N neurons
                        refractory=refractoryPeriod  # length of refractory period
                        );
 
-layerEx.v = 'V0_ex'  # + br.rand() * (Vt - Vr)'
+layerEx.v[:] = V0_ex  + br.rand() * (Vth_ex - V0_ex)
 layerEx.ge = 0
 layerEx.gi = 0
 #layerEx.Iext = 25*mV;
@@ -84,8 +96,8 @@ sttMonLayerEx = br.StateMonitor(layerEx,'v', record=True,when='before_resets');
 
 #popMonLayerEx = br.PopulationRateMonitor(layerG);
 
-simTime = 100;
-nEp = 4
+simTime = 1000;
+nEp = 1
 for i in range(nEp):
     print i
     plt.subplot(3,nEp,nEp*0+i+1)

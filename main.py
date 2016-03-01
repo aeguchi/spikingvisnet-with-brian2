@@ -136,7 +136,8 @@ def runSimulation():
                 #to later save FR to the file
                 if phase==0 or phase==2:
                     FRrecTmp = np.zeros((nLayers+1, layerDim, layerDim));
-                    FRrecTmp[0] = vnet.getFiringRateMap(layerDim,vnet.spkdetBindingLayer,timeBegin,simulationTime);
+                    if bindingLayerOn:
+                        FRrecTmp[0] = vnet.getFiringRateMap(layerDim,vnet.spkdetBindingLayer,timeBegin,simulationTime);
                     #SpikeRec[index_obj][index_trans].append(vnet.spkdetBindingLayer.spike_trains());
                     for i in range(nLayers):
                         FRrecTmp[i+1]=vnet.getFiringRateMap(layerDim,vnet.spkdetLayers[i],timeBegin,simulationTime);                

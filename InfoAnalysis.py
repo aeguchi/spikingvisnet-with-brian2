@@ -10,7 +10,7 @@ class InfoAnalysis(object):
     def __init__(self,borrowed_globals):
         globals().update(borrowed_globals);
 
-    def singleCellInfoAnalysis(self,phases = ['FR_0_blank.pkl', 'FR_1_trained.pkl'],numBins=3,weightedAnalysis = 1):
+    def singleCellInfoAnalysis(self,phases = ['FR_0_blank.pkl', 'FR_1_trained.pkl'],numBins=3,weightedAnalysis = 0):
         plt.figure(4 , figsize=(15, 5),dpi=100);
         plotAllSingleCellInfo = 0;
         
