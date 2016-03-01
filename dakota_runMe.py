@@ -9,8 +9,8 @@ from brian2 import ms
 
 objectiveFunc = 2; #1:inforAnalysis, 2:PI
 
-experimentName="dakota_maximizePI_BO_two"
-imageFolder = "BO_two"
+experimentName="dakota_testFourlayers_maxPI"
+imageFolder = "BO_single"
 experimentName = experimentName + time.strftime("_%Y.%m.%d_%H.%M.%S", time.gmtime());
 print str(sys.argv);
 
@@ -19,11 +19,14 @@ outputFile = sys.argv[1];
 tau_syn_const = float(sys.argv[2]);
 conductanceConst_I2E = float(sys.argv[3]);
 
-simplifyMultiplitude = 10;
+#simplifyMultiplitude = 10;
 
-trainingTime = 200.0;
-trainingEpochs = int(trainingEpochs/simplifyMultiplitude);
+trainingTime = 100.0;
+trainingEpochs = 10;#int(trainingEpochs/simplifyMultiplitude);
 testingTime = 5000.0;
+
+
+nLayers = 4;
 
 #lRate = lRate*3;
 # fanInRadSigma_connGtoInput = 0.5

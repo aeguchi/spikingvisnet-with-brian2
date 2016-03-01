@@ -40,11 +40,24 @@ class visnet(object):
             for s in range(ss):
                 self.layerG[p].append([])
                 for o in range(ors):
-                    self.layerG[p][s].append(br.PoissonGroup(
-                        layerGDim * layerGDim,  # N neurons
-                        np.random.rand(layerGDim * layerGDim) * Hz)  # rates
-                    )
-
+                    if inputType==1:
+                        self.layerG[p][s].append(br.PoissonGroup(
+                            layerGDim * layerGDim,  # N neurons
+                            np.random.rand(layerGDim * layerGDim) * Hz)  # rates
+                        )
+                    elif inputType==2:
+                        self.layerG[p][s].append(br.NeuronGroup(layerGDim * layerGDim,  # N neurons
+                               eqn_membranEx,  # differential equations
+                               threshold='v>Vth_ex',  # spike condition
+                               reset='''v = V0_ex
+                                ge = 0
+                                gi = 0''',  # code to execute on reset
+                               refractory=refractoryPeriod  # length of refractory period
+                               )
+                        )
+                        self.layerG[p][s][o].v = V0_ex + br.rand(layerGDim * layerGDim) * (Vth_ex - V0_ex);
+                        self.layerG[p][s][o].ge = 0
+                        self.layerG[p][s][o].gi = 0            
         self.net.add(self.layerG);
 
         # Excitatory layers
@@ -61,7 +74,7 @@ class visnet(object):
                                refractory=refractoryPeriod  # length of refractory period
                                )
             )
-            self.layers[layer].v = 'V0_ex'  # + br.rand() * (Vt - Vr)'
+            self.layers[layer].v = V0_ex + br.rand(layerDim * layerDim) * (Vth_ex - V0_ex);
             self.layers[layer].ge = 0
             self.layers[layer].gi = 0
 
@@ -81,27 +94,28 @@ class visnet(object):
                 refractory=refractoryPeriod
             )
             )
-            self.inhibLayers[layer].v = 'V0_in'  # + br.rand() * (Vt - Vr)'
+            self.inhibLayers[layer].v = V0_in + br.rand(inhibLayerDim * inhibLayerDim) * (Vth_in - V0_in)
             self.inhibLayers[layer].ge = 0
             self.inhibLayers[layer].gi = 0
         self.net.add(self.inhibLayers)
         
         
-        #binding layer
-        print "  ..binding layers.."
-        self.bindingLayer = br.NeuronGroup(
-            layerDim * layerDim,
-            eqn_membranEx,  # differential equations
-            threshold='v>Vth_ex',  # spike condition
-            reset='''v = V0_ex
-                    ge = 0
-                    gi = 0''',
-            refractory=refractoryPeriod
-        )
-        self.bindingLayer.v = 'V0_ex'  # + br.rand() * (Vt - Vr)'
-        self.bindingLayer.ge = 0
-        self.bindingLayer.gi = 0      
-        self.net.add(self.bindingLayer) 
+        if bindingLayerOn:
+            #binding layer
+            print "  ..binding layers.."
+            self.bindingLayer = br.NeuronGroup(
+                layerDim * layerDim,
+                eqn_membranEx,  # differential equations
+                threshold='v>Vth_ex',  # spike condition
+                reset='''v = V0_ex
+                        ge = 0
+                        gi = 0''',
+                refractory=refractoryPeriod
+            )
+            self.bindingLayer.v = V0_ex + br.rand(layerDim * layerDim) * (Vth_ex - V0_ex)
+            self.bindingLayer.ge = 0
+            self.bindingLayer.gi = 0      
+            self.net.add(self.bindingLayer) 
         
         
         
@@ -129,10 +143,6 @@ class visnet(object):
                     )
             
         for i_post_index in range(layerDim*layerDim):
-            o = np.random.randint(ors);
-            p = np.random.randint(ps);
-            s = np.random.randint(ss);
-            
             i_post_row = int(i_post_index/layerDim);
             i_post_col = i_post_index%layerDim;
 
@@ -140,7 +150,15 @@ class visnet(object):
             i_pre_cols = np.random.normal(i_post_col*layerGDim/layerDim, fanInRadSigma_connGtoInput, nConnections_connGtoInput).astype(int)%layerGDim;
             
             i_pre_indexes = layerGDim*i_pre_rows + i_pre_cols;
-            self.connGtoInput[p][s][o].connect(i_pre_indexes,i_post_index);
+            
+#             o = np.random.randint(ors);
+#             p = np.random.randint(ps);
+#             s = np.random.randint(ss);
+            
+            for p in range(ps):
+                for s in range(ss):
+                    for o in range(ors):
+                        self.connGtoInput[p][s][o].connect(i_pre_indexes,i_post_index);
 
         for p in range(ps):
             for s in range(ss):
@@ -284,36 +302,36 @@ class visnet(object):
             self.net.add(self.connTopDown)
         
         
-
-        #binding layer conn
-        print "  ..ExBind Syns.."
-        self.connExBind = []
-        for layer in range(0, nLayers):
-            self.connExBind.append(br.Synapses(
-                self.layers[layer],
-                self.bindingLayer,
-                eqs_stdpSyn_bind,
-                pre = eqs_stdpPre_bind,
-                post = eqs_stdpPost_bind
-            )
-            )
-
-#             for cellIndex in range(layerDim*layerDim):
-#                 self.connExBind[layer].connect('j==cellIndex', p=pConnections_connExBind)
-
-            for i_post_index in range(layerDim*layerDim):
-                i_post_row = int(i_post_index/layerDim);
-                i_post_col = i_post_index%layerDim;
-     
-                i_pre_rows = np.random.normal(i_post_row, fanInRadSigma_connExBind, nConnections_connExBind).astype(int)%layerDim;
-                i_pre_cols = np.random.normal(i_post_col, fanInRadSigma_connExBind, nConnections_connExBind).astype(int)%layerDim;
-                 
-                i_pre_indexes = layerDim*i_pre_rows + i_pre_cols;
-                self.connExBind[layer].connect(i_pre_indexes,i_post_index);
-            
-            self.connExBind[layer].w[:, :] = br.rand(len(self.connExBind[layer].w[:, :])) * gmax_bind
-            self.connExBind[layer].delay[:, :] = br.rand(len(self.connExBind[layer].delay[:, :])) * delayConst_connExBind if delayRandOn else delayConst_connExBind
-        self.net.add(self.connExBind)
+        if bindingLayerOn:
+            #binding layer conn
+            print "  ..ExBind Syns.."
+            self.connExBind = []
+            for layer in range(0, nLayers):
+                self.connExBind.append(br.Synapses(
+                    self.layers[layer],
+                    self.bindingLayer,
+                    eqs_stdpSyn_bind,
+                    pre = eqs_stdpPre_bind,
+                    post = eqs_stdpPost_bind
+                )
+                )
+    
+    #             for cellIndex in range(layerDim*layerDim):
+    #                 self.connExBind[layer].connect('j==cellIndex', p=pConnections_connExBind)
+    
+                for i_post_index in range(layerDim*layerDim):
+                    i_post_row = int(i_post_index/layerDim);
+                    i_post_col = i_post_index%layerDim;
+         
+                    i_pre_rows = np.random.normal(i_post_row, fanInRadSigma_connExBind, nConnections_connExBind).astype(int)%layerDim;
+                    i_pre_cols = np.random.normal(i_post_col, fanInRadSigma_connExBind, nConnections_connExBind).astype(int)%layerDim;
+                     
+                    i_pre_indexes = layerDim*i_pre_rows + i_pre_cols;
+                    self.connExBind[layer].connect(i_pre_indexes,i_post_index);
+                
+                self.connExBind[layer].w[:, :] = br.rand(len(self.connExBind[layer].w[:, :])) * gmax_bind
+                self.connExBind[layer].delay[:, :] = br.rand(len(self.connExBind[layer].delay[:, :])) * delayConst_connExBind if delayRandOn else delayConst_connExBind
+            self.net.add(self.connExBind)
 
 
     def buildSpikeMonitors(self):
@@ -352,8 +370,9 @@ class visnet(object):
                 br.SpikeMonitor(self.inhibLayers[layer]))
         self.net.add(self.spkdetInhibLayers)
         
-        self.spkdetBindingLayer = br.SpikeMonitor(self.bindingLayer)
-        self.net.add(self.spkdetBindingLayer)
+        if bindingLayerOn:
+            self.spkdetBindingLayer = br.SpikeMonitor(self.bindingLayer)
+            self.net.add(self.spkdetBindingLayer)
 
     def setGaborFiringRates(self, res_norm):
         ps = len(psiList);
@@ -371,7 +390,10 @@ class visnet(object):
                     #r = np.reshape(np.mean(tmp, axis=3),(layerGDim * layerGDim))
                     # print r
                     #self.layerG[index_filter].rates = r * Rmax
-                    self.layerG[p][s][o].rates = r * Rmax
+                    if inputType==1:
+                        self.layerG[p][s][o].rates = r * Rmax
+                    elif inputType==2:
+                        self.layerG[p][s][o].Iext = r * (Vth_ex-V0_ex)/(1/Rmax)*(taum_ex)+(Vth_ex - V0_ex)*2/3 #to be checked
                     
                     # To be fixed
                     # print vnet.layerG[index_filter].rates
@@ -379,35 +401,49 @@ class visnet(object):
     def traceReset(self):
         #init neurons
         for layer in range(nLayers):
-            self.layers[layer].v = 'V0_ex'  # + br.rand() * (Vt - Vr)'
+            self.layers[layer].v = V0_ex + br.rand(layerDim * layerDim) * (Vth_ex - V0_ex)
             self.layers[layer].ge = 0
             self.layers[layer].gi = 0
-            self.inhibLayers[layer].v = 'V0_in'  # + br.rand() * (Vt - Vr)'
+            self.inhibLayers[layer].v = V0_in + br.rand(inhibLayerDim * inhibLayerDim) * (Vth_in - V0_in)
             self.inhibLayers[layer].ge = 0
             self.inhibLayers[layer].gi = 0
         
-        self.bindingLayer.v = 'V0_ex'  # + br.rand() * (Vt - Vr)'
-        self.bindingLayer.ge = 0
-        self.bindingLayer.gi = 0
-        
+        if bindingLayerOn:
+            self.bindingLayer.v = V0_ex + br.rand(layerDim * layerDim) * (Vth_ex - V0_ex)
+            self.bindingLayer.ge = 0
+            self.bindingLayer.gi = 0
+            
         #init syn
         for layer in range(nLayers):
-            self.connExBind[layer].Apre_bind[:,:] = 0;
-            self.connExBind[layer].Apost_bind[:,:] = 0;
+            if bindingLayerOn:
+                self.connExBind[layer].Apre_bind[:,:] = 0;
+                self.connExBind[layer].Apost_bind[:,:] = 0;
             
         for layer in range(nLayers - 1):
             self.connBottomUp[layer].Apre[:,:] = 0;
             self.connBottomUp[layer].Apost[:,:] = 0;
+            if topDownOn:
+                self.connTopDown[layer].Apre[:,:] = 0;
+                self.connTopDown[layer].Apost[:,:] = 0;
+                
 
         print "  ..Trace reset.."
         
     def setSynapticPlasticity(self, synapticBool):
 
 #        for connection in [self.connGtoInput, self.connBottomUp,self.connTopDown, self.connExIn, self.connInEx]:
-        for connection in [self.connBottomUp,self.connExBind]:    
-            for syn in self.connBottomUp:
+        
+        for syn in self.connBottomUp:
+            syn.plastic = synapticBool
+
+        if topDownOn:
+            for syn in self.connTopDown:
+                syn.plastic = synapticBool    
+        
+        if bindingLayerOn:
+            for syn in self.connExBind:
                 syn.plastic = synapticBool
-                
+            
     def getFiringRateMap(self,lDim,layer,timeBegin,simulationTime):
         FRMap = np.zeros((lDim, lDim))
         spikeTrains = layer.spike_trains();
@@ -428,17 +464,24 @@ class visnet(object):
                 w_tmp = self.connBottomUp[layer].w[:, :];
                 w_norm =  np.sqrt(np.sum(np.square(w_tmp)));
                 self.connBottomUp[layer].w[:, :] = w_tmp/w_norm*gmax*type1NormConst;
+                if bindingLayerOn:
+                    w_tmp = self.connExBind[layer].w[:, :];
+                    w_norm =  np.sqrt(np.sum(np.square(w_tmp)));
+                    self.connExBind[layer].w[:, :] = w_tmp/w_norm*gmax_bind*type1NormConst;
+                if topDownOn:
+                    w_tmp = self.connTopDown[layer].w[:, :];
+                    w_norm =  np.sqrt(np.sum(np.square(w_tmp)));
+                    self.connTopDown[layer].w[:, :] = w_tmp/w_norm*gmax*type1NormConst;
                 
-                w_tmp = self.connExBind[layer].w[:, :];
-                w_norm =  np.sqrt(np.sum(np.square(w_tmp)));
-                self.connExBind[layer].w[:, :] = w_tmp/w_norm*gmax_bind*type1NormConst;
             elif typeOfWeightNormalization==2:
                 w_tmp = self.connBottomUp[layer].w[:, :];
                 self.connBottomUp[layer].w[:, :] = (w_tmp - np.min(w_tmp))/(np.max(w_tmp)-np.min(w_tmp))*gmax;
-
-                w_tmp = self.connExBind[layer].w[:, :];
-                self.connExBind[layer].w[:, :] = (w_tmp - np.min(w_tmp))/(np.max(w_tmp)-np.min(w_tmp))*gmax_bind;
-            
+                if bindingLayerOn:
+                    w_tmp = self.connExBind[layer].w[:, :];
+                    self.connExBind[layer].w[:, :] = (w_tmp - np.min(w_tmp))/(np.max(w_tmp)-np.min(w_tmp))*gmax_bind;
+                if topDownOn:
+                    w_tmp = self.connTopDown[layer].w[:, :];
+                    self.connTopDown[layer].w[:, :] = (w_tmp - np.min(w_tmp))/(np.max(w_tmp)-np.min(w_tmp))*gmax;
         
     def saveStates(self,dest,itr):
         synStates_GtoInput = []
@@ -453,8 +496,11 @@ class visnet(object):
                     synStates_GtoInput[p][s].append(self.connGtoInput[p][s][o].get_states(['i_pre','i_post','delay','w']))
         
         synStates_BottomUp = []
+        synStates_TopDown = []
         for layer in range(nLayers-1):
             synStates_BottomUp.append(self.connBottomUp[layer].get_states(['i_pre','i_post','delay','w']));
+            if topDownOn:
+                synStates_TopDown.append(self.connTopDown[layer].get_states(['i_pre','i_post','delay','w']));
         
         synStates_InEx = []
         for layer in range(nLayers):
@@ -463,10 +509,11 @@ class visnet(object):
         synStates_ExIn = []
         for layer in range(nLayers):
             synStates_ExIn.append(self.connExIn[layer].get_states(['i_pre','i_post','delay','w']));
-            
-        synStates_ExBind = []
-        for layer in range(nLayers):
-            synStates_ExBind.append(self.connExBind[layer].get_states(['i_pre','i_post','delay','w']));
+        
+        if bindingLayerOn:
+            synStates_ExBind = []
+            for layer in range(nLayers):
+                synStates_ExBind.append(self.connExBind[layer].get_states(['i_pre','i_post','delay','w']));
         
         if ReccurentOn:
             synStates_ExEx = []
@@ -478,18 +525,20 @@ class visnet(object):
         pickle.dump(synStates_BottomUp, open(dest + str(itr)+"_netStates_L2L.pkl", "wb"));
         pickle.dump(synStates_InEx, open(dest + str(itr)+"_netStates_I2E.pkl", "wb"));
         pickle.dump(synStates_ExIn, open(dest + str(itr)+"_netStates_E2I.pkl", "wb"));
-        pickle.dump(synStates_ExBind, open(dest + str(itr)+"_netStates_L2B.pkl", "wb"));
+        if bindingLayerOn:
+            pickle.dump(synStates_ExBind, open(dest + str(itr)+"_netStates_L2B.pkl", "wb"));
         if ReccurentOn:
             pickle.dump(synStates_ExEx, open(dest + str(itr)+"_netStates_E2E.pkl", "wb"));
+        if topDownOn:
+            pickle.dump(synStates_TopDown, open(dest + str(itr)+"_netStates_L2LTopDown.pkl", "wb"));
+        
         
     
     def saveSpikes(self,dest,itr):
         spikes_g = [];
         spikes_e = [];
         spikes_i = [];
-        
-        
-        
+
         ps = len(psiList);
         ss = len(lamdaList);
         ors = len(thetaList);
@@ -517,13 +566,15 @@ class visnet(object):
             spikes_e.append(tmp_e);
             spikes_i.append(tmp_i);
     
-        spikes_b = self.spkdetBindingLayer.spike_trains();
-        for i in range(layerDim*layerDim):
-            if len(spikes_b[i]>0):
-                spikes_b[i] = np.sort(spikes_b[i]/ms);
+        if bindingLayerOn:
+            spikes_b = self.spkdetBindingLayer.spike_trains();
+            for i in range(layerDim*layerDim):
+                if len(spikes_b[i]>0):
+                    spikes_b[i] = np.sort(spikes_b[i]/ms);
         
         pickle.dump(spikes_e, open(dest + str(itr)+"_spikes_e.pkl", "wb"))
         pickle.dump(spikes_i, open(dest + str(itr)+"_spikes_i.pkl", "wb"))
-        pickle.dump(spikes_b, open(dest + str(itr)+"_spikes_b.pkl", "wb"))
+        if bindingLayerOn:
+            pickle.dump(spikes_b, open(dest + str(itr)+"_spikes_b.pkl", "wb"))
     
             

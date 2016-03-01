@@ -5,19 +5,26 @@ import InfoAnalysis
 import pylab as plt
 import spikeAnalysis
 
-experimentName="BO_single1_gabMod2"
-imageFolder = "BO_two"
+experimentName="test_fourlayers"
+imageFolder = "BO_single"
 
 plotGaborAtTraining = False;
 plotActivitiesAtTraining = False;
 plotWeightsAtTraining = False;
 plotPopulationRateOn = False;
+
+
 ReccurentOn = True;
+topDownOn = False;
+
+
+inputType=1;
+nLayers = 4
 
 #simulation settings
-trainingTime = 200.0;
-trainingEpochs = 1000;
-testingTime = 10000.0;
+trainingTime = 100.0#200.0;
+trainingEpochs = 10#1000;
+testingTime = 1000.0#10000.0;
 
 #psiList = [-np.pi/2,np.pi/2]
 # typeOfWeightNormalization = 1;
@@ -63,9 +70,12 @@ testingTime = 10000.0;
 main.loadParams(globals());
 main.runSimulation();
 
+spikeAnalysis.loadParams(globals());
+spikeAnalysis.runSpikeAnalysis(2,2,PIcalcOn=True,polyAnalysisOn = False,polyHist = False);
+
 # spikeAnalysis.loadParams(globals());
 # spikeAnalysis.runSpikeAnalysis(2,2,PIcalcOn=True,polyAnalysisOn = False,polyHist = False)
 
 # ia = InfoAnalysis.InfoAnalysis(globals())
-# ia.singleCellInfoAnalysis();
-# plt.show();
+# ia.singleCellInfoAnalysis(phases = ['FR_0_blank.pkl'],numBins=3,weightedAnalysis = 1);
+#plt.show();
