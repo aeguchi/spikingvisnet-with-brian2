@@ -7,18 +7,18 @@ import os;
 import spikeAnalysis
 from brian2 import ms
 
-objectiveFunc = 2; #1:inforAnalysis, 2:PI
+objectiveFunc = 1; #1:inforAnalysis, 2:PI
 
-experimentName="dakota_testFourlayers_maxPI"
+experimentName="dakota_fixedWeightRange_gmaxAndInhib"
 imageFolder = "BO_single"
 experimentName = experimentName + time.strftime("_%Y.%m.%d_%H.%M.%S", time.gmtime());
 print str(sys.argv);
 
 #set params
 outputFile = sys.argv[1];
-tau_syn_const = float(sys.argv[2]);
+#tau_syn_const = float(sys.argv[2]);
+gmax =  float(sys.argv[2]);
 conductanceConst_I2E = float(sys.argv[3]);
-
 #simplifyMultiplitude = 10;
 
 trainingTime = 100.0;

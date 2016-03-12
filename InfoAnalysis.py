@@ -17,6 +17,7 @@ class InfoAnalysis(object):
         #ExperimentName = "BO_single";
         #layer = 2; #0: bindingLayer, 1: 1st layer ..
         plotMode = 1; #0:normal 1:max
+        numInfoCalc = 20;
         
         #phases = ['FR_0_blank.pkl', 'FR_1_trained.pkl'];
         #phases = ['FR_0_blank.pkl'];
@@ -34,7 +35,7 @@ class InfoAnalysis(object):
         
         performanceMeasure = 0.0;
         
-        for layer in range(3):
+        for layer in range(1,nLayers+1):
             index = 1;
             for phase in phases:
                 FR=pickle.load(open(os.path.split(os.path.realpath(__file__))[0] +"/Results/"+experimentName+"/"+ phase, "rb"));
@@ -125,8 +126,7 @@ class InfoAnalysis(object):
                 index+=1;
                 
                 
-                if (layer == 2 and phase == 'FR_1_trained.pkl'):
-                    numInfoCalc = 100;
+                if (layer == numLayers and phase == 'FR_1_trained.pkl'):
                     performanceMeasure = -1*np.sum(reversed_arr[0:numInfoCalc]);
                     f = open(os.path.split(os.path.realpath(__file__))[0] +"/Results/"+experimentName+"/performance.txt","w");
                     f.write(str(performanceMeasure));
@@ -136,7 +136,7 @@ class InfoAnalysis(object):
                     
                 
             if plotMode==1:
-                plt.subplot(1,3,layer+1)
+                plt.subplot(1,numLayers,layer)
                 plt.plot(np.transpose(infos[0]), linestyle='--', color='k');
                 plt.hold(True);   
                 plt.plot(np.transpose(infos[1]), linestyle='-', color='k');

@@ -5,27 +5,28 @@ import InfoAnalysis
 import pylab as plt
 import spikeAnalysis
 
-experimentName="test_fourlayers"
+experimentName="dakota_fixedWeightRange_gmaxAndInhib_2016.03.09_07.23.12"
 imageFolder = "BO_single"
 
 plotGaborAtTraining = False;
 plotActivitiesAtTraining = False;
 plotWeightsAtTraining = False;
 plotPopulationRateOn = False;
-
-
 ReccurentOn = True;
-topDownOn = False;
 
 
-inputType=1;
-nLayers = 4
+#set params
+#tau_syn_const = float(sys.argv[2]);
+gmax =  2.234;
+conductanceConst_I2E = 2.564;
+#simplifyMultiplitude = 10;
 
-#simulation settings
-trainingTime = 100.0#200.0;
-trainingEpochs = 10#1000;
-testingTime = 1000.0#10000.0;
+trainingTime = 100.0;
+trainingEpochs = 10;#int(trainingEpochs/simplifyMultiplitude);
+testingTime = 5000.0;
 
+
+nLayers = 4;
 #psiList = [-np.pi/2,np.pi/2]
 # typeOfWeightNormalization = 1;
 # type1NormConst = 15.0;
@@ -68,10 +69,10 @@ testingTime = 1000.0#10000.0;
 
 
 main.loadParams(globals());
-main.runSimulation();
+#main.runSimulation();
 
 spikeAnalysis.loadParams(globals());
-spikeAnalysis.runSpikeAnalysis(2,2,PIcalcOn=True,polyAnalysisOn = False,polyHist = False);
+spikeAnalysis.runSpikeAnalysis(2,2,PIcalcOn=True, polyAnalysisOn = True,polyHist = False);
 
 # spikeAnalysis.loadParams(globals());
 # spikeAnalysis.runSpikeAnalysis(2,2,PIcalcOn=True,polyAnalysisOn = False,polyHist = False)

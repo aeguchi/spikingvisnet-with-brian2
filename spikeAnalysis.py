@@ -22,31 +22,36 @@ import InfoAnalysis
 def loadParams(borrowed_globals):
     globals().update(borrowed_globals);
 
-def traceDelay(poly_indexs,poly_delays,index,delay):
-    #print str(index) + " " + str(delay);
-    polyTableConnected = polyTable[index][preList];
-    preMax = polyTableConnected.max();
-    #print "max: " + str(preMax);
-    if preMax<polyChainDetectTh:
-        return;
-    preArgMax = np.where(polyTableConnected==preMax);
-    
-    for in_max in range(len(preArgMax[0])):
-        cond1 = np.array(poly_indexs)==preList[preArgMax[0][in_max]];#check if the pair of the values already exists
-        cond2 = np.array(poly_delays)==delay+int(preArgMax[1][in_max]);
-        cond = cond1 & cond2;
-        #print str(preArgMax[0][in_max]) + ", " +str(delay+preArgMax[1][in_max]);
-        #if preArgMax[1][in_max]!=0 and delay+preArgMax[1][in_max]<maxDelay:
-        if not (True in cond) and delay+preArgMax[1][in_max]<maxDelay:
-            print str(preList[preArgMax[0][in_max]]) + " " + str(delay+int(preArgMax[1][in_max]));
-            poly_indexs.append(preList[preArgMax[0][in_max]]);
-            poly_delays.append(delay+int(preArgMax[1][in_max]));
-            traceDelay(poly_indexs,poly_delays,preList[preArgMax[0][in_max]],delay+int(preArgMax[1][in_max]));
+
 
 
 def runSpikeAnalysis(nStims,nTrans,PIcalcOn=True,polyAnalysisOn = False,polyHist = False):
+    def traceDelay(poly_indexs,poly_delays,index,delay):
+        #print str(index) + " " + str(delay);
+        polyTableConnected = polyTable[index][preList];
+        preMax = polyTableConnected.max();
+        #print "max: " + str(preMax);
+        if preMax<polyChainDetectTh:
+            return;
+        preArgMax = np.where(polyTableConnected==preMax);
+        
+        for in_max in range(len(preArgMax[0])):
+            cond1 = np.array(poly_indexs)==preList[preArgMax[0][in_max]];#check if the pair of the values already exists
+            cond2 = np.array(poly_delays)==delay+int(preArgMax[1][in_max]);
+            cond = cond1 & cond2;
+            #print str(preArgMax[0][in_max]) + ", " +str(delay+preArgMax[1][in_max]);
+            #if preArgMax[1][in_max]!=0 and delay+preArgMax[1][in_max]<maxDelay:
+            if not (True in cond) and delay+preArgMax[1][in_max]<maxDelay:
+                print str(preList[preArgMax[0][in_max]]) + " " + str(delay+int(preArgMax[1][in_max]));
+                poly_indexs.append(preList[preArgMax[0][in_max]]);
+                poly_delays.append(delay+int(preArgMax[1][in_max]));
+                traceDelay(poly_indexs,poly_delays,preList[preArgMax[0][in_max]],delay+int(preArgMax[1][in_max]));
+    
+    
+    
+    
     #params
-    polyChainDetectTh = 10;
+    polyChainDetectTh = 40;
     nTopCellsChosenForPI = 10#10;
     nCells = layerDim*layerDim;
     maxDelay = delayConst_connBottomUp/ms;
@@ -117,6 +122,8 @@ def runSpikeAnalysis(nStims,nTrans,PIcalcOn=True,polyAnalysisOn = False,polyHist
             #plt.clf();
             #prevSpikeTime = np.ones([len(preList), len(spikes_e[1][i_post])])*(maxDelay+1);  # pre cell index, number of spikes
             prevSpikeTime = np.ones([nCells, len(spikes_e[analysisLayer][i_post])])*(maxDelay+1);  # pre cell index, number of spikes
+            relativeSpikeTime = []; #nCells,
+            
             spikeTime_post = spikes_e[analysisLayer][i_post]; #spiking time of cell i_post in post synaptic layer (layer 1)
             cond_post1 = spikeTime_post < t_max;
             cond_post2 = t_min < spikeTime_post;
@@ -124,9 +131,11 @@ def runSpikeAnalysis(nStims,nTrans,PIcalcOn=True,polyAnalysisOn = False,polyHist
             spikeTime_post_ext=np.extract(cond_post, spikeTime_post)    #extract spike timings between specified timing    
             
             if(len(spikeTime_post_ext)>0):  #if post synaptic cell ever spikes
-                count = 0;
-                for t_post in spikeTime_post_ext: #for each spikes of the post synaptic cell (i_post)
-                    for i_pre in range(100):        #for each presynaptic cell
+                for i_pre in range(100):#for each presynaptic cell
+                    count = 0; #keep track with spike index
+                    relativeSpikeTime.append([]);#append cell index    
+                    for t_post in spikeTime_post_ext: #for each spikes of the post synaptic cell (i_post)
+                        relativeSpikeTime[i_pre].append([]);
                         if len(spikes_e[analysisLayer-1][i_pre]) > 0: #if the presynaptic cell in layer 0 ever spikes
                             # print i_pre
                             spikeTime_pre = spikes_e[analysisLayer-1][i_pre]; #store the spike timings of the presynaptic cell in layer 0
@@ -136,9 +145,11 @@ def runSpikeAnalysis(nStims,nTrans,PIcalcOn=True,polyAnalysisOn = False,polyHist
                             cond = cond_pre1 & cond_pre2;   #extract presynaptic spike timing between the timing of post spike and XX ms before the spike
                             spikeTime_pre_ext = np.extract(cond, spikeTime_pre);
                             if (len(spikeTime_pre_ext) > 0):
-                                t_back = t_post - spikeTime_pre_ext[0];
+                                t_back = t_post - spikeTime_pre_ext[0];#t_post - last activation of the presynaptic cells within the interval
                                 prevSpikeTime[i_pre][count] = t_back;
-                    count += 1;
+                                for spike_i in range(len(spikeTime_pre_ext)):
+                                    relativeSpikeTime[i_pre][count].append(t_post - spikeTime_pre_ext[spike_i]);
+                        count += 1;
                     #print count
                 
          
@@ -198,20 +209,10 @@ def runSpikeAnalysis(nStims,nTrans,PIcalcOn=True,polyAnalysisOn = False,polyHist
                         
                         for i_SpikeTrain in randIndex[0:nSpikesUsedForPI]:
                             #print len(randIndex[0:nSpikesUsedForPI]);
-                            tmp = prevSpikeTime[:,i_SpikeTrain];  #store delay of each presynaptic spike (before the ith post synaptic spike)
-                            #tmp = prevSpikeTime[preList,i_SpikeTrain];  #store delay of each presynaptic spike (before the ith post synaptic spike)
-                            sorted = np.sort(tmp)       #sorted the delay of each input cell (before the ith post synaptic spike)
-                            sorted_i = np.argsort(tmp)  #sorted index
-                            cond_sorted1 = sorted<maxDelay+1; #eliminated all the stored delay bigger than maxDelay
-                            ext_sorted = np.extract(cond_sorted1,sorted);
-                            ext_sorted_i = np.extract(cond_sorted1,sorted_i);
-                            #print str(cell_in) + " " + str(t_backs);
-                            for order_in in range(len(ext_sorted)):
-                                t_back = int(ext_sorted[order_in]/1);
-                                polyTableTmp[ext_sorted_i[order_in]][t_back] += 1;
-                        
-                        
-                        #calculating PI
+                            for inputCell in range(100):
+                                for spikeTime in relativeSpikeTime[inputCell][i_SpikeTrain]:
+                                   polyTableTmp[inputCell][int(spikeTime)] += 1; 
+
                         sortedPolyTable = np.sort(polyTableTmp.reshape(maxDelay*nCells));
                         if meanFR_pre>0:
                             PI[PI_phase,stim_index,i_post]=np.mean(sortedPolyTable[-1-nTopCellsChosenForPI:-1])/(meanFR_pre*nSpikesUsedForPI/1000);
@@ -226,8 +227,6 @@ def runSpikeAnalysis(nStims,nTrans,PIcalcOn=True,polyAnalysisOn = False,polyHist
                         if exception.errno != errno.EEXIST:
                             raise
                         
-                        
-                    
                     fig_poly = plt.figure(2 , figsize=(20, 20),dpi=100);
                     plt.clf();
                     plt.title("Post Synaptic Cell index: "+str(i_post));
@@ -240,28 +239,13 @@ def runSpikeAnalysis(nStims,nTrans,PIcalcOn=True,polyAnalysisOn = False,polyHist
                     subplotDim = np.ceil(np.sqrt(len(preList)+1));
                     
                     
-                    sCount = 0;
                     if count>0:
                         for i_SpikeTrain in range(count):#for each post synaptic spike
-                            tmp = prevSpikeTime[:,i_SpikeTrain];  #store delay of each presynaptic spike (before the ith post synaptic spike)
-                            sCount+=1;    
-                            sorted = np.sort(tmp)       #sorted the delay of each input cell (before the ith post synaptic spike)
-                            sorted_i = np.argsort(tmp)  #sorted index
-                            cond_sorted1 = sorted<maxDelay+1; #eliminated all the stored delay bigger than maxDelay
-                            ext_sorted = np.extract(cond_sorted1,sorted);
-                            ext_sorted_i = np.extract(cond_sorted1,sorted_i);
-                            #print str(cell_in) + " " + str(t_backs);
-                            for order_in in range(len(ext_sorted)):
-                                t_back = int(ext_sorted[order_in]/1);
-                                polyTableTmp[ext_sorted_i[order_in]][t_back] += 1;
-                        
-        #                 
-        #                 #calculating PI
-        #                 sortedPolyTable = np.sort(polyTableTmp.reshape(maxDelay*nCells));
-        #                 if meanFR_pre>0:
-        #                     PI[i_post]=np.mean(sortedPolyTable[-1-nTopCellsChosenForPI:-1])/(meanFR_pre*count/1000);
-        #             
-        
+                            #print relativeSpikeTime[0][i_SpikeTrain]
+                            for inputCell in range(100):
+                                for spikeTime in relativeSpikeTime[inputCell][i_SpikeTrain]:
+                                   polyTableTmp[inputCell][int(spikeTime)] += 1; 
+
                         #plt.subplot(int(subplotDim)+1,int(subplotDim),1);
                         polyTableTmpConnected = polyTableTmp[preList];
                         plt.subplot(int(subplotDim)+1,2,1);
@@ -278,34 +262,33 @@ def runSpikeAnalysis(nStims,nTrans,PIcalcOn=True,polyAnalysisOn = False,polyHist
                         subplot_i=0;
                         for cell_focus in preList:
                             subplot_i+=1;
-                            for i_SpikeTrain in range(count):#for each post synaptic spike
-                                tmp = prevSpikeTime[:,i_SpikeTrain];  #store delay of each presynaptic spike (before the ith post synaptic spike)
-                                if tmp[cell_focus]<maxDelay+1: #
-                                    spikeCount[cell_focus]+=1;    
-                                    sorted = np.sort(tmp)       #sorted the delay of each input cell (before the ith post synaptic spike)
-                                    sorted_i = np.argsort(tmp)  #sorted index
-                                    cond_sorted1 = sorted<maxDelay+1; #eliminated all the stored delay bigger than maxDelay
-                                    cond_sorted2 = tmp[cell_focus]<sorted
-                                    cond_sorted = cond_sorted1&cond_sorted2;
-                                    ext_sorted = np.extract(cond_sorted,sorted);
-                                    ext_sorted_i = np.extract(cond_sorted,sorted_i);
-                                    t_backs=ext_sorted-tmp[cell_focus];
-                                    #print str(cell_in) + " " + str(t_backs);
-                                    for order_in in range(len(ext_sorted)):
-                                        t_back = int(t_backs[order_in]/1);
-                                        polyTable[cell_focus][ext_sorted_i[order_in]][t_back] += 1;                
+                            spikeTime_focus = spikes_e[analysisLayer-1][cell_focus]; #spiking time of cell i_post in post synaptic layer (layer 1)
+                            cond_focus1 = spikeTime_focus < t_max;
+                            cond_focus2 = t_min < spikeTime_focus;
+                            cond_focus = cond_focus1 & cond_focus2;
+                            spikeTime_focus_ext=np.extract(cond_focus, spikeTime_focus)
+                            for i_pre in preList:    
+                                for t_focus in spikeTime_focus_ext: #for each spikes of the post synaptic cell (i_post)
+                                    if len(spikes_e[analysisLayer-1][i_pre]) > 0: #if the presynaptic cell in layer 0 ever spikes
+                                        # print i_pre
+                                        spikeTime_pre = spikes_e[analysisLayer-1][i_pre]; #store the spike timings of the presynaptic cell in layer 0
+                                        spikeTime_pre = spikeTime_pre[::-1];    #and reverse order
+                                        cond_pre1 = t_focus-maxDelay < spikeTime_pre;
+                                        cond_pre2 = spikeTime_pre < t_focus;
+                                        cond = cond_pre1 & cond_pre2;   #extract presynaptic spike timing between the timing of post spike and XX ms before the spike
+                                        spikeTime_pre_ext = np.extract(cond, spikeTime_pre);
+                                        if (len(spikeTime_pre_ext) > 0):
+                                            for spike_i in range(len(spikeTime_pre_ext)):
+                                                t_back = int(t_focus - spikeTime_pre_ext[spike_i]);
+                                                polyTable[cell_focus][i_pre][t_back] += 1;
+              
                             plt.subplot(int(subplotDim)+1,int(subplotDim),subplot_i+int(subplotDim));
-                            #print polyTable[i]
-                            #plt.clf()
-                            #plt.imshow(polyTable[i],interpolation='none');
-                            #plt.imshow(polyTable[cell_focus][preList],interpolation='none',vmin=0,vmax=spikeCount[cell_focus]);
+
                             plt.imshow(polyTable[cell_focus][preList],interpolation='none');
                             plt.colorbar()
                             plt.title("i:" + str(cell_focus) + " max:" + str(spikeCount[cell_focus]));
-                            #plt.title("(PostSynCell: " + str(i_post) + ") Distribution of the delay of spikes after spikes of PreSynCell " + str(i))
                             plt.xlabel("delay [ms]");
                             plt.gca().invert_xaxis()
-                            #plt.ylabel("index of neuron in layer 0");
                             plt.yticks(range(len(preList)), preList)
                         
                         
@@ -330,7 +313,7 @@ def runSpikeAnalysis(nStims,nTrans,PIcalcOn=True,polyAnalysisOn = False,polyHist
                                 plt.gca().invert_xaxis()
                                 #plt.show()
                          
-                        fig_poly.savefig(os.path.split(os.path.realpath(__file__))[0] + "/Results/"+experimentName+"/poly"+str(t_min)+"-"+str(t_max)+"/poly_"+str(t_min)+"-"+str(t_max)+"_"+str(i_post)+"_polyLen"+str(len(poly_indexs))+"_PI{:.2f}".format(PI[i_post])+".png");
+                        fig_poly.savefig(os.path.split(os.path.realpath(__file__))[0] + "/Results/"+experimentName+"/poly"+str(t_min)+"-"+str(t_max)+"/poly_"+str(t_min)+"-"+str(t_max)+"_"+str(i_post)+"_polyLen"+str(len(poly_indexs))+".png");#"_PI{:.2f}".format(PI[i_post])+".png");
             
                         
             
@@ -377,8 +360,12 @@ def runSpikeAnalysis(nStims,nTrans,PIcalcOn=True,polyAnalysisOn = False,polyHist
         PImeanBlank = 0;
         PImeanTrained = 0;
         for stim in range(nStims):
-            PImeanBlank += np.mean(np.extract(PI[0][stim]!=0,PI[0][stim]));
-            PImeanTrained +=  np.mean(np.extract(PI[1][stim]!=0,PI[1][stim]));
+            tmp = np.mean(np.extract(PI[0][stim]!=0,PI[0][stim]));
+            if np.isnan(tmp) == False:
+                PImeanBlank += tmp;
+            tmp = np.mean(np.extract(PI[1][stim]!=0,PI[1][stim]));
+            if np.isnan(tmp) == False:
+                PImeanTrained += tmp;
         
         print "PImeanImprovement: " + str(PImeanTrained-PImeanBlank) + " (blank:" + str(PImeanBlank/nStims) + ", trained:" + str(PImeanTrained/nStims) + ")";
         f = open(os.path.split(os.path.realpath(__file__))[0] + "/Results/"+experimentName+"/PI_improvement.txt","w");    
