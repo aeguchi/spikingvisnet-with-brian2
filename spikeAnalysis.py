@@ -232,7 +232,8 @@ def runSpikeAnalysis(nStims,nTrans,PIcalcOn=True,polyAnalysisOn = False,polyHist
                     plt.title("Post Synaptic Cell index: "+str(i_post));
                     
                     cond_ipost = postSynConn == i_post
-                    preList = np.extract(cond_ipost,preSynConn);  
+                    preList = np.extract(cond_ipost,preSynConn);
+                    preList_sorted = np.sort(preList);
                     polyTable = np.zeros([nCells,nCells,maxDelay]);#post,pre,diff
                     spikeCount = np.zeros(nCells);
                     polyTableTmp = np.zeros([nCells,maxDelay]);
@@ -247,7 +248,7 @@ def runSpikeAnalysis(nStims,nTrans,PIcalcOn=True,polyAnalysisOn = False,polyHist
                                    polyTableTmp[inputCell][int(spikeTime)] += 1; 
 
                         #plt.subplot(int(subplotDim)+1,int(subplotDim),1);
-                        polyTableTmpConnected = polyTableTmp[preList];
+                        polyTableTmpConnected = polyTableTmp[preList_sorted];
                         plt.subplot(int(subplotDim)+1,2,1);
                         plt.imshow(polyTableTmpConnected,interpolation='none');                
                         plt.colorbar()
@@ -255,7 +256,7 @@ def runSpikeAnalysis(nStims,nTrans,PIcalcOn=True,polyAnalysisOn = False,polyHist
                         #plt.title("(PostSynCell: " + str(i_post) + ") Distribution of the delay of spikes after spikes of PreSynCell " + str(i))
                         plt.xlabel("delay [ms]");
                         #plt.ylabel("index of neuron in layer 0");
-                        plt.yticks(range(len(preList)), preList)
+                        plt.yticks(range(len(preList)), preList_sorted)
                         plt.gca().invert_xaxis()
                         
                         
@@ -284,12 +285,12 @@ def runSpikeAnalysis(nStims,nTrans,PIcalcOn=True,polyAnalysisOn = False,polyHist
               
                             plt.subplot(int(subplotDim)+1,int(subplotDim),subplot_i+int(subplotDim));
 
-                            plt.imshow(polyTable[cell_focus][preList],interpolation='none');
+                            plt.imshow(polyTable[cell_focus][preList_sorted],interpolation='none');
                             plt.colorbar()
                             plt.title("i:" + str(cell_focus) + " max:" + str(spikeCount[cell_focus]));
                             plt.xlabel("delay [ms]");
                             plt.gca().invert_xaxis()
-                            plt.yticks(range(len(preList)), preList)
+                            plt.yticks(range(len(preList)), preList_sorted)
                         
                         
                         #tracing poly
@@ -302,9 +303,9 @@ def runSpikeAnalysis(nStims,nTrans,PIcalcOn=True,polyAnalysisOn = False,polyHist
                         
                         if postMax>=polyChainDetectTh:
                             for max_in in range(len(postArgMax[0])):
-                                poly_indexs.append(preList[postArgMax[0][max_in]]);
+                                poly_indexs.append(preList_sorted[postArgMax[0][max_in]]);
                                 poly_delays.append(int(postArgMax[1][max_in]));
-                                traceDelay(poly_indexs,poly_delays,preList[postArgMax[0][max_in]],int(postArgMax[1][max_in]))
+                                traceDelay(poly_indexs,poly_delays,preList_sorted[postArgMax[0][max_in]],int(postArgMax[1][max_in]))
                                 plt.subplot(int(subplotDim)+1,2,2);
                                 plt.plot(poly_delays,poly_indexs,'*');
                                 plt.xlim([maxDelay*-0.01,maxDelay*1.01]);
