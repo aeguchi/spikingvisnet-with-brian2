@@ -191,4 +191,4 @@ def runSimulation():
     #vplotter.saveFigs(os.path.split(os.path.realpath(__file__))[0] + "/Results/"+experimentName+"/"+str(count)+"_p"+str(phase)+"_o"+str(index_obj)+"_t"+str(index_trans),plotW=plotWeights);
         
     plt.clf();
-    ia.singleCellInfoAnalysis();
+    ia.singleCellInfoAnalysis(weightedAnalysis = 1);

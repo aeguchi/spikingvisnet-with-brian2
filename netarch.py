@@ -272,7 +272,7 @@ class visnet(object):
                 PreCellsIndex = layerDim*j_rows + j_cols;
                 self.connBottomUp[layer].connect(PreCellsIndex,cellIndex);
             
-            self.connBottomUp[layer].w[:, :] = br.rand(len(self.connBottomUp[layer].w[:, :])) * gmax
+            self.connBottomUp[layer].w[:, :] = (br.rand(len(self.connBottomUp[layer].w[:, :]))*(weightRange[1]-weightRange[0])+weightRange[0]) * gmax
             self.connBottomUp[layer].delay[:, :] = br.rand(len(self.connBottomUp[layer].delay[:, :])) * delayConst_connBottomUp if delayRandOn else delayConst_connBottomUp
             
             if topDownOn:
@@ -295,7 +295,7 @@ class visnet(object):
                     i_pre_indexes = layerDim*i_pre_rows + i_pre_cols;
                     self.connTopDown[layer].connect(i_pre_indexes,i_post_index);    
                 
-                self.connTopDown[layer].w[:, :] = br.rand(len(self.connTopDown[layer].w[:, :])) * gmax
+                self.connTopDown[layer].w[:, :] = (br.rand(len(self.connTopDown[layer].w[:, :]))*(weightRange[1]-weightRange[0])+weightRange[0]) * gmax
                 self.connTopDown[layer].delay[:, :] = br.rand(len(self.connTopDown[layer].delay[:, :])) * delayConst_connTopDown if delayRandOn else delayConst_connTopDown
         self.net.add(self.connBottomUp)
         if topDownOn:
@@ -329,7 +329,7 @@ class visnet(object):
                     i_pre_indexes = layerDim*i_pre_rows + i_pre_cols;
                     self.connExBind[layer].connect(i_pre_indexes,i_post_index);
                 
-                self.connExBind[layer].w[:, :] = br.rand(len(self.connExBind[layer].w[:, :])) * gmax_bind
+                self.connExBind[layer].w[:, :] = (br.rand(len(self.connExBind[layer].w[:, :]))*(weightRange[1]-weightRange[0])+weightRange[0]) * gmax_bind
                 self.connExBind[layer].delay[:, :] = br.rand(len(self.connExBind[layer].delay[:, :])) * delayConst_connExBind if delayRandOn else delayConst_connExBind
             self.net.add(self.connExBind)
 

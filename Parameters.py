@@ -121,6 +121,7 @@ Iext : volt #external current input
 
 #synapse params:  from < 100 microseconds in very short axons to > 100 ms in very long non-myelinated central axons. 
 delayRandOn = True;
+weightRange = [0.45,0.55];
 weightNormalizationOn = True;
 typeOfWeightNormalization = 1; #1:normal, 2:unit norm.(feature rescaling)
 type1NormConst = 15.0;
