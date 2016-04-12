@@ -7,10 +7,10 @@ import os;
 import spikeAnalysis
 from brian2 import ms
 
-objectiveFunc = 1; #1:inforAnalysis, 2:PI
+objectiveFunc = 3; #1:inforAnalysis, 2:PI, 3:both
 
-experimentName="dakota_fixedWeightRange_gmaxAndInhib"
-imageFolder = "BO_single"
+experimentName="dakota_visnet_BO_imgs5revised"
+imageFolder = "visnet_BO_imgs5revised_train_mod_single"
 experimentName = experimentName + time.strftime("_%Y.%m.%d_%H.%M.%S", time.gmtime());
 print str(sys.argv);
 
@@ -26,7 +26,7 @@ trainingEpochs = 10;#int(trainingEpochs/simplifyMultiplitude);
 testingTime = 5000.0;
 
 
-nLayers = 4;
+nLayers = 3;
 
 #lRate = lRate*3;
 # fanInRadSigma_connGtoInput = 0.5
@@ -66,7 +66,7 @@ main.loadParams(globals());
 main.runSimulation();
 
 spikeAnalysis.loadParams(globals());
-spikeAnalysis.runSpikeAnalysis(2,2,PIcalcOn=True,polyAnalysisOn = False,polyHist = False);
+spikeAnalysis.runSpikeAnalysis(2,2,nLayers,PIcalcOn=True,polyAnalysisOn = False,polyHist = False);
 
 #export params
 f = open(os.path.split(os.path.realpath(__file__))[0] +"/Results/"+experimentName+"/params.txt","w");
@@ -81,6 +81,8 @@ if objectiveFunc==1:
     source = os.path.split(os.path.realpath(__file__))[0] +"/Results/"+experimentName+"/performance.txt";
 elif objectiveFunc==2:
     source = os.path.split(os.path.realpath(__file__))[0] +"/Results/"+experimentName+"/PI_improvement.txt";
+elif objectiveFunc==3:
+    source = os.path.split(os.path.realpath(__file__))[0] +"/Results/"+experimentName+"/infoAndPI.txt";
     
 destination = outputFile;
 subprocess.call("cp " + source + " " + destination, shell=True);

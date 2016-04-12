@@ -25,7 +25,7 @@ def loadParams(borrowed_globals):
 
 
 
-def runSpikeAnalysis(nStims,nTrans,PIcalcOn=True,polyAnalysisOn = False,polyHist = False):
+def runSpikeAnalysis(nStims,nTrans,analysisLayer, PIcalcOn=True,polyAnalysisOn = False,polyHist = False):
     def traceDelay(poly_indexs,poly_delays,index,delay):
         #print str(index) + " " + str(delay);
         polyTableConnected = polyTable[index][preList];
@@ -65,8 +65,8 @@ def runSpikeAnalysis(nStims,nTrans,PIcalcOn=True,polyAnalysisOn = False,polyHist
     netState_L2L = pickle.load(open(os.path.split(os.path.realpath(__file__))[0] + "/Results/" + experimentName + "/"+ str(trainingEpochs+1) + "_netStates_L2L.pkl", "rb"));
     
     
-    analysisLayer = 3;#(3)
-    
+    #analysisLayer = nLayers-1;#(3)
+    analysisLayer = analysisLayer-1;
     
     preSynConn = netState_L2L[analysisLayer-1]['i_pre'];
     postSynConn = netState_L2L[analysisLayer-1]['i_post'];
@@ -202,7 +202,7 @@ def runSpikeAnalysis(nStims,nTrans,PIcalcOn=True,polyAnalysisOn = False,polyHist
                 if PIcalcOn:
                     #calculating PI
                     if count>=nSpikesUsedForPI:
-                        polyTableTmp = np.zeros([nCells,maxDelay]);
+                        polyTableTmp = np.zeros([nCells,maxDelay+1]);
                         randIndex = np.random.permutation(count);
                         cond_ipost = postSynConn == i_post
                         preList = np.extract(cond_ipost,preSynConn);
@@ -213,7 +213,7 @@ def runSpikeAnalysis(nStims,nTrans,PIcalcOn=True,polyAnalysisOn = False,polyHist
                                 for spikeTime in relativeSpikeTime[inputCell][i_SpikeTrain]:
                                    polyTableTmp[inputCell][int(spikeTime)] += 1; 
 
-                        sortedPolyTable = np.sort(polyTableTmp.reshape(maxDelay*nCells));
+                        sortedPolyTable = np.sort(polyTableTmp.reshape((maxDelay+1)*nCells));
                         if meanFR_pre>0:
                             PI[PI_phase,stim_index,i_post]=np.mean(sortedPolyTable[-1-nTopCellsChosenForPI:-1])/(meanFR_pre*nSpikesUsedForPI/1000);
         
@@ -234,9 +234,9 @@ def runSpikeAnalysis(nStims,nTrans,PIcalcOn=True,polyAnalysisOn = False,polyHist
                     cond_ipost = postSynConn == i_post
                     preList = np.extract(cond_ipost,preSynConn);
                     preList_sorted = np.sort(preList);
-                    polyTable = np.zeros([nCells,nCells,maxDelay]);#post,pre,diff
+                    polyTable = np.zeros([nCells,nCells,maxDelay+1]);#post,pre,diff
                     spikeCount = np.zeros(nCells);
-                    polyTableTmp = np.zeros([nCells,maxDelay]);
+                    polyTableTmp = np.zeros([nCells,maxDelay+1]);
                     subplotDim = np.ceil(np.sqrt(len(preList)+1));
                     
                     
@@ -371,4 +371,8 @@ def runSpikeAnalysis(nStims,nTrans,PIcalcOn=True,polyAnalysisOn = False,polyHist
         print "PImeanImprovement: " + str(PImeanTrained-PImeanBlank) + " (blank:" + str(PImeanBlank/nStims) + ", trained:" + str(PImeanTrained/nStims) + ")";
         f = open(os.path.split(os.path.realpath(__file__))[0] + "/Results/"+experimentName+"/PI_improvement.txt","w");    
         f.write(str(PImeanBlank-PImeanTrained));
+        f.close();
+        
+        f = open(os.path.split(os.path.realpath(__file__))[0] +"/Results/"+experimentName+"/infoAndPI.txt","a");
+        f.write(str(PImeanBlank-PImeanTrained)+" ");
         f.close();

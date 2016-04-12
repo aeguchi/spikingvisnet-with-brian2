@@ -1,0 +1,10 @@
+2
+4
+obj1a.png
+obj1b.png
+obj1c.png
+obj1d.png
+obj2a.png
+obj2b.png
+obj2c.png
+obj2d.png

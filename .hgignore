@@ -8,3 +8,4 @@ images/temp/*
 *~
 matlabGabor/*
 *.pyc.*
+*.DS_Store
