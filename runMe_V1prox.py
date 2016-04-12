@@ -5,8 +5,8 @@ import InfoAnalysis
 import pylab as plt
 import spikeAnalysis
 
-experimentName="dakota_fixedWeightRange_gmaxAndInhib_2016.03.09_07.23.12"
-imageFolder = "BO_single"
+experimentName="160412_visnet_BO_imgs5revised_train_mod_single"
+imageFolder = "visnet_BO_imgs5revised_train_mod_single"
 
 plotGaborAtTraining = False;
 plotActivitiesAtTraining = False;
@@ -26,7 +26,7 @@ trainingEpochs = 10;#int(trainingEpochs/simplifyMultiplitude);
 testingTime = 5000.0;
 
 
-nLayers = 4;
+nLayers = 3;
 #psiList = [-np.pi/2,np.pi/2]
 # typeOfWeightNormalization = 1;
 # type1NormConst = 15.0;
@@ -72,7 +72,7 @@ main.loadParams(globals());
 #main.runSimulation();
 
 spikeAnalysis.loadParams(globals());
-spikeAnalysis.runSpikeAnalysis(2,2,PIcalcOn=True, polyAnalysisOn = True,polyHist = False);
+spikeAnalysis.runSpikeAnalysis(2,2,nLayers,PIcalcOn=True, polyAnalysisOn = True,polyHist = False);
 
 # spikeAnalysis.loadParams(globals());
 # spikeAnalysis.runSpikeAnalysis(2,2,PIcalcOn=True,polyAnalysisOn = False,polyHist = False)

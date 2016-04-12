@@ -43,6 +43,7 @@ class InfoAnalysis(object):
                 numTrans = FR.shape[1];
                 numLayers = FR.shape[2]-1;
                 numCells = FR.shape[3];
+                targetLayerForObjFunc = numLayers;
                 
                 FR_layer = FR[:,:,layer,:,:];
                 
@@ -126,12 +127,15 @@ class InfoAnalysis(object):
                 index+=1;
                 
                 
-                if (layer == numLayers and phase == 'FR_1_trained.pkl'):
+                if (layer == targetLayerForObjFunc and phase == 'FR_1_trained.pkl'):
                     performanceMeasure = -1*np.sum(reversed_arr[0:numInfoCalc]);
                     f = open(os.path.split(os.path.realpath(__file__))[0] +"/Results/"+experimentName+"/performance.txt","w");
                     f.write(str(performanceMeasure));
                     f.close();
                     
+                    f = open(os.path.split(os.path.realpath(__file__))[0] +"/Results/"+experimentName+"/infoAndPI.txt","a");
+                    f.write(str(performanceMeasure)+" ");
+                    f.close();                    
                     
                     
                 

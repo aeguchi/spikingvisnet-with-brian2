@@ -42,7 +42,7 @@ interface,
 
 
 responses,                                      
-	num_objective_functions = 1             
+	num_objective_functions = 2             
 # 	numerical_gradients			
 # 	  fd_gradient_step_size = .01	
 	no_gradients
