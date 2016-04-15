@@ -62,12 +62,12 @@
 	my $par1 = sprintf("%.3f", $table[1][0]);
 	my $par2 = sprintf("%.3f", $table[2][0]);
 	my $par3 = sprintf("%.3f", $table[3][0]);
-#	my $par4 = sprintf("%.3f", $table[4][0]);
+	my $par4 = sprintf("%.3f", $table[4][0]);
 #	my $par5 = sprintf("%.3f", $table[5][0]);
 #	my $ss1 = $table[3][0];
 #	my $ss2 = $table[4][0];
 #	my $ir1 = $table[5][0];
 #	my $ir2 = $table[6][0];
 	
-	system("python ../../dakota_runMe.py $outdir $par1 $par2");
+	system("python ../../dakota_runMe.py $outdir $par1 $par2 $par3 $par4");
 	

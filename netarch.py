@@ -214,7 +214,7 @@ class visnet(object):
                 i_pre_indexes = inhibLayerDim*i_pre_rows + i_pre_cols;
                 self.connInEx[layer].connect(i_pre_indexes,i_post_index);
             
-            self.connInEx[layer].w[:, :] = br.rand(len(self.connInEx[layer].w[:, :])) * conductanceConst_I2E if weightRandOn else conductanceConst_I2E
+            self.connInEx[layer].w[:, :] = br.rand(len(self.connInEx[layer].w[:, :])) * conductanceConst_I2Es[layer] if weightRandOn else conductanceConst_I2Es[layer]
             self.connInEx[layer].delay[:, :] = br.rand(len(self.connInEx[layer].delay[:, :])) * delayConst_connInEx if delayRandOn else delayConst_connInEx
 
             #Excitatory -> Excitatory
