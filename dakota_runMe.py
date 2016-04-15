@@ -7,9 +7,9 @@ import os;
 import spikeAnalysis
 from brian2 import ms
 
-objectiveFunc = 3; #1:inforAnalysis, 2:PI, 3:both
+objectiveFunc = 1; #1:inforAnalysis, 2:PI, 3:both
 
-experimentName="dakota_visnet_BO_imgs5revised"
+experimentName="dakota_visnet_BO_imgs5revised_diffI2EbetweenLayers"
 imageFolder = "visnet_BO_imgs5revised_train_mod_single"
 experimentName = experimentName + time.strftime("_%Y.%m.%d_%H.%M.%S", time.gmtime());
 print str(sys.argv);
@@ -18,8 +18,13 @@ print str(sys.argv);
 outputFile = sys.argv[1];
 #tau_syn_const = float(sys.argv[2]);
 gmax =  float(sys.argv[2]);
-conductanceConst_I2E = float(sys.argv[3]);
+#conductanceConst_I2E = float(sys.argv[3]);
 #simplifyMultiplitude = 10;
+conductanceConst_I2Es[0] = float(sys.argv[3]);
+conductanceConst_I2Es[1] = float(sys.argv[4]);
+conductanceConst_I2Es[2] = float(sys.argv[5]);
+
+
 
 trainingTime = 100.0;
 trainingEpochs = 10;#int(trainingEpochs/simplifyMultiplitude);

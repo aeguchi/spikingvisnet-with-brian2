@@ -174,7 +174,10 @@ eqs_ExPre ='''ge += w'''
 conductanceConst_G2L = 2.5#0.4;#20*we;
 conductanceConst_E2I = 1.0#0.2;#10*we;
 conductanceConst_E2E = 1.0#0.1;#*we; (rec)
-conductanceConst_I2E = 1.0#0.075;#0.5*wi;
+#conductanceConst_I2E = 1.0#0.075;#0.5*wi;
+conductanceConst_I2Es = [1.0,1.0,1.0,1.0]#0.075;#0.5*wi;
+
+
 weightRandOn = False; #for G2L, E2I, E2E, I2E
 
    
