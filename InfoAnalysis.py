@@ -17,7 +17,7 @@ class InfoAnalysis(object):
         #ExperimentName = "BO_single";
         #layer = 2; #0: bindingLayer, 1: 1st layer ..
         plotMode = 1; #0:normal 1:max
-        numInfoCalc = 20;
+        numInfoCalc = layerDim*layerDim;
         
         #phases = ['FR_0_blank.pkl', 'FR_1_trained.pkl'];
         #phases = ['FR_0_blank.pkl'];
@@ -125,21 +125,23 @@ class InfoAnalysis(object):
                     plt.title(phase);
                     
                 index+=1;
-                performanceMeasureTmp = performanceMeasure;
-                performanceMeasure = np.sum(reversed_arr[0:numInfoCalc]);
-                if (layer == targetLayerForObjFunc and phase == 'FR_1_trained.pkl'):
-                    #performanceMeasure = -1*np.sum(reversed_arr[0:numInfoCalc]);
-                    f = open(os.path.split(os.path.realpath(__file__))[0] +"/Results/"+experimentName+"/performance.txt","w");
-                    f.write(str(-1*performanceMeasure));
-                    f.close();
-                    
-                    f = open(os.path.split(os.path.realpath(__file__))[0] +"/Results/"+experimentName+"/SI_improvement.txt","w");
-                    f.write(str(performanceMeasureTmp-performanceMeasure));
-                    f.close();
-                    
-                    f = open(os.path.split(os.path.realpath(__file__))[0] +"/Results/"+experimentName+"/infoAndPI.txt","a");
-                    f.write(str(performanceMeasureTmp-performanceMeasure)+" ");
-                    f.close();                    
+                if (layer == targetLayerForObjFunc):
+                    performanceMeasureTmp = performanceMeasure;
+                    #performanceMeasure = np.sum(reversed_arr[0:numInfoCalc]);
+                    performanceMeasure = len(reversed_arr[reversed_arr==np.log2(numObj)]);
+                    if (phase == 'FR_1_trained.pkl'):
+                        #performanceMeasure = -1*np.sum(reversed_arr[0:numInfoCalc]);
+                        f = open(os.path.split(os.path.realpath(__file__))[0] +"/Results/"+experimentName+"/performance.txt","w");
+                        f.write(str(-1*performanceMeasure));
+                        f.close();
+                        
+                        f = open(os.path.split(os.path.realpath(__file__))[0] +"/Results/"+experimentName+"/SI_improvement.txt","w");
+                        f.write(str(performanceMeasureTmp-performanceMeasure));
+                        f.close();
+                        
+                        f = open(os.path.split(os.path.realpath(__file__))[0] +"/Results/"+experimentName+"/infoAndPI.txt","a");
+                        f.write(str(performanceMeasureTmp-performanceMeasure)+" ");
+                        f.close();                    
                     
                     
                 

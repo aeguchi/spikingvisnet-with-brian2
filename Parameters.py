@@ -125,6 +125,7 @@ weightRange = [0.45,0.55];
 weightNormalizationOn = True;
 typeOfWeightNormalization = 1; #1:normal, 2:unit norm.(feature rescaling)
 type1NormConst = 15.0;
+nSynaptiContact = 1;
 delayConst_G2Input = 20.0*ms;
 delayConst_connBottomUp = 20.0*ms;
 delayConst_connExIn = 20.0*ms;

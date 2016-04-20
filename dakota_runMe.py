@@ -9,7 +9,7 @@ from brian2 import ms
 
 objectiveFunc = 1; #1:inforAnalysis, 2:PI, 3:both
 
-experimentName="dakota_visnet_BO_imgs5revised_diffI2EbetweenLayers"
+experimentName="dakota_visnet_BO_imgs5revised_5connections"
 imageFolder = "visnet_BO_imgs5revised_train_mod_single"
 experimentName = experimentName + time.strftime("_%Y.%m.%d_%H.%M.%S", time.gmtime());
 print str(sys.argv);
@@ -30,8 +30,8 @@ trainingTime = 100.0;
 trainingEpochs = 10;#int(trainingEpochs/simplifyMultiplitude);
 testingTime = 5000.0;
 
-
-nLayers = 3;
+nSynaptiContact = 5;
+nLayers = 4;
 
 #lRate = lRate*3;
 # fanInRadSigma_connGtoInput = 0.5
@@ -70,8 +70,8 @@ ReccurentOn = True;
 main.loadParams(globals());
 main.runSimulation();
 
-spikeAnalysis.loadParams(globals());
-spikeAnalysis.runSpikeAnalysis(2,2,nLayers,PIcalcOn=True,polyAnalysisOn = False,polyHist = False);
+#spikeAnalysis.loadParams(globals());
+#spikeAnalysis.runSpikeAnalysis(2,2,nLayers,PIcalcOn=True,polyAnalysisOn = False,polyHist = False);
 
 #export params
 f = open(os.path.split(os.path.realpath(__file__))[0] +"/Results/"+experimentName+"/params.txt","w");

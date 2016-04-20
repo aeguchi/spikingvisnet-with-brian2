@@ -5,7 +5,7 @@ import InfoAnalysis
 import pylab as plt
 import spikeAnalysis
 
-experimentName="160412_visnet_BO_imgs5revised_train_mod_single"
+experimentName="dakota_visnet_BO_imgs5revised_5connections_2016.04.20_11.25.23"
 imageFolder = "visnet_BO_imgs5revised_train_mod_single"
 
 plotGaborAtTraining = False;
@@ -26,7 +26,8 @@ trainingEpochs = 10;#int(trainingEpochs/simplifyMultiplitude);
 testingTime = 5000.0;
 
 
-nLayers = 3;
+nSynaptiContact = 5;
+nLayers = 4;
 #psiList = [-np.pi/2,np.pi/2]
 # typeOfWeightNormalization = 1;
 # type1NormConst = 15.0;
@@ -77,6 +78,6 @@ spikeAnalysis.runSpikeAnalysis(2,2,nLayers,PIcalcOn=True, polyAnalysisOn = True,
 # spikeAnalysis.loadParams(globals());
 # spikeAnalysis.runSpikeAnalysis(2,2,PIcalcOn=True,polyAnalysisOn = False,polyHist = False)
 
-# ia = InfoAnalysis.InfoAnalysis(globals())
-# ia.singleCellInfoAnalysis(phases = ['FR_0_blank.pkl'],numBins=3,weightedAnalysis = 1);
+#ia = InfoAnalysis.InfoAnalysis(globals())
+#ia.singleCellInfoAnalysis(weightedAnalysis = 1);
 #plt.show();
