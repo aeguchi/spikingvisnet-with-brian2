@@ -270,7 +270,7 @@ class visnet(object):
                 j_rows = np.random.normal(i_row, fanInRadSigma_connBottomUp, nConnections_connBottomUp).astype(int)%layerDim;
                 j_cols = np.random.normal(i_col, fanInRadSigma_connBottomUp, nConnections_connBottomUp).astype(int)%layerDim;
                 PreCellsIndex = layerDim*j_rows + j_cols;
-                self.connBottomUp[layer].connect(PreCellsIndex,cellIndex);
+                self.connBottomUp[layer].connect(PreCellsIndex,cellIndex,n=nSynaptiContact);
             
             self.connBottomUp[layer].w[:, :] = (br.rand(len(self.connBottomUp[layer].w[:, :]))*(weightRange[1]-weightRange[0])+weightRange[0]) * gmax
             self.connBottomUp[layer].delay[:, :] = br.rand(len(self.connBottomUp[layer].delay[:, :])) * delayConst_connBottomUp if delayRandOn else delayConst_connBottomUp
@@ -293,7 +293,7 @@ class visnet(object):
                     i_pre_rows = np.random.normal(i_row, fanInRadSigma_connTopDown, nConnections_connTopDown).astype(int)%layerDim;
                     i_pre_cols = np.random.normal(i_col, fanInRadSigma_connTopDown, nConnections_connTopDown).astype(int)%layerDim;
                     i_pre_indexes = layerDim*i_pre_rows + i_pre_cols;
-                    self.connTopDown[layer].connect(i_pre_indexes,i_post_index);    
+                    self.connTopDown[layer].connect(i_pre_indexes,i_post_index,n=nSynaptiContact);    
                 
                 self.connTopDown[layer].w[:, :] = (br.rand(len(self.connTopDown[layer].w[:, :]))*(weightRange[1]-weightRange[0])+weightRange[0]) * gmax
                 self.connTopDown[layer].delay[:, :] = br.rand(len(self.connTopDown[layer].delay[:, :])) * delayConst_connTopDown if delayRandOn else delayConst_connTopDown

@@ -58,7 +58,6 @@ def runSpikeAnalysis(nStims,nTrans,analysisLayer, PIcalcOn=True,polyAnalysisOn =
     nSpikesUsedForPI = maxDelay*testingTime*nTrans/1000
     #experimentName = 'BO_single1_gabMod2';
     
-    
     #init
     SpikeData = [str(trainingEpochs+1)+'_spikes_e.pkl', str(trainingEpochs+1)+'_spikes_i.pkl', str(trainingEpochs+1)+'_pikes_b.pkl', str(trainingEpochs+1)+'_pikes_g.pkl'];
     spikes_e = pickle.load(open(os.path.split(os.path.realpath(__file__))[0] + "/Results/" + experimentName + "/" + SpikeData[0], "rb"));
@@ -98,7 +97,7 @@ def runSpikeAnalysis(nStims,nTrans,analysisLayer, PIcalcOn=True,polyAnalysisOn =
         #calculate FR in layer 0:
         meanFR_pre = 0;
         meanFR_post = 0;
-        for i in range(100):
+        for i in range(nCells):
             spikeTime_pre = spikes_e[analysisLayer-1][i]; #spiking time of cell i_post in post synaptic layer (layer 1)
             cond_post1 = spikeTime_pre < t_max;
             cond_post2 = t_min < spikeTime_pre;
@@ -117,7 +116,7 @@ def runSpikeAnalysis(nStims,nTrans,analysisLayer, PIcalcOn=True,polyAnalysisOn =
         print meanFR_post;
         
         
-        for i_post in range(100):
+        for i_post in range(nCells):
             print i_post
             #plt.clf();
             #prevSpikeTime = np.ones([len(preList), len(spikes_e[1][i_post])])*(maxDelay+1);  # pre cell index, number of spikes
@@ -131,7 +130,7 @@ def runSpikeAnalysis(nStims,nTrans,analysisLayer, PIcalcOn=True,polyAnalysisOn =
             spikeTime_post_ext=np.extract(cond_post, spikeTime_post)    #extract spike timings between specified timing    
             
             if(len(spikeTime_post_ext)>0):  #if post synaptic cell ever spikes
-                for i_pre in range(100):#for each presynaptic cell
+                for i_pre in range(nCells):#for each presynaptic cell
                     count = 0; #keep track with spike index
                     relativeSpikeTime.append([]);#append cell index    
                     for t_post in spikeTime_post_ext: #for each spikes of the post synaptic cell (i_post)
@@ -166,7 +165,7 @@ def runSpikeAnalysis(nStims,nTrans,analysisLayer, PIcalcOn=True,polyAnalysisOn =
                     
                     fig_hist = plt.figure(1 , figsize=(40, 40),dpi=500);
                     plt.clf();
-                    for i_pre in range(100):
+                    for i_pre in range(nCells):
                         plt.subplot(10,10,i_pre+1);
                         c = 'b';
                         #overlay actual connectivity
@@ -233,7 +232,17 @@ def runSpikeAnalysis(nStims,nTrans,analysisLayer, PIcalcOn=True,polyAnalysisOn =
                     
                     cond_ipost = postSynConn == i_post
                     preList = np.extract(cond_ipost,preSynConn);
+                    
+                    #remove duplicate
+                    preList = preList[range(0,len(preList),nSynaptiContact)];
+                    
+                    
                     preList_sorted = np.sort(preList);
+                    
+                    
+                    
+                    
+                    
                     polyTable = np.zeros([nCells,nCells,maxDelay+1]);#post,pre,diff
                     spikeCount = np.zeros(nCells);
                     polyTableTmp = np.zeros([nCells,maxDelay+1]);
@@ -243,7 +252,7 @@ def runSpikeAnalysis(nStims,nTrans,analysisLayer, PIcalcOn=True,polyAnalysisOn =
                     if count>0:
                         for i_SpikeTrain in range(count):#for each post synaptic spike
                             #print relativeSpikeTime[0][i_SpikeTrain]
-                            for inputCell in range(100):
+                            for inputCell in range(nCells):
                                 for spikeTime in relativeSpikeTime[inputCell][i_SpikeTrain]:
                                    polyTableTmp[inputCell][int(spikeTime)] += 1; 
 
