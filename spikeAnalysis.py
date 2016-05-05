@@ -233,7 +233,7 @@ def runSpikeAnalysis(nStims,nTrans,analysisLayer, PIcalcOn=True,polyAnalysisOn =
                     cond_ipost = postSynConn == i_post
                     preList = np.extract(cond_ipost,preSynConn);
                     
-                    #remove duplicate
+                    #remove duplicate (due to multiple synaptic contact)
                     preList = preList[range(0,len(preList),nSynaptiContact)];
                     
                     
@@ -296,7 +296,7 @@ def runSpikeAnalysis(nStims,nTrans,analysisLayer, PIcalcOn=True,polyAnalysisOn =
 
                             plt.imshow(polyTable[cell_focus][preList_sorted],interpolation='none');
                             plt.colorbar()
-                            plt.title("i:" + str(cell_focus) + " max:" + str(spikeCount[cell_focus]));
+                            plt.title("i:" + str(cell_focus) + " max:" + str(len(spikeTime_focus_ext)));
                             plt.xlabel("delay [ms]");
                             plt.gca().invert_xaxis()
                             plt.yticks(range(len(preList)), preList_sorted)

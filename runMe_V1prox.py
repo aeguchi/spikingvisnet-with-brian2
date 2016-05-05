@@ -5,7 +5,7 @@ import InfoAnalysis
 import pylab as plt
 import spikeAnalysis
 
-experimentName="dakota_visnet_BO_imgs5revised_5connections_2016.04.20_11.25.23"
+experimentName="dakota_visnet_BO_imgs5revised_5connections_2016.04.21_11.06.32"
 imageFolder = "visnet_BO_imgs5revised_train_mod_single"
 
 plotGaborAtTraining = False;

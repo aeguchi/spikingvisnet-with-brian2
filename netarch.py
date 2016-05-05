@@ -17,7 +17,7 @@ class visnet(object):
         super(visnet, self).__init__()
         globals().update(borrowed_globals);
         np.random.seed(randSeed)
-
+        
         self.net = br.Network(br.collect())
         print " - initializing layers.."
         self.buildLayers()
@@ -43,7 +43,8 @@ class visnet(object):
                     if inputType==1:
                         self.layerG[p][s].append(br.PoissonGroup(
                             layerGDim * layerGDim,  # N neurons
-                            np.random.rand(layerGDim * layerGDim) * Hz)  # rates
+                            np.random.rand(layerGDim * layerGDim) * Hz,
+                            dt = timeStep)  # rates
                         )
                     elif inputType==2:
                         self.layerG[p][s].append(br.NeuronGroup(layerGDim * layerGDim,  # N neurons
@@ -52,7 +53,8 @@ class visnet(object):
                                reset='''v = V0_ex
                                 ge = 0
                                 gi = 0''',  # code to execute on reset
-                               refractory=refractoryPeriod  # length of refractory period
+                               refractory=refractoryPeriod,  # length of refractory period
+                               dt = timeStep
                                )
                         )
                         self.layerG[p][s][o].v = V0_ex + br.rand(layerGDim * layerGDim) * (Vth_ex - V0_ex);
@@ -71,7 +73,8 @@ class visnet(object):
                                reset='''v = V0_ex
                                 ge = 0
                                 gi = 0''',  # code to execute on reset
-                               refractory=refractoryPeriod  # length of refractory period
+                               refractory=refractoryPeriod,  # length of refractory period
+                               dt = timeStep
                                )
             )
             self.layers[layer].v = V0_ex + br.rand(layerDim * layerDim) * (Vth_ex - V0_ex);
@@ -91,7 +94,8 @@ class visnet(object):
                 reset='''v = V0_in
                         ge = 0
                         gi = 0''',
-                refractory=refractoryPeriod
+                       refractory=refractoryPeriod,  # length of refractory period
+                       dt = timeStep
             )
             )
             self.inhibLayers[layer].v = V0_in + br.rand(inhibLayerDim * inhibLayerDim) * (Vth_in - V0_in)
@@ -110,7 +114,8 @@ class visnet(object):
                 reset='''v = V0_ex
                         ge = 0
                         gi = 0''',
-                refractory=refractoryPeriod
+                       refractory=refractoryPeriod,  # length of refractory period
+                       dt = timeStep
             )
             self.bindingLayer.v = V0_ex + br.rand(layerDim * layerDim) * (Vth_ex - V0_ex)
             self.bindingLayer.ge = 0
@@ -138,7 +143,8 @@ class visnet(object):
                         br.Synapses(self.layerG[p][s][o],
                                     self.layers[0],
                                     eqs_Syn,
-                                    pre=eqs_ExPre
+                                    pre=eqs_ExPre,
+                                    dt = timeStep
                                     )
                     )
             
@@ -182,7 +188,7 @@ class visnet(object):
             #Excitatory -> Inhibitory
             self.connExIn.append(
                 br.Synapses(self.layers[layer], self.inhibLayers[layer],
-                            eqs_Syn, pre=eqs_ExPre))
+                            eqs_Syn, pre=eqs_ExPre, dt = timeStep))
 #             for cellIndex in range(inhibLayerDim*inhibLayerDim):
 #                 self.connExIn[layer].connect('j==cellIndex', p=pConnections_connExIn)
             for i_post_index in range(inhibLayerDim*inhibLayerDim):
@@ -202,7 +208,7 @@ class visnet(object):
             #Inhibitory -> Excitatotry 
             self.connInEx.append(
                 br.Synapses(self.inhibLayers[layer], self.layers[layer],
-                            eqs_Syn, pre=eqs_InPre))
+                            eqs_Syn, pre=eqs_InPre,dt = timeStep))
 
             for i_post_index in range(layerDim*layerDim):
                 i_post_row = int(i_post_index/layerDim);
@@ -221,7 +227,7 @@ class visnet(object):
             if ReccurentOn:
                 self.connRecEx.append(
                     br.Synapses(self.layers[layer], self.layers[layer],
-                                eqs_Syn, pre=eqs_ExPre))
+                                eqs_Syn, pre=eqs_ExPre,dt = timeStep))
      
                 for i_post_index in range(layerDim*layerDim):
                     i_row = int(i_post_index/layerDim);
@@ -257,7 +263,8 @@ class visnet(object):
                 self.layers[layer + 1],
                 eqs_stdpSyn,
                 pre = eqs_stdpPre,
-                post = eqs_stdpPost
+                post = eqs_stdpPost,
+                dt = timeStep
             )
             )
 
@@ -281,7 +288,8 @@ class visnet(object):
                     self.layers[layer],
                     eqs_stdpSyn,
                     pre = eqs_stdpPre,
-                    post = eqs_stdpPost
+                    post = eqs_stdpPost,
+                    dt = timeStep
                 )
                 )
                 
@@ -312,7 +320,8 @@ class visnet(object):
                     self.bindingLayer,
                     eqs_stdpSyn_bind,
                     pre = eqs_stdpPre_bind,
-                    post = eqs_stdpPost_bind
+                    post = eqs_stdpPost_bind,
+                    dt = timeStep
                 )
                 )
     
