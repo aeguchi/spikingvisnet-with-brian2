@@ -9,20 +9,20 @@ from brian2 import ms
 
 objectiveFunc = 1; #1:inforAnalysis, 2:PI, 3:both
 
-experimentName="dakota_visnet_BO_imgs5revised_5connections"
-imageFolder = "visnet_BO_imgs5revised_train_mod_single"
+experimentName="dakota_visnet_BO_imgs5revised_5connections_smallGmax"
+imageFolder = "visnet_BO_imgs5revised_train_mod_single";#"visnet_BO_imgs5revised_train_mod_two"
 experimentName = experimentName + time.strftime("_%Y.%m.%d_%H.%M.%S", time.gmtime());
 print str(sys.argv);
 
 #set params
 outputFile = sys.argv[1];
-#tau_syn_const = float(sys.argv[2]);
 gmax =  float(sys.argv[2]);
+tau_syn_const = float(sys.argv[3]);
 #conductanceConst_I2E = float(sys.argv[3]);
 #simplifyMultiplitude = 10;
-conductanceConst_I2Es[0] = float(sys.argv[3]);
-conductanceConst_I2Es[1] = float(sys.argv[4]);
-conductanceConst_I2Es[2] = float(sys.argv[5]);
+conductanceConst_I2Es[0] = float(sys.argv[4]);
+conductanceConst_I2Es[1] = float(sys.argv[5]);
+conductanceConst_I2Es[2] = float(sys.argv[6]);
 
 
 

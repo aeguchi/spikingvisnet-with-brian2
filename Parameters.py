@@ -85,6 +85,8 @@ Rmax = 50.0 * Hz  # max FR
 # Iext : volt #external current input
 # '''
 
+timeStep = 1*ms;
+
 #params for membrane eqn
 tau_ex = 2.0*ms;
 tau_in = 5.0*ms;

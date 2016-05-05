@@ -127,7 +127,7 @@ class InfoAnalysis(object):
                 index+=1;
                 if (layer == targetLayerForObjFunc):
                     performanceMeasureTmp = performanceMeasure;
-                    #performanceMeasure = np.sum(reversed_arr[0:numInfoCalc]);
+                    #performanceMeasure = np.sum(reversed_arr);
                     performanceMeasure = len(reversed_arr[reversed_arr==np.log2(numObj)]);
                     if (phase == 'FR_1_trained.pkl'):
                         #performanceMeasure = -1*np.sum(reversed_arr[0:numInfoCalc]);
