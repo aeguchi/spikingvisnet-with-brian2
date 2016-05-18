@@ -4,8 +4,9 @@ from brian2 import ms
 import InfoAnalysis
 import pylab as plt
 import spikeAnalysis
+import calcPG_DP
 
-experimentName="dakota_visnet_BO_imgs5revised_5connections_2016.04.21_11.06.32"
+experimentName="2016.05.06_dakota_visnet_BO_imgs5revised_5connections_smallGmax"
 imageFolder = "visnet_BO_imgs5revised_train_mod_single"
 
 plotGaborAtTraining = False;
@@ -15,15 +16,21 @@ plotPopulationRateOn = False;
 ReccurentOn = True;
 
 
+
 #set params
 #tau_syn_const = float(sys.argv[2]);
-gmax =  2.234;
-conductanceConst_I2E = 2.564;
+gmax =  1.500;
+tau_syn_const = 1.696;
+#conductanceConst_I2E = float(sys.argv[3]);
 #simplifyMultiplitude = 10;
+conductanceConst_I2Es[0] = 0.713;
+conductanceConst_I2Es[1] = 9.998;
+conductanceConst_I2Es[2] = 1.198;
 
 trainingTime = 100.0;
 trainingEpochs = 10;#int(trainingEpochs/simplifyMultiplitude);
 testingTime = 5000.0;
+NbSpikeMin = 1
 
 
 nSynaptiContact = 5;
@@ -69,11 +76,15 @@ nLayers = 4;
 
 
 
-main.loadParams(globals());
+#main.loadParams(globals());
 #main.runSimulation();
 
-spikeAnalysis.loadParams(globals());
-spikeAnalysis.runSpikeAnalysis(2,2,nLayers,PIcalcOn=True, polyAnalysisOn = True,polyHist = False);
+#spikeAnalysis.loadParams(globals());
+#spikeAnalysis.runSpikeAnalysis(2,2,nLayers,PIcalcOn=True, polyAnalysisOn = True,polyHist = False);
+
+calcPG_DP.loadParams(globals());
+calcPG_DP.runCalcPG(nLayers);
+
 
 # spikeAnalysis.loadParams(globals());
 # spikeAnalysis.runSpikeAnalysis(2,2,PIcalcOn=True,polyAnalysisOn = False,polyHist = False)
