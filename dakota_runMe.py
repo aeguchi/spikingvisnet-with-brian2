@@ -9,8 +9,8 @@ from brian2 import ms
 
 objectiveFunc = 1; #1:inforAnalysis, 2:PI, 3:both
 
-experimentName="dakota_visnet_BO_imgs5revised_5connections_smallGmax"
-imageFolder = "visnet_BO_imgs5revised_train_mod_single";#"visnet_BO_imgs5revised_train_mod_two"
+experimentName="dakota_visnet_BO_imgs5revised_5connections_smallGmax_trans"
+imageFolder = "visnet_BO_imgs5revised_train_mod_two";#"visnet_BO_imgs5revised_train_mod_two"
 experimentName = experimentName + time.strftime("_%Y.%m.%d_%H.%M.%S", time.gmtime());
 print str(sys.argv);
 

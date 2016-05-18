@@ -127,8 +127,8 @@ class InfoAnalysis(object):
                 index+=1;
                 if (layer == targetLayerForObjFunc):
                     performanceMeasureTmp = performanceMeasure;
-                    #performanceMeasure = np.sum(reversed_arr);
-                    performanceMeasure = len(reversed_arr[reversed_arr==np.log2(numObj)]);
+                    performanceMeasure = np.sum(reversed_arr);
+                    performanceMeasure = performanceMeasure*(len(reversed_arr[reversed_arr==np.log2(numObj)])+1);
                     if (phase == 'FR_1_trained.pkl'):
                         #performanceMeasure = -1*np.sum(reversed_arr[0:numInfoCalc]);
                         f = open(os.path.split(os.path.realpath(__file__))[0] +"/Results/"+experimentName+"/performance.txt","w");
