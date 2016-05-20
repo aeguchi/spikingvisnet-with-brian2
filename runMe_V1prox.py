@@ -83,11 +83,8 @@ nLayers = 4;
 #spikeAnalysis.runSpikeAnalysis(2,2,nLayers,PIcalcOn=True, polyAnalysisOn = True,polyHist = False);
 
 calcPG_DP.loadParams(globals());
-calcPG_DP.runCalcPG(nLayers);
+calcPG_DP.runCalcPG(2,2,nLayers);
 
-
-# spikeAnalysis.loadParams(globals());
-# spikeAnalysis.runSpikeAnalysis(2,2,PIcalcOn=True,polyAnalysisOn = False,polyHist = False)
 
 #ia = InfoAnalysis.InfoAnalysis(globals())
 #ia.singleCellInfoAnalysis(weightedAnalysis = 1);
