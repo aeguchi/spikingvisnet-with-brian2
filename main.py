@@ -87,12 +87,12 @@ def runSimulation():
         print "*** simulation phase: " + str(phase) + " Epoch " + str(count) +"/" +str((trainingEpochs+2)) +"***";
         if phase==1:
             vnet.setSynapticPlasticity(True)
-            numObj = numObj_test;
-            numTrans = numTrans_test;
-        else:
-            vnet.setSynapticPlasticity(False)
             numObj = numObj_train;
             numTrans = numTrans_train;
+        else:
+            vnet.setSynapticPlasticity(False)
+            numObj = numObj_test;
+            numTrans = numTrans_test;
             
         # for img_fn in img_fns:
         FRrec = np.zeros((numObj_test,numTrans_test,nLayers+1, layerDim, layerDim));#1st layer is binding layer
@@ -103,8 +103,12 @@ def runSimulation():
                 #SpikeRec[index_obj].append([]);
                 print " - obj: " + str(index_obj) + ", trans: " + str(index_trans) +" **";
                 index_img = index_obj * numTrans + index_trans;
-                img_fn = os.path.split(os.path.realpath(__file__))[0] + "/images/" + imageFolder + "/train/" + fileList_train[index_img + 2];
-            
+                
+                if phase==1:
+                    img_fn = os.path.split(os.path.realpath(__file__))[0] + "/images/" + imageFolder + "/train/" + fileList_train[index_img + 2];
+                else:
+                    img_fn = os.path.split(os.path.realpath(__file__))[0] + "/images/" + imageFolder + "/test/" + fileList_test[index_img + 2];
+                
                 inputImage = scipy.misc.imread(img_fn);
                 if inputImage is None:
                     print 'Failed to load image file:', img_fn

@@ -1,3 +1,4 @@
+3
 2
-2
-1c.png1d.png2c.png2d.png
+1c.png1d.png2c.png2d.pngrand1.png
+rand2.png
