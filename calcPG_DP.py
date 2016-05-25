@@ -16,8 +16,7 @@ def runCalcPG(nStims,nTrans,analysisLayer):
 
     PGTypes = [2,3]; #1:supported PG, 2:adapted PGs, 3:activated PGs
     trainedNetwork = True;
-    
-    plotFigure = True;    
+    plotFigure = False;    
     drawArrow = True;
     
     nCells = 100;
@@ -25,9 +24,14 @@ def runCalcPG(nStims,nTrans,analysisLayer):
     NbSpikesNeeded = 3;
     NbSpikesMax = 200;
     MaxTimeSpan = 100;
-    jitter = 1;
     reflPeriod = refractoryPeriod/ms;
+    minPGLen = NbSpikesNeeded*2;
 
+    #for alg1: PG supported
+    jitter = 1;
+
+
+    #for alg2: PG adopted
     spikingTh = Vth_ex/mV;
     alg2_Vrev_ex = Vrev_ex/mV;
     #decayRatio = 0.5;
@@ -39,11 +43,11 @@ def runCalcPG(nStims,nTrans,analysisLayer):
     jitter_plotArrow = np.log2(0.9)/np.log2(1-1./alg2_taum_ex)
     print jitter_plotArrow;
     
-    #analysisLayer = nLayers-1;#(3)
-    analysisLayer = analysisLayer-1;
     
     
     #Load Data
+    analysisLayer = analysisLayer-1;
+    
     f = open(os.path.split(os.path.realpath(__file__))[0] + "/Results/" + experimentName + "/"+ str(trainingEpochs+1) + "_netStates_E2E.pkl", "rb");
     netState_E2E = pickle.load(f);
     f.close();
@@ -98,10 +102,6 @@ def runCalcPG(nStims,nTrans,analysisLayer):
         fig = plt.figure();
         
 
-    
-            
-            
-    
     for PGType in PGTypes:
         if PGType==1 or PGType==2:
             #for s_list in [(0, 1, 97)]:#list(itertools.combinations(range(nCells),sPicked)):
@@ -110,7 +110,7 @@ def runCalcPG(nStims,nTrans,analysisLayer):
     #                 break;
                 #print s_list
                 #look for PGs triggered by this combination
-                print s_list
+                #print s_list
                         
                 
                 triggeringConnections = [];
@@ -226,8 +226,8 @@ def runCalcPG(nStims,nTrans,analysisLayer):
                                                     geTable[post_cell,timing]=geTable[post_cell,timing]+ge*w_const;
                                                     #PSPTable[post_cell,timing]=((alg2_Vrev_ex-PSPTable[post_cell,timing])*ge)/alg2_taum_ex;
                                             
-                        #print PG;                   
-                        if  len(PG)>sPicked:
+                        #print nad save PG;                   
+                        if  len(PG)>minPGLen:#sPicked:
                             if plotFigure and len(PG)>10:
                                 plt.clf();
                                 if drawArrow:
