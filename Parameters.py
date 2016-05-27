@@ -26,7 +26,7 @@ experimentName = "2obj3"
 imageFolder = "simpleImages2obj"
 
 #STRUCTURE OF THE NETWORK
-nLayers = 2
+nLayers = 4
 layerGDim = 20;
 layerDim = 10   # size of layer1 in neurons
 inhibLayerDim = 5;

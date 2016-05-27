@@ -6,7 +6,7 @@ import pylab as plt
 import spikeAnalysis
 import calcPG_DP
 
-experimentName="2016.05.06_dakota_visnet_BO_imgs5revised_5connections_smallGmax_rerunWithRandInput"
+experimentName="2016.05.06_dakota_visnet_BO_imgs5revised_5connections_smallGmax"
 imageFolder = "visnet_BO_imgs5revised_train_mod_single"
 
 plotGaborAtTraining = False;
@@ -76,14 +76,14 @@ nLayers = 4;
 
 
 
-main.loadParams(globals());
-main.runSimulation();
+#main.loadParams(globals());
+#main.runSimulation();
 
 #spikeAnalysis.loadParams(globals());
 #spikeAnalysis.runSpikeAnalysis(2,2,nLayers,PIcalcOn=True, polyAnalysisOn = True,polyHist = False);
 
 calcPG_DP.loadParams(globals());
-calcPG_DP.runCalcPG(3,2,nLayers);
+calcPG_DP.runCalcPG(2,2,nLayers);
 
 
 #ia = InfoAnalysis.InfoAnalysis(globals())
