@@ -30,7 +30,7 @@ trainingTime = 100.0;
 trainingEpochs = 10;#int(trainingEpochs/simplifyMultiplitude);
 testingTime = 5000.0;
 
-nSynaptiContact = 5;
+nSynaptiContact = 1;
 nLayers = 4;
 
 #lRate = lRate*3;
