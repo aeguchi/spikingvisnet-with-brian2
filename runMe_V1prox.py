@@ -6,8 +6,8 @@ import pylab as plt
 import spikeAnalysis
 import calcPG_DP
 
-experimentName="2016.05.06_dakota_visnet_BO_imgs5revised_5connections_smallGmax"
-imageFolder = "visnet_BO_imgs5revised_train_mod_single"
+experimentName="2016.05.12_dakota_visnet_BO_imgs5revised_5connections_smallGmax_trans"
+imageFolder = "visnet_BO_imgs5revised_train_mod_two"
 
 plotGaborAtTraining = False;
 plotActivitiesAtTraining = False;
@@ -19,13 +19,13 @@ ReccurentOn = True;
 
 #set params
 #tau_syn_const = float(sys.argv[2]);
-gmax =  1.500;
-tau_syn_const = 1.696;
+gmax =  0.833;#1.500;
+tau_syn_const = 0.102;#1.696;
 #conductanceConst_I2E = float(sys.argv[3]);
 #simplifyMultiplitude = 10;
-conductanceConst_I2Es[0] = 0.713;
-conductanceConst_I2Es[1] = 9.998;
-conductanceConst_I2Es[2] = 1.198;
+conductanceConst_I2Es[0] = 8.164;#0.713;
+conductanceConst_I2Es[1] = 0.101;#9.998;
+conductanceConst_I2Es[2] = 0.102;#1.198;
 
 trainingTime = 100.0;
 trainingEpochs = 10;#int(trainingEpochs/simplifyMultiplitude);
@@ -83,7 +83,7 @@ nLayers = 4;
 #spikeAnalysis.runSpikeAnalysis(2,2,nLayers,PIcalcOn=True, polyAnalysisOn = True,polyHist = False);
 
 calcPG_DP.loadParams(globals());
-calcPG_DP.runCalcPG(2,2,nLayers);
+calcPG_DP.runCalcPG(2,4,nLayers);
 
 
 #ia = InfoAnalysis.InfoAnalysis(globals())

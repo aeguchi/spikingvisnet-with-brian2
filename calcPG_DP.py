@@ -14,7 +14,7 @@ def loadParams(borrowed_globals):
 
 def runCalcPG(nStims,nTrans,analysisLayer):
 
-    PGTypes = [3]; #1:supported PG, 2:adapted PGs, 3:activated PGs
+    PGTypes = [2,3]; #1:supported PG, 2:adapted PGs, 3:activated PGs
     isTrained = False;
     plotFigure = True;    
     drawArrow = True;
@@ -32,15 +32,16 @@ def runCalcPG(nStims,nTrans,analysisLayer):
 
 
     #for alg2: PG adopted
-    triggerTh = sPicked/3;
+    triggerTh = sPicked/3;#*(gmax*0.2);#this number is arbitrary
     spikingTh = Vth_ex/mV;
     alg2_Vrev_ex = Vrev_ex/mV;
     #decayRatio = 0.5;
     alg2_V0_ex = V0_ex/mV;
     alg2_taum_ex = taum_ex/ms;
-    alg2_tau_ex = tau_ex/ms*0.8;
+    alg2_tau_ex = tau_ex/ms;#*0.8
 #     decalyRatio = (1-timeStep/taum_ex);
-    w_const = 1.0;
+    w_const_FF = 1.5/gmax;#this number is arbitrary
+    w_const_Lat = 1.0;
     jitter_plotArrow = np.log2(0.9)/np.log2(1-1./alg2_taum_ex)
     print jitter_plotArrow;
     
@@ -139,15 +140,15 @@ def runCalcPG(nStims,nTrans,analysisLayer):
                 
                 #count connections comming from triggers, to find common triggers output neurons
                 for p in s_list:
-                    cond_pre = preSynConn == p;
-                    listConnectedFromTp = np.extract(cond_pre, postSynConn);
+                    cond_pre = preSynConn_FF_list[0] == p;
+                    listConnectedFromTp = np.extract(cond_pre, postSynConn_FF_list[0]);
                     for i in listConnectedFromTp:
                         if p not in triggeringConnections[i]:#remove duplicate
                             triggeringConnections[i].append(p);
                             if PGType==2:
-                                cond_post = postSynConn == i;
-                                weightListPtoI = np.extract(cond_pre & cond_post, weightList);
-                                gSumList[i]=gSumList[i]+weightListPtoI[0];
+                                cond_post = postSynConn_FF_list[0] == i;
+                                weightListPtoI = np.extract(cond_pre & cond_post, weightList_FF_list[0]);
+                                gSumList[i]=gSumList[i]+weightListPtoI[0]*w_const_FF;
                 
                 
                 for i in range(nCells,nCells*2): 
@@ -160,7 +161,7 @@ def runCalcPG(nStims,nTrans,analysisLayer):
                     PSPRecord = np.zeros((nCells*nLayers,MaxTimeSpan));
                     tLastSpike = np.zeros(nCells*nLayers)-reflPeriod;
                     
-                
+                    #if there is satisfactory incoming connections from the trigger..
                     if ((len(triggeringConnections[i]) >= sPicked) and (PGType==1 or gSumList[i]>triggerTh)):
                         cond_post = postSynConn == i;
                         initSpikeTimings = np.zeros(nCells);
@@ -192,11 +193,17 @@ def runCalcPG(nStims,nTrans,analysisLayer):
                             elif PGType==2:
                                 weightsConnectedFromP = np.extract(cond_pre, weightList);
                                 for cell_i in range(len(cellsConnectedFromP)):
-                                    if p is not cellsConnectedFromP[cell_i]:
-                                        timing = initSpikeTimings[p]+delaysConnectedFromP[cell_i];
-                                        post_cell = cellsConnectedFromP[cell_i];
-                                        ge = weightsConnectedFromP[cell_i]
-                                        geTable[post_cell,timing]= geTable[post_cell,timing]+ge*w_const;
+                                    timing = initSpikeTimings[p]+delaysConnectedFromP[cell_i];
+                                    post_cell = cellsConnectedFromP[cell_i];
+                                    ge = weightsConnectedFromP[cell_i]
+                                    
+                                    layer_pre = int(np.floor((p*1.0)/nCells));
+                                    layer_post = int(np.floor((cellsConnectedFromP[cell_i]*1.0)/nCells));
+                                                                         
+                                    if layer_pre == layer_post: 
+                                        geTable[post_cell,timing]= geTable[post_cell,timing]+ge*w_const_Lat;
+                                    else:
+                                        geTable[post_cell,timing]= geTable[post_cell,timing]+ge*w_const_FF;
                                         #PSPTable[post_cell,timing]=PSPTable[post_cell,timing]+dv;
                                         #print(PSPTable[post_cell,timing]);
                                         #PSPTable[post_cell,timing]=PSPTable[post_cell,timing]+dPSP;
@@ -246,7 +253,15 @@ def runCalcPG(nStims,nTrans,analysisLayer):
                                                     post_cell = cellsConnectedFromP[cell_i];
                                                     ge = weightsConnectedFromP[cell_i]
                                                     #PSPTable[post_cell,timing]=PSPTable[post_cell,timing]+ge;
-                                                    geTable[post_cell,timing]=geTable[post_cell,timing]+ge*w_const;
+                                                    
+                                                    layer_pre = int(np.floor((p*1.0)/nCells));
+                                                    layer_post = int(np.floor((post_cell*1.0)/nCells));
+                                                    
+                                                    if layer_post==layer_pre:
+                                                        geTable[post_cell,timing]=geTable[post_cell,timing]+ge*w_const_Lat;
+                                                    else:
+                                                        geTable[post_cell,timing]=geTable[post_cell,timing]+ge*w_const_FF;
+
                                                     #PSPTable[post_cell,timing]=((alg2_Vrev_ex-PSPTable[post_cell,timing])*ge)/alg2_taum_ex;
                                             
                         #print nad save PG;                   
@@ -382,7 +397,7 @@ def runCalcPG(nStims,nTrans,analysisLayer):
                         areTriggered = True;
                         for Np in triggers_sorted[1:sPicked]:
                             cell_i = int(Np[0]%nCells);
-                            layer = int(np.ceil(Np[0]*1.0/nCells));
+                            layer = int(np.floor(Np[0]*1.0/nCells));
                             
                             spikeTime_p = spikes_e[layer][cell_i];
                             cond =  (t+Np[1]-jitter <= spikeTime_p) & (spikeTime_p <= t+Np[1]+jitter)
@@ -392,7 +407,7 @@ def runCalcPG(nStims,nTrans,analysisLayer):
                         
                         
                         cell_i = int(triggeredCell[0]%nCells);
-                        layer = int(np.ceil(triggeredCell[0]*1.0/nCells))
+                        layer = int(np.floor(triggeredCell[0]*1.0/nCells))
                         spikeTime_post =  spikes_e[layer][cell_i];
                         cond =  (t+triggeredCell[1]-jitter <= spikeTime_post) & (spikeTime_post <= t+triggeredCell[1]+jitter);
                         if len(np.extract(cond, spikeTime_post))<1:
