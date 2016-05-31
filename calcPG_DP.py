@@ -14,9 +14,9 @@ def loadParams(borrowed_globals):
 
 def runCalcPG(nStims,nTrans,analysisLayer):
 
-    PGTypes = [2,3]; #1:supported PG, 2:adapted PGs, 3:activated PGs
+    PGTypes = [3]; #1:supported PG, 2:adapted PGs, 3:activated PGs
     isTrained = False;
-    plotFigure = True;    
+    plotFigure = False;    
     drawArrow = True;
     
     nCells = 100;
@@ -41,7 +41,7 @@ def runCalcPG(nStims,nTrans,analysisLayer):
     alg2_tau_ex = tau_ex/ms;#*0.8
 #     decalyRatio = (1-timeStep/taum_ex);
     w_const_FF = 1.5/gmax;#this number is arbitrary
-    w_const_Lat = 1.0;
+    w_const_Lat = 1.5/conductanceConst_E2E;
     jitter_plotArrow = np.log2(0.9)/np.log2(1-1./alg2_taum_ex)
     print jitter_plotArrow;
     
@@ -266,7 +266,7 @@ def runCalcPG(nStims,nTrans,analysisLayer):
                                             
                         #print nad save PG;                   
                         if  len(PG)>=minPGLen:#sPicked:
-                            if plotFigure and len(PG)>20:
+                            if plotFigure and len(PG)>20 and len(PG)<150:
                                 plt.clf();
                                 if drawArrow:
                                     plt.hold(True);
@@ -361,6 +361,7 @@ def runCalcPG(nStims,nTrans,analysisLayer):
             PGList = pickle.load(f);
             f.close();
             
+            triggerActivatedCount = np.zeros((nStims,len(PGList)));
             
             #init
             phases = []
@@ -380,6 +381,7 @@ def runCalcPG(nStims,nTrans,analysisLayer):
                 triggeredList = []
                 PGLen_sum = 0;
                 t_max = t_min+testingTime*nTrans;
+                PG_index = 0;
                 print len(PGList);
                 for PG in PGList:
                     triggeringPGLen = len(PG);#len of triggering PG
@@ -399,6 +401,8 @@ def runCalcPG(nStims,nTrans,analysisLayer):
                             cell_i = int(Np[0]%nCells);
                             layer = int(np.floor(Np[0]*1.0/nCells));
                             
+#                             print "pre: " + str(layer) + " " +str(cell_i);
+                            
                             spikeTime_p = spikes_e[layer][cell_i];
                             cond =  (t+Np[1]-jitter <= spikeTime_p) & (spikeTime_p <= t+Np[1]+jitter)
                             if len(np.extract(cond, spikeTime_p))<1:
@@ -408,6 +412,7 @@ def runCalcPG(nStims,nTrans,analysisLayer):
                         
                         cell_i = int(triggeredCell[0]%nCells);
                         layer = int(np.floor(triggeredCell[0]*1.0/nCells))
+#                         print "post: " + str(layer) + " " +str(cell_i);
                         spikeTime_post =  spikes_e[layer][cell_i];
                         cond =  (t+triggeredCell[1]-jitter <= spikeTime_post) & (spikeTime_post <= t+triggeredCell[1]+jitter);
                         if len(np.extract(cond, spikeTime_post))<1:
@@ -415,11 +420,18 @@ def runCalcPG(nStims,nTrans,analysisLayer):
                         
                         if areTriggered:
                             PGLen_sum=PGLen_sum+triggeringPGLen;
+                            triggerActivatedCount[phase_i-1,PG_index]=triggerActivatedCount[phase_i-1,PG_index]+1;
                             triggeredList.append([]);
                             for Np in triggers_sorted:
                                 triggeredList[len(triggeredList)-1].append([Np[0],t+Np[1]]);
     #             triggerList.append(PG);
-                print str(phase_i) + ": PGLen=" + str(PGLen_sum);# + " PGList=" + str(PG);
+                    PG_index = PG_index+1;
+
+
+                corrcoef = np.corrcoef(triggerActivatedCount);
+                
+                
+                print str(phase_i) + ": PGLen=" + str(PGLen_sum)# + " PGList=" + str(PG);
                 fileName = os.path.split(os.path.realpath(__file__))[0] + "/Results/"+experimentName+"/PGAc_Trained="+ str(isTrained)+"_spikingTh="+str(spikingTh);
                 fd = open(fileName+".txt",'a')
                 fd.write(str(phase_i) + ": PGLen_sum=" + str(PGLen_sum)+"\n");# + " TriggeredList=" + str(triggeredList) + "\n");
@@ -430,6 +442,15 @@ def runCalcPG(nStims,nTrans,analysisLayer):
                 pickle.dump(triggeredList, fd);
                 fd.close();
             
-            
+#             print "triggerActivatedCount=" + str(triggerActivatedCount);
+#             print "corrcoef=" + str(corrcoef); 
+#             fd = open(fileName+".txt",'a')
+#             fd.write("triggerActivatedCount=" + str(triggerActivatedCount)+"\n corrcoef=" + str(corrcoef));# + " TriggeredList=" + str(triggeredList) + "\n");
+#             fd.close();
+#             fig = plt.figure();
+#             plt.imshow(corrcoef, cmap='gray', vmin=0, vmax=1, interpolation='none')
+#             fig.savefig(fileName+".png");
+                
+               
 
 
